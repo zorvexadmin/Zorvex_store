@@ -715,7 +715,7 @@ async function openReviewsModal(){
         <p class="text-slate-400 text-[10px] mt-1">${new Date(r.created_at).toLocaleDateString()}</p>
       </div>
     </div>
-  `).join('') || '<p class="text-slate-400 text-center py-6">You haven't written any reviews yet.</p>';
+  `).join('') || '<p class="text-slate-400 text-center py-6">You have not written any reviews yet.</p>';
 
   openModal('reviewsModal');
 }
