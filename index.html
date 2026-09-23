@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zorvex | Worldwide Store</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = { theme: { extend: { colors: {
+    brand: { 50:'#eff6ff',100:'#dbeafe',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8' }
+  }, fontFamily: { sans: ['Inter','sans-serif'] } } } }
+</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>body{font-family:'Inter',sans-serif}</style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+
+<!-- ===== TOP BAR ===== -->
+<div class="bg-slate-900 text-white text-xs py-2 px-4 flex flex-wrap gap-2 justify-between items-center">
+  <span class="flex items-center gap-1.5"><i class="fa-solid fa-globe text-blue-400"></i> Worldwide Express Delivery</span>
+  <div class="flex items-center gap-3">
+    <select id="shipCountry" class="bg-slate-800 text-white text-xs rounded px-2 py-1 outline-none">
+      <option value="BD">🇧🇩 Bangladesh</option>
+      <option value="US">🇺🇸 United States</option>
+      <option value="UK">🇬🇧 United Kingdom</option>
+      <option value="IN">🇮🇳 India</option>
+      <option value="AE">🇦🇪 UAE</option>
+      <option value="CA">🇨🇦 Canada</option>
+      <option value="AU">🇦🇺 Australia</option>
+    </select>
+    <select id="currency" class="bg-slate-800 text-white text-xs rounded px-2 py-1 outline-none">
+      <option value="USD">USD ($)</option>
+      <option value="BDT" selected>BDT (৳)</option>
+      <option value="GBP">GBP (£)</option>
+      <option value="EUR">EUR (€)</option>
+      <option value="INR">INR (₹)</option>
+    </select>
+    <button onclick="openOrdersModal()" class="hover:text-blue-400"><i class="fa-solid fa-truck-fast"></i> My Orders</button>
+  </div>
+</div>
+
+<!-- ===== HEADER ===== -->
+<header class="sticky top-0 z-30 bg-white/95 backdrop-blur border-b shadow-sm">
+  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-4">
+    <div class="flex items-center gap-2 font-black text-xl text-slate-900 cursor-pointer" onclick="loadProducts()">
+      <div class="w-9 h-9 bg-blue-600 rounded-xl text-white flex items-center justify-center"><i class="fa-solid fa-earth-americas"></i></div>
+      Zor<span class="text-blue-600">vex</span>
+    </div>
+    <div class="flex-1 max-w-xl hidden md:block relative">
+      <input id="searchInput" oninput="loadProducts()" placeholder="Search products..." class="w-full pl-10 pr-3 py-2.5 rounded-xl bg-slate-100 text-sm outline-none focus:ring-2 focus:ring-blue-500">
+      <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400"></i>
+    </div>
+    <div class="flex items-center gap-2 ml-auto">
+      <button id="authBtn" onclick="openAuthModal()" class="text-xs font-bold bg-blue-50 text-blue-700 px-3 py-2 rounded-xl">
+        <i class="fa-solid fa-user"></i> <span id="authBtnLabel">Sign In</span>
+      </button>
+      <button onclick="openCart()" class="relative text-xs font-bold bg-slate-900 text-white px-3 py-2 rounded-xl">
+        <i class="fa-solid fa-cart-shopping"></i> Cart
+        <span id="cartCount" class="absolute -top-2 -right-2 bg-red-500 rounded-full w-5 h-5 text-[10px] flex items-center justify-center">0</span>
+      </button>
+    </div>
+  </div>
+  <div id="categoryBar" class="max-w-7xl mx-auto px-4 pb-3 flex gap-2 overflow-x-auto text-xs font-semibold"></div>
+</header>
+
+<!-- ===== PRODUCT GRID ===== -->
+<main class="max-w-7xl mx-auto px-4 py-8">
+  <div id="productGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+  <p id="emptyMsg" class="hidden text-center text-slate-400 py-16">No products found.</p>
+</main>
+
+<!-- ===== PRODUCT DETAIL MODAL ===== -->
+<div id="productModal" class="fixed inset-0 z-50 hidden bg-black/60 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div class="flex justify-between items-center p-4 border-b">
+      <h3 class="font-bold">Product Details</h3>
+      <button onclick="closeModal('productModal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="grid sm:grid-cols-2 gap-4 p-4">
+      <img id="pImg" class="w-full aspect-square object-cover rounded-xl bg-slate-100">
+      <div>
+        <h2 id="pTitle" class="text-lg font-black mb-1"></h2>
+        <p class="text-xs text-slate-500 mb-2"><i class="fa-solid fa-location-dot"></i> Ships from <span id="pCountry"></span></p>
+        <div class="flex items-center gap-2 mb-2 text-amber-400 text-sm">
+          <span id="pStars"></span> <span id="pRating" class="text-slate-700 font-bold"></span>
+          <span id="pReviewCount" class="text-slate-400"></span>
+        </div>
+        <p id="pDesc" class="text-sm text-slate-600 mb-3"></p>
+        <div class="flex items-baseline gap-2 mb-4">
+          <span id="pPrice" class="text-2xl font-black text-blue-600"></span>
+          <span id="pOldPrice" class="text-sm text-slate-400 line-through"></span>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="addToCart(currentProduct)" class="flex-1 bg-slate-900 text-white font-bold py-2.5 rounded-xl text-xs">Add to Cart</button>
+          <button onclick="buyNow()" class="flex-1 bg-blue-600 text-white font-bold py-2.5 rounded-xl text-xs">Buy Now</button>
+        </div>
+      </div>
+    </div>
+    <div class="p-4 border-t">
+      <h4 class="font-bold text-sm mb-2">Reviews</h4>
+      <div id="reviewForm" class="hidden mb-3 flex gap-2">
+        <select id="reviewRating" class="border rounded px-2 text-xs"><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select>
+        <input id="reviewComment" placeholder="Write a review..." class="flex-1 border rounded px-2 text-xs">
+        <button onclick="submitReview()" class="bg-blue-600 text-white text-xs px-3 rounded">Post</button>
+      </div>
+      <div id="reviewsList" class="space-y-2 text-xs"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== AUTH MODAL ===== -->
+<div id="authModal" class="fixed inset-0 z-50 hidden bg-black/60 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-sm w-full p-6">
+    <div class="flex justify-between mb-4"><h3 class="font-black text-lg">Welcome</h3><button onclick="closeModal('authModal')"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="flex gap-2 mb-4">
+      <button onclick="oauthLogin('google')" class="flex-1 border rounded-xl py-2 text-xs font-bold"><i class="fa-brands fa-google"></i> Google</button>
+      <button onclick="oauthLogin('facebook')" class="flex-1 border rounded-xl py-2 text-xs font-bold"><i class="fa-brands fa-facebook"></i> Facebook</button>
+    </div>
+    <div class="text-center text-[10px] text-slate-400 mb-4">— or use email —</div>
+    <form onsubmit="return emailAuth(event)" class="space-y-3">
+      <input id="authName" placeholder="Full Name (for sign up)" class="w-full border rounded-xl px-3 py-2.5 text-sm">
+      <input id="authEmail" type="email" required placeholder="Email" class="w-full border rounded-xl px-3 py-2.5 text-sm">
+      <input id="authPass" type="password" required placeholder="Password" class="w-full border rounded-xl px-3 py-2.5 text-sm">
+      <div class="flex gap-2">
+        <button type="submit" class="flex-1 bg-blue-600 text-white font-bold py-2.5 rounded-xl text-xs">Sign In</button>
+        <button type="button" onclick="emailSignup()" class="flex-1 bg-slate-900 text-white font-bold py-2.5 rounded-xl text-xs">Sign Up</button>
+      </div>
+    </form>
+    <p id="authMsg" class="text-xs text-red-500 mt-2"></p>
+  </div>
+</div>
+
+<!-- ===== CART DRAWER ===== -->
+<div id="cartDrawer" class="fixed inset-0 z-50 hidden bg-black/60 flex justify-end">
+  <div class="bg-white w-full max-w-md h-full flex flex-col">
+    <div class="flex justify-between items-center p-4 border-b"><h3 class="font-bold">Your Cart</h3><button onclick="closeModal('cartDrawer')"><i class="fa-solid fa-xmark"></i></button></div>
+    <div id="cartItems" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
+    <div class="p-4 border-t">
+      <div class="flex justify-between font-bold mb-3"><span>Subtotal</span><span id="cartSubtotal"></span></div>
+      <button onclick="openCheckout()" class="w-full bg-blue-600 text-white font-black py-3 rounded-xl text-xs">Proceed to Checkout</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CHECKOUT MODAL ===== -->
+<div id="checkoutModal" class="fixed inset-0 z-50 hidden bg-black/60 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6">
+    <div class="flex justify-between mb-4"><h3 class="font-black text-lg">Checkout</h3><button onclick="closeModal('checkoutModal')"><i class="fa-solid fa-xmark"></i></button></div>
+    <form onsubmit="return placeOrder(event)" class="space-y-3">
+      <input id="coName" required placeholder="Full Name" class="w-full border rounded-xl px-3 py-2.5 text-sm">
+      <input id="coPhone" required placeholder="Phone (with country code, e.g. +8801...)" class="w-full border rounded-xl px-3 py-2.5 text-sm">
+      <textarea id="coAddress" required placeholder="Full Delivery Address" class="w-full border rounded-xl px-3 py-2.5 text-sm"></textarea>
+      <div>
+        <label class="text-xs font-bold text-slate-500">Payment Method</label>
+        <select id="coPayment" onchange="togglePaymentInfo()" class="w-full border rounded-xl px-3 py-2.5 text-sm mt-1">
+          <option value="cod">Cash on Delivery</option>
+          <option value="bkash_manual">bKash (Manual - Send Money)</option>
+          <option value="nagad_manual">Nagad (Manual - Send Money)</option>
+        </select>
+      </div>
+      <div id="manualPayBox" class="hidden bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs space-y-2">
+        <p>Send the total amount to <b id="payNumber">01XXXXXXXXX</b> (Personal) and enter the Transaction ID below.</p>
+        <input id="coTxnId" placeholder="Transaction ID" class="w-full border rounded-lg px-3 py-2 text-sm">
+      </div>
+      <div class="flex justify-between text-xs text-slate-500"><span>Subtotal</span><span id="checkoutSubtotal"></span></div>
+      <div class="flex justify-between text-xs text-slate-500"><span>Shipping</span><span id="checkoutShipping"></span></div>
+      <div class="flex justify-between font-bold text-sm pt-2 border-t"><span>Total</span><span id="checkoutTotal"></span></div>
+      <button type="submit" class="w-full bg-blue-600 text-white font-black py-3 rounded-xl text-xs">Place Order</button>
+    </form>
+  </div>
+</div>
+
+<!-- ===== ORDER SUCCESS ===== -->
+<div id="successModal" class="fixed inset-0 z-50 hidden bg-black/60 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-sm w-full p-6 text-center">
+    <i class="fa-solid fa-circle-check text-emerald-500 text-4xl mb-3"></i>
+    <h3 class="font-black text-lg mb-1">Order Placed!</h3>
+    <p class="text-xs text-slate-500 mb-4">Order ID: <span id="successOrderId" class="font-bold"></span></p>
+    <button onclick="closeModal('successModal')" class="w-full bg-slate-900 text-white font-bold py-2.5 rounded-xl text-xs">Continue Shopping</button>
+  </div>
+</div>
+
+<!-- ===== MY ORDERS MODAL ===== -->
+<div id="ordersModal" class="fixed inset-0 z-50 hidden bg-black/60 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-lg w-full max-h-[80vh] overflow-y-auto p-6">
+    <div class="flex justify-between mb-4"><h3 class="font-black text-lg">My Orders</h3><button onclick="closeModal('ordersModal')"><i class="fa-solid fa-xmark"></i></button></div>
+    <div id="ordersList" class="space-y-3 text-xs"></div>
+  </div>
+</div>
+
+<script src="js/supabase-config.js"></script>
+<script>
+// ============================================================
+// STATE
+// ============================================================
+let currentUser = null;
+let allProducts = [];
+let currentProduct = null;
+let cart = JSON.parse(localStorage.getItem('tg_cart') || '[]');
+const RATES = { USD:1, BDT:118, GBP:0.79, EUR:0.92, INR:83 };
+const SYMBOLS = { USD:'$', BDT:'৳', GBP:'£', EUR:'€', INR:'₹' };
+
+function fmt(usd) {
+  const cur = document.getElementById('currency').value;
+  return SYMBOLS[cur] + (usd * RATES[cur]).toFixed(0);
+}
+function closeModal(id){ document.getElementById(id).classList.add('hidden'); }
+function openModal(id){ document.getElementById(id).classList.remove('hidden'); }
+
+// ============================================================
+// AUTH
+// ============================================================
+supabaseClient.auth.onAuthStateChange((event, session) => {
+  currentUser = session?.user || null;
+  document.getElementById('authBtnLabel').innerText = currentUser ? (currentUser.email?.split('@')[0] || 'Account') : 'Sign In';
+});
+
+async function oauthLogin(provider){
+  await supabaseClient.auth.signInWithOAuth({ provider, options: { redirectTo: window.location.href } });
+}
+function openAuthModal(){
+  if (currentUser) { supabaseClient.auth.signOut(); return; }
+  openModal('authModal');
+}
+async function emailAuth(e){
+  e.preventDefault();
+  const email = document.getElementById('authEmail').value;
+  const password = document.getElementById('authPass').value;
+  const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+  if (error) { document.getElementById('authMsg').innerText = error.message; return false; }
+  closeModal('authModal');
+  return false;
+}
+async function emailSignup(){
+  const email = document.getElementById('authEmail').value;
+  const password = document.getElementById('authPass').value;
+  const full_name = document.getElementById('authName').value;
+  const { error } = await supabaseClient.auth.signUp({ email, password, options: { data: { full_name } } });
+  document.getElementById('authMsg').innerText = error ? error.message : 'Account created! Check your email to confirm, then sign in.';
+}
+
+// ============================================================
+// PRODUCTS
+// ============================================================
+async function loadCategories(){
+  const { data } = await supabaseClient.from('categories').select('*');
+  const bar = document.getElementById('categoryBar');
+  bar.innerHTML = `<button onclick="filterCat(null)" class="px-3 py-1.5 bg-slate-900 text-white rounded-full">All</button>` +
+    (data||[]).map(c => `<button onclick="filterCat(${c.id})" class="px-3 py-1.5 bg-slate-100 rounded-full whitespace-nowrap">${c.name}</button>`).join('');
+}
+let activeCat = null;
+function filterCat(id){ activeCat = id; loadProducts(); }
+
+async function loadProducts(){
+  const SAFE_COLS = 'id,title,description,category_id,price_usd,old_price_usd,origin_country,image_url,default_courier,is_active,stock,rating,reviews_count,created_at';
+  let q = supabaseClient.from('products').select(SAFE_COLS).order('created_at', { ascending:false });
+  if (activeCat) q = q.eq('category_id', activeCat);
+  const { data, error } = await q;
+  const search = document.getElementById('searchInput')?.value?.toLowerCase() || '';
+  allProducts = (data || []).filter(p => p.title.toLowerCase().includes(search));
+  renderProducts();
+}
+
+function renderProducts(){
+  const grid = document.getElementById('productGrid');
+  document.getElementById('emptyMsg').classList.toggle('hidden', allProducts.length > 0);
+  grid.innerHTML = allProducts.map(p => `
+    <div class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition cursor-pointer" onclick="openProduct('${p.id}')">
+      <img src="${p.image_url || 'https://placehold.co/400x400?text=No+Image'}" class="w-full aspect-square object-cover">
+      <div class="p-3">
+        <p class="text-xs font-semibold line-clamp-2">${p.title}</p>
+        <p class="text-[10px] text-slate-400 mb-1"><i class="fa-solid fa-location-dot"></i> ${p.origin_country}</p>
+        <p class="font-black text-blue-600 text-sm">${fmt(p.price_usd)}</p>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openProduct(id){
+  currentProduct = allProducts.find(p => p.id === id);
+  const p = currentProduct;
+  document.getElementById('pImg').src = p.image_url || 'https://placehold.co/500x500?text=No+Image';
+  document.getElementById('pTitle').innerText = p.title;
+  document.getElementById('pCountry').innerText = p.origin_country;
+  document.getElementById('pDesc').innerText = p.description || '';
+  document.getElementById('pPrice').innerText = fmt(p.price_usd);
+  document.getElementById('pOldPrice').innerText = p.old_price_usd ? fmt(p.old_price_usd) : '';
+  document.getElementById('pRating').innerText = p.rating;
+  document.getElementById('pReviewCount').innerText = `(${p.reviews_count} reviews)`;
+  document.getElementById('pStars').innerHTML = '★'.repeat(Math.round(p.rating));
+  document.getElementById('reviewForm').classList.toggle('hidden', !currentUser);
+  loadReviews(id);
+  openModal('productModal');
+}
+
+async function loadReviews(productId){
+  const { data } = await supabaseClient.from('reviews').select('*').eq('product_id', productId).order('created_at', { ascending:false });
+  document.getElementById('reviewsList').innerHTML = (data||[]).map(r =>
+    `<div class="border-b pb-2"><b>${'★'.repeat(r.rating)}</b> ${r.comment || ''}</div>`
+  ).join('') || '<p class="text-slate-400">No reviews yet.</p>';
+}
+async function submitReview(){
+  if (!currentUser) return openAuthModal();
+  const rating = parseInt(document.getElementById('reviewRating').value);
+  const comment = document.getElementById('reviewComment').value;
+  await supabaseClient.from('reviews').insert({ product_id: currentProduct.id, customer_id: currentUser.id, rating, comment });
+  loadReviews(currentProduct.id);
+}
+
+// ============================================================
+// CART
+// ============================================================
+function saveCart(){ localStorage.setItem('tg_cart', JSON.stringify(cart)); renderCartCount(); }
+function renderCartCount(){ document.getElementById('cartCount').innerText = cart.reduce((s,i)=>s+i.qty,0); }
+function addToCart(p){
+  const existing = cart.find(i => i.id === p.id);
+  if (existing) existing.qty++; else cart.push({ id:p.id, title:p.title, price:p.price_usd, image:p.image_url, qty:1 });
+  saveCart();
+  closeModal('productModal');
+}
+function buyNow(){ addToCart(currentProduct); openCheckout(); }
+function openCart(){ renderCart(); openModal('cartDrawer'); }
+function renderCart(){
+  document.getElementById('cartItems').innerHTML = cart.map((i,idx) => `
+    <div class="flex gap-3 items-center">
+      <img src="${i.image}" class="w-14 h-14 object-cover rounded-lg bg-slate-100">
+      <div class="flex-1"><p class="text-xs font-semibold">${i.title}</p><p class="text-xs text-blue-600 font-bold">${fmt(i.price)}</p></div>
+      <input type="number" min="1" value="${i.qty}" onchange="updateQty(${idx}, this.value)" class="w-12 border rounded text-center text-xs">
+      <button onclick="removeItem(${idx})" class="text-red-400"><i class="fa-solid fa-trash"></i></button>
+    </div>`).join('') || '<p class="text-slate-400 text-sm">Your cart is empty.</p>';
+  document.getElementById('cartSubtotal').innerText = fmt(cartSubtotal());
+}
+function updateQty(idx, val){ cart[idx].qty = parseInt(val)||1; saveCart(); renderCart(); }
+function removeItem(idx){ cart.splice(idx,1); saveCart(); renderCart(); }
+function cartSubtotal(){ return cart.reduce((s,i)=> s + i.price*i.qty, 0); }
+
+// ============================================================
+// CHECKOUT
+// ============================================================
+const FLAT_SHIPPING_USD = 5; // placeholder — replace with real courier-rate logic in a later phase
+function openCheckout(){
+  if (!currentUser) { closeModal('cartDrawer'); openAuthModal(); return; }
+  document.getElementById('checkoutSubtotal').innerText = fmt(cartSubtotal());
+  document.getElementById('checkoutShipping').innerText = fmt(FLAT_SHIPPING_USD);
+  document.getElementById('checkoutTotal').innerText = fmt(cartSubtotal() + FLAT_SHIPPING_USD);
+  closeModal('cartDrawer');
+  openModal('checkoutModal');
+}
+function togglePaymentInfo(){
+  const val = document.getElementById('coPayment').value;
+  document.getElementById('manualPayBox').classList.toggle('hidden', val === 'cod');
+  document.getElementById('payNumber').innerText = val === 'bkash_manual' ? '01XXXXXXXXX (bKash Personal)' : '01XXXXXXXXX (Nagad Personal)';
+}
+async function placeOrder(e){
+  e.preventDefault();
+  const subtotal = cartSubtotal();
+  const shipping = FLAT_SHIPPING_USD;
+  const order = {
+    customer_id: currentUser.id,
+    full_name: document.getElementById('coName').value,
+    phone: document.getElementById('coPhone').value,
+    address: document.getElementById('coAddress').value,
+    ship_country: document.getElementById('shipCountry').value,
+    currency: document.getElementById('currency').value,
+    payment_method: document.getElementById('coPayment').value,
+    payment_txn_id: document.getElementById('coTxnId')?.value || null,
+    subtotal_usd: subtotal,
+    shipping_usd: shipping,
+    total_usd: subtotal + shipping
+  };
+  const { data, error } = await supabaseClient.from('orders').insert(order).select().single();
+  if (error) { alert('Order failed: ' + error.message); return false; }
+  const items = cart.map(i => ({ order_id: data.id, product_id: i.id, title_snapshot: i.title, price_usd: i.price, qty: i.qty }));
+  await supabaseClient.from('order_items').insert(items);
+  cart = []; saveCart();
+  closeModal('checkoutModal');
+  document.getElementById('successOrderId').innerText = data.order_code;
+  openModal('successModal');
+  return false;
+}
+
+// ============================================================
+// MY ORDERS
+// ============================================================
+async function openOrdersModal(){
+  if (!currentUser) return openAuthModal();
+  const { data } = await supabaseClient.from('orders').select('*').order('created_at', { ascending:false });
+  const STAGES = ['pending','confirmed','packaging','shipped','out_for_delivery','delivered'];
+  document.getElementById('ordersList').innerHTML = (data||[]).map(o => `
+    <div class="border rounded-xl p-3">
+      <div class="flex justify-between font-bold"><span>${o.order_code}</span><span>${fmt(o.total_usd)}</span></div>
+      <p class="text-slate-400 mb-2">Status: <b class="text-blue-600">${o.status.replace('_',' ')}</b> ${o.tracking_no ? '· Tracking: '+o.tracking_no : ''}</p>
+      <div class="flex gap-1">
+        ${STAGES.map(s => `<div class="flex-1 h-1.5 rounded ${STAGES.indexOf(o.status) >= STAGES.indexOf(s) ? 'bg-blue-600' : 'bg-slate-200'}"></div>`).join('')}
+      </div>
+    </div>`).join('') || '<p class="text-slate-400">No orders yet.</p>';
+  openModal('ordersModal');
+}
+
+// ============================================================
+// INIT
+// ============================================================
+document.getElementById('currency').addEventListener('change', () => { renderProducts(); });
+loadCategories();
+loadProducts();
+renderCartCount();
+</script>
+</body>
+</html>
