@@ -72,7 +72,7 @@
     </div>
   </div>
 </div>
-<div id="dashboard" class="hidden min-h-screen">
+  <div id="dashboard" class="hidden min-h-screen">
 
   <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
     <div class="px-4 py-3 flex items-center gap-3">
@@ -115,7 +115,6 @@
   </header>
 
   <div class="flex">
-
     <aside id="sidebar" class="hidden md:block fixed md:sticky top-[57px] left-0 w-64 h-[calc(100vh-57px)] bg-white border-r border-slate-200 overflow-y-auto z-20">
       <nav class="p-3 space-y-1">
         <p class="text-[10px] font-bold text-slate-400 uppercase px-3 pt-3 pb-1">Main</p>
@@ -161,10 +160,9 @@
     <div id="sidebarOverlay" onclick="toggleSidebar()" class="hidden fixed inset-0 bg-black/50 z-10 md:hidden"></div>
 
     <main class="flex-1 min-w-0 p-4 md:p-6">
-            <div id="page-dashboard" class="page fade-in">
+           <div id="page-dashboard" class="page fade-in">
         <h1 class="text-2xl font-black mb-1">Dashboard</h1>
         <p class="text-sm text-slate-500 mb-6">Welcome back, <span id="welcomeName" class="font-bold text-slate-700">Admin</span> 👋</p>
-
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
           <div class="bg-white rounded-2xl p-4 border border-slate-200">
             <i class="fa-solid fa-box text-blue-600"></i>
@@ -187,7 +185,6 @@
             <p class="text-xs text-slate-500">Revenue (USD)</p>
           </div>
         </div>
-
         <div class="bg-white rounded-2xl p-6 border border-slate-200">
           <div class="flex items-center gap-3 mb-3">
             <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
@@ -218,7 +215,7 @@
         <p class="text-sm text-slate-500 mb-6">Manage all products</p>
         <div class="bg-white rounded-2xl p-10 border border-slate-200 text-center">
           <i class="fa-solid fa-box text-slate-300 text-5xl mb-3"></i>
-          <p class="text-slate-500">Product management — coming in next step</p>
+          <p class="text-slate-500">Product management — coming in Phase 2C</p>
         </div>
       </div>
 
@@ -227,7 +224,7 @@
         <p class="text-sm text-slate-500 mb-6">Manage customer orders</p>
         <div class="bg-white rounded-2xl p-10 border border-slate-200 text-center">
           <i class="fa-solid fa-receipt text-slate-300 text-5xl mb-3"></i>
-          <p class="text-slate-500">Order management — coming soon</p>
+          <p class="text-slate-500">Order management — coming in Phase 2D</p>
         </div>
       </div>
 
@@ -254,7 +251,7 @@
         <p class="text-sm text-slate-500 mb-6">Manage admin team and permissions</p>
         <div class="bg-white rounded-2xl p-10 border border-slate-200 text-center">
           <i class="fa-solid fa-users-gear text-slate-300 text-5xl mb-3"></i>
-          <p class="text-slate-500">Team management — coming soon</p>
+          <p class="text-slate-500">Team management — coming in Phase 2B</p>
         </div>
       </div>
 
@@ -272,16 +269,111 @@
         <p class="text-sm text-slate-500 mb-6">Approve and manage sellers</p>
         <div class="bg-white rounded-2xl p-10 border border-slate-200 text-center">
           <i class="fa-solid fa-store text-slate-300 text-5xl mb-3"></i>
-          <p class="text-slate-500">Seller management — coming soon</p>
+          <p class="text-slate-500">Seller management — coming in Phase 2E</p>
         </div>
       </div>
 
       <div id="page-settings" class="page hidden fade-in">
         <h1 class="text-2xl font-black mb-1">Store Settings</h1>
-        <p class="text-sm text-slate-500 mb-6">Contact info, social links, taglines</p>
-        <div class="bg-white rounded-2xl p-10 border border-slate-200 text-center">
-          <i class="fa-solid fa-gear text-slate-300 text-5xl mb-3"></i>
-          <p class="text-slate-500">Settings form — coming next step</p>
+        <p class="text-sm text-slate-500 mb-6">Contact info & social links — what customers see</p>
+
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 mb-4">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-9 h-9 bg-emerald-100 rounded-xl flex items-center justify-center">
+              <i class="fa-brands fa-whatsapp text-emerald-600"></i>
+            </div>
+            <div>
+              <h2 class="font-black">WhatsApp</h2>
+              <p class="text-[11px] text-slate-500">Customer WhatsApp contact</p>
+            </div>
+          </div>
+          <div class="space-y-3">
+            <div>
+              <label class="text-xs font-bold text-slate-500">WhatsApp Number (for link)</label>
+              <input id="set_whatsapp_number" placeholder="8801712345678" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
+              <p class="text-[10px] text-slate-400 mt-1">No + sign, no spaces. Example: 8801712345678</p>
+            </div>
+            <div>
+              <label class="text-xs font-bold text-slate-500">Display Number (what customer sees)</label>
+              <input id="set_whatsapp_display" placeholder="+880 1712-345678" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 mb-4">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-9 h-9 bg-blue-100 rounded-xl flex items-center justify-center">
+              <i class="fa-solid fa-envelope text-blue-600"></i>
+            </div>
+            <div>
+              <h2 class="font-black">Email</h2>
+              <p class="text-[11px] text-slate-500">Support email address</p>
+            </div>
+          </div>
+          <input id="set_support_email" type="email" placeholder="support@example.com" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 mb-4">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-9 h-9 bg-purple-100 rounded-xl flex items-center justify-center">
+              <i class="fa-solid fa-hashtag text-purple-600"></i>
+            </div>
+            <div>
+              <h2 class="font-black">Social Links</h2>
+              <p class="text-[11px] text-slate-500">Just the username — no @ sign, no full URL</p>
+            </div>
+          </div>
+          <div class="space-y-3">
+            <div>
+              <label class="text-xs font-bold text-slate-500 flex items-center gap-1.5"><i class="fa-brands fa-facebook text-blue-700"></i> Facebook Page Username</label>
+              <input id="set_facebook_page" placeholder="zorvexstore" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+            <div>
+              <label class="text-xs font-bold text-slate-500 flex items-center gap-1.5"><i class="fa-brands fa-facebook-messenger text-blue-500"></i> Messenger Username</label>
+              <input id="set_messenger_username" placeholder="zorvexstore" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
+              <p class="text-[10px] text-slate-400 mt-1">Usually same as Facebook page</p>
+            </div>
+            <div>
+              <label class="text-xs font-bold text-slate-500 flex items-center gap-1.5"><i class="fa-brands fa-instagram text-pink-600"></i> Instagram Username</label>
+              <input id="set_instagram_username" placeholder="zorvexstore" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+            <div>
+              <label class="text-xs font-bold text-slate-500 flex items-center gap-1.5"><i class="fa-brands fa-telegram text-sky-500"></i> Telegram Username</label>
+              <input id="set_telegram_username" placeholder="zorvexstore" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+            <div>
+              <label class="text-xs font-bold text-slate-500 flex items-center gap-1.5"><i class="fa-brands fa-tiktok"></i> TikTok Username</label>
+              <input id="set_tiktok_username" placeholder="zorvexstore" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+            <div>
+              <label class="text-xs font-bold text-slate-500 flex items-center gap-1.5"><i class="fa-brands fa-youtube text-red-600"></i> YouTube Channel</label>
+              <input id="set_youtube_channel" placeholder="zorvexstore" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 mb-4">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-9 h-9 bg-slate-100 rounded-xl flex items-center justify-center">
+              <i class="fa-solid fa-quote-left text-slate-600"></i>
+            </div>
+            <div>
+              <h2 class="font-black">Store Info</h2>
+            </div>
+          </div>
+          <div>
+            <label class="text-xs font-bold text-slate-500">Homepage Tagline (top bar)</label>
+            <input id="set_site_tagline" placeholder="Worldwide Express Delivery" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
+          </div>
+        </div>
+
+        <div class="flex gap-2 mb-20">
+          <button onclick="loadSettings()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-3 rounded-xl text-sm">
+            <i class="fa-solid fa-rotate"></i> Reload
+          </button>
+          <button onclick="saveSettings()" id="saveSettingsBtn" class="flex-[2] bg-blue-600 hover:bg-blue-700 text-white font-black py-3 rounded-xl text-sm">
+            <i class="fa-solid fa-check"></i> Save All Changes
+          </button>
         </div>
       </div>
 
@@ -305,36 +397,27 @@
 
     </main>
   </div>
-</div>
-<script src="js/supabase-config.js"></script>
+  </div>
+  <script src="js/supabase-config.js"></script>
 <script>
 // ============ ADMIN STATE ============
 let adminUser = null;
 let adminProfile = null;
+let settingsCache = {};
 const ADMIN_ROLES = ['super_admin','admin','acting_admin','sub_admin','manager','moderator'];
 
 // ============ BOOT ============
 supabaseClient.auth.onAuthStateChange(async (event, session) => {
   adminUser = session?.user || null;
-
-  if (!adminUser) {
-    showLogin();
-    return;
-  }
-
+  if (!adminUser) { showLogin(); return; }
   const { data } = await supabaseClient
     .from('profiles')
     .select('full_name, profile_pic_url, role, is_banned')
-    .eq('id', adminUser.id)
-    .single();
-
+    .eq('id', adminUser.id).single();
   adminProfile = data;
-
   if (!adminProfile || !ADMIN_ROLES.includes(adminProfile.role) || adminProfile.is_banned) {
-    showDenied();
-    return;
+    showDenied(); return;
   }
-
   showDashboard();
 });
 
@@ -344,10 +427,7 @@ function hideAll(){
     document.getElementById(id).classList.add('hidden');
   });
 }
-function showLogin(){
-  hideAll();
-  document.getElementById('loginScreen').classList.remove('hidden');
-}
+function showLogin(){ hideAll(); document.getElementById('loginScreen').classList.remove('hidden'); }
 function showDenied(){
   hideAll();
   document.getElementById('deniedEmail').innerText = adminUser?.email || '';
@@ -358,7 +438,6 @@ function showDashboard(){
   document.getElementById('dashboard').classList.remove('hidden');
   updateAdminUI();
   loadStats();
-
   const hash = window.location.hash.substring(1);
   const validPages = ['dashboard','products','orders','categories','reviews','team','customers','sellers','settings','commission','logs'];
   const page = validPages.includes(hash) ? hash : 'dashboard';
@@ -371,24 +450,19 @@ function updateAdminUI(){
   const name = adminProfile?.full_name || adminUser?.email?.split('@')[0] || 'Admin';
   const pic = adminProfile?.profile_pic_url;
   const role = adminProfile?.role || '';
-
   document.getElementById('adminName').innerText = name;
   document.getElementById('adminMenuName').innerText = name;
   document.getElementById('adminMenuEmail').innerText = adminUser?.email || '';
   document.getElementById('welcomeName').innerText = name;
-
   const roleText = role.split('_').map(w => w[0].toUpperCase()+w.slice(1)).join(' ');
   document.getElementById('adminRoleBadge').innerText = roleText;
-
   const av = document.getElementById('adminAvatar');
   const init = document.getElementById('adminAvatarInit');
   if (pic) {
-    av.src = pic;
-    av.classList.remove('hidden');
+    av.src = pic; av.classList.remove('hidden');
     init.classList.add('hidden');
   } else {
-    av.classList.add('hidden');
-    init.classList.remove('hidden');
+    av.classList.add('hidden'); init.classList.remove('hidden');
     init.innerText = (name[0] || 'A').toUpperCase();
   }
 }
@@ -396,7 +470,6 @@ function updateAdminUI(){
 function toggleAdminMenu(){
   document.getElementById('adminMenu').classList.toggle('hidden');
 }
-
 document.addEventListener('click', function(e){
   const menu = document.getElementById('adminMenu');
   if (!menu || menu.classList.contains('hidden')) return;
@@ -404,7 +477,6 @@ document.addEventListener('click', function(e){
     menu.classList.add('hidden');
   }
 });
-
 function toggleSidebar(){
   const sb = document.getElementById('sidebar');
   const ov = document.getElementById('sidebarOverlay');
@@ -418,31 +490,28 @@ function showPage(pageId, fromPop){
   document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
   const target = document.getElementById('page-' + pageId);
   if (target) target.classList.remove('hidden');
-
   document.querySelectorAll('.nav-btn').forEach(b => {
     const on = b.dataset.nav === pageId;
     b.className = on
       ? 'nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold bg-blue-600 text-white'
       : 'nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold hover:bg-slate-100 text-slate-700';
   });
-
   if (window.innerWidth < 768) {
     const sb = document.getElementById('sidebar');
     if (!sb.classList.contains('hidden')) toggleSidebar();
   }
-
   document.getElementById('adminMenu').classList.add('hidden');
-
   if (!fromPop && window.location.hash !== '#' + pageId) {
     window.history.pushState({ page: pageId }, '', '#' + pageId);
   }
+  // Load data for page
+  if (pageId === 'settings') loadSettings();
 }
-
 window.addEventListener('popstate', function(e){
   const page = (e.state && e.state.page) || (window.location.hash ? window.location.hash.substring(1) : 'dashboard');
   showPage(page, true);
 });
-  
+
 // ============ LOGIN ============
 async function adminLogin(e){
   e.preventDefault();
@@ -451,24 +520,18 @@ async function adminLogin(e){
   btn.disabled = true;
   btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Signing in…';
   msg.innerText = '';
-
   const email = document.getElementById('loginEmail').value;
   const password = document.getElementById('loginPassword').value;
-
   const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
-
   btn.disabled = false;
   btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Sign In';
-
   if (error) {
     msg.className = 'text-xs text-center mt-3 text-red-500';
     msg.innerText = error.message;
     return false;
   }
-
   return false;
 }
-
 async function adminSignOut(){
   window.history.replaceState(null, '', window.location.pathname);
   await supabaseClient.auth.signOut();
@@ -481,13 +544,52 @@ async function loadStats(){
     supabaseClient.from('orders').select('total_usd', { count: 'exact' }),
     supabaseClient.from('profiles').select('id', { count: 'exact', head: true })
   ]);
-
   document.getElementById('statProducts').innerText = p.count ?? '—';
   document.getElementById('statOrders').innerText = o.count ?? '—';
   document.getElementById('statUsers').innerText = u.count ?? '—';
-
   const revenue = (o.data || []).reduce((s, x) => s + Number(x.total_usd || 0), 0);
   document.getElementById('statRevenue').innerText = '$' + revenue.toFixed(2);
+}
+
+// ============ SETTINGS ============
+async function loadSettings(){
+  const { data, error } = await supabaseClient.from('site_settings').select('key, value');
+  if (error) { alert('Failed to load settings: ' + error.message); return; }
+  settingsCache = {};
+  (data || []).forEach(s => settingsCache[s.key] = s.value || '');
+  const keys = ['whatsapp_number','whatsapp_display','support_email','facebook_page','messenger_username','instagram_username','telegram_username','tiktok_username','youtube_channel','site_tagline'];
+  keys.forEach(k => {
+    const el = document.getElementById('set_' + k);
+    if (el) el.value = settingsCache[k] || '';
+  });
+}
+
+async function saveSettings(){
+  const btn = document.getElementById('saveSettingsBtn');
+  const original = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving…';
+
+  const keys = ['whatsapp_number','whatsapp_display','support_email','facebook_page','messenger_username','instagram_username','telegram_username','tiktok_username','youtube_channel','site_tagline'];
+  const updates = keys.map(k => ({
+    key: k,
+    value: (document.getElementById('set_' + k)?.value || '').trim(),
+    updated_at: new Date().toISOString()
+  }));
+
+  const { error } = await supabaseClient
+    .from('site_settings')
+    .upsert(updates, { onConflict: 'key' });
+
+  btn.disabled = false;
+  btn.innerHTML = original;
+
+  if (error) {
+    alert('Save failed: ' + error.message);
+    return;
+  }
+  btn.innerHTML = '<i class="fa-solid fa-check"></i> Saved!';
+  setTimeout(() => { btn.innerHTML = original; }, 1500);
 }
 </script>
 </body>
