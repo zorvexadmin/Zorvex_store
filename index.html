@@ -48,10 +48,15 @@
       <div class="w-9 h-9 bg-blue-600 rounded-xl text-white flex items-center justify-center"><i class="fa-solid fa-earth-americas"></i></div>
       <span>Zor<span class="text-blue-600">vex</span></span>
     </div>
-    <div class="flex-1 max-w-xl hidden md:block relative">
-      <input id="searchInput" oninput="onSearch(this.value)" placeholder="Search products..." class="w-full pl-10 pr-3 py-2.5 rounded-xl bg-slate-100 text-sm outline-none focus:ring-2 focus:ring-blue-500">
+        <div class="flex-1 max-w-xl hidden md:block relative">
+      <input id="searchInput" oninput="onSearch(this.value)" onfocus="showSearchHistory('searchHistory')" placeholder="Search products..." class="w-full pl-10 pr-20 py-2.5 rounded-xl bg-slate-100 text-sm outline-none focus:ring-2 focus:ring-blue-500">
       <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400"></i>
-    </div>
+      <div class="absolute right-2 top-1.5 flex gap-0.5">
+        <button type="button" onclick="startVoiceSearch('searchInput')" class="w-8 h-8 rounded-lg hover:bg-slate-200 text-slate-600 flex items-center justify-center" title="Voice search"><i class="fa-solid fa-microphone text-xs"></i></button>
+        <button type="button" onclick="openQRScanner()" class="w-8 h-8 rounded-lg hover:bg-slate-200 text-slate-600 flex items-center justify-center" title="Scan barcode/QR"><i class="fa-solid fa-qrcode text-xs"></i></button>
+      </div>
+      <div id="searchHistory" class="hidden absolute left-0 right-0 top-14 bg-white rounded-xl shadow-lg border border-slate-200 py-1 z-40 max-h-80 overflow-y-auto"></div>
+        </div>
     <div class="flex items-center gap-2 ml-auto">
       <button onclick="openCart()" class="relative text-xs font-bold bg-slate-900 text-white px-3 py-2 rounded-xl">
         <i class="fa-solid fa-cart-shopping"></i>
@@ -105,10 +110,15 @@
       </div>
     </div>
   </div>
-  <div class="md:hidden max-w-7xl mx-auto px-4 pb-3 relative">
-    <input id="searchInputMobile" oninput="onSearch(this.value)" placeholder="Search products..." class="w-full pl-10 pr-3 py-2.5 rounded-xl bg-slate-100 text-sm outline-none focus:ring-2 focus:ring-blue-500">
+    <div class="md:hidden max-w-7xl mx-auto px-4 pb-3 relative">
+    <input id="searchInputMobile" oninput="onSearch(this.value)" onfocus="showSearchHistory('searchHistoryMobile')" placeholder="Search products..." class="w-full pl-10 pr-20 py-2.5 rounded-xl bg-slate-100 text-sm outline-none focus:ring-2 focus:ring-blue-500">
     <i class="fa-solid fa-magnifying-glass absolute left-7 top-3.5 text-slate-400"></i>
-  </div>
+    <div class="absolute right-6 top-3 flex gap-0.5">
+      <button type="button" onclick="startVoiceSearch('searchInputMobile')" class="w-8 h-8 rounded-lg hover:bg-slate-200 text-slate-600 flex items-center justify-center" title="Voice search"><i class="fa-solid fa-microphone text-xs"></i></button>
+      <button type="button" onclick="openQRScanner()" class="w-8 h-8 rounded-lg hover:bg-slate-200 text-slate-600 flex items-center justify-center" title="Scan barcode/QR"><i class="fa-solid fa-qrcode text-xs"></i></button>
+    </div>
+    <div id="searchHistoryMobile" class="hidden absolute left-4 right-4 top-14 bg-white rounded-xl shadow-lg border border-slate-200 py-1 z-40 max-h-80 overflow-y-auto"></div>
+    </div>
   <div id="categoryBar" class="max-w-7xl mx-auto px-4 pb-3 flex gap-2 overflow-x-auto text-xs font-semibold"></div>
 </header>
 
@@ -323,6 +333,17 @@
     </a>
   </div>
 </div>
+  <div id="qrScannerModal" class="fixed inset-0 z-[60] hidden bg-black/90 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-md w-full overflow-hidden">
+    <div class="flex justify-between items-center p-4 border-b">
+      <h3 class="font-bold text-sm">Scan Barcode / QR Code</h3>
+      <button onclick="closeQRScanner()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="qrReader" class="w-full bg-black"></div>
+    <p id="qrStatus" class="text-xs text-center p-3 text-slate-500">Point camera at a barcode or QR code…</p>
+  </div>
+  </div>
+  
 <script src="js/supabase-config.js"></script>
 <script>
 // ============ STATE ============
@@ -588,19 +609,22 @@ async function saveProfile(){
 
 // ============ SEARCH ============
 function onSearch(val){
-  searchTerm = (val || '').toLowerCase();
+  searchTerm = (val || '').toLowerCase().trim();
   const a = document.getElementById('searchInput');
   const b = document.getElementById('searchInputMobile');
   if (a && a.value !== val) a.value = val;
   if (b && b.value !== val) b.value = val;
+  hideSearchHistory();
   loadProducts();
 }
 function resetSearch(){ onSearch(''); activeCat = null; loadProducts(); }
   // ============ PRODUCTS ============
-const SAFE_COLS = 'id,title,description,category_id,price_usd,old_price_usd,origin_country,image_url,default_courier,is_active,stock,rating,reviews_count,created_at';
-
+const SAFE_COLS = 'id,title,description,category_id,price_usd,old_price_usd,origin_country,image_url,default_courier,is_active,stock,rating,reviews_count,created_at,barcode';
+let categoriesMap = {};
 async function loadCategories(){
   const { data } = await supabaseClient.from('categories').select('*').order('name');
+  categoriesMap = {};
+  (data||[]).forEach(c => categoriesMap[c.id] = c.name);
   const bar = document.getElementById('categoryBar');
   bar.innerHTML = `<button data-cat="all" onclick="filterCat(null)" class="px-3 py-1.5 bg-slate-900 text-white rounded-full">All</button>` +
     (data||[]).map(c => `<button data-cat="${c.id}" onclick="filterCat(${c.id})" class="px-3 py-1.5 bg-slate-100 rounded-full whitespace-nowrap">${esc(c.name)}</button>`).join('');
@@ -630,15 +654,27 @@ async function loadProducts(){
     em.classList.remove('hidden');
     return;
   }
-  allProducts = (data || []).filter(p => !searchTerm || (p.title||'').toLowerCase().includes(searchTerm));
+  if (searchTerm) {
+    allProducts = (data || [])
+      .map(p => ({ p, score: smartScore(p, searchTerm) }))
+      .filter(x => x.score >= 5)
+      .sort((a, b) => b.score - a.score)
+      .map(x => x.p);
+  } else {
+    allProducts = data || [];
+  }
   renderProducts();
 }
 
 function renderProducts(){
   const grid = document.getElementById('productGrid');
   const em = document.getElementById('emptyMsg');
-  em.innerText = 'No products found.';
-  em.classList.toggle('hidden', allProducts.length > 0);
+  if (allProducts.length === 0) {
+    em.innerText = searchTerm ? `No results for "${searchTerm}"` : 'No products found.';
+    em.classList.remove('hidden');
+  } else {
+    em.classList.add('hidden');
+  }
   grid.innerHTML = allProducts.map(p => `
     <div class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition cursor-pointer" onclick="openProduct('${p.id}')">
       <img src="${p.image_url || 'https://placehold.co/400x400?text=No+Image'}" loading="lazy" class="w-full aspect-square object-cover bg-slate-100">
@@ -863,7 +899,201 @@ async function openOrdersModal(){
   }).join('') || '<p class="text-slate-400">No orders yet.</p>';
   openModal('ordersModal');
 }
+  
+// ============ SMART SEARCH ============
+function smartScore(p, term){
+  if (!term) return 100;
+  const words = term.split(/\s+/).filter(w => w.length > 1);
+  if (words.length === 0) return 100;
 
+  const title = (p.title || '').toLowerCase();
+  const desc = (p.description || '').toLowerCase();
+  const catName = (categoriesMap[p.category_id] || '').toLowerCase();
+  const country = (p.origin_country || '').toLowerCase();
+  const barcode = (p.barcode || '').toLowerCase();
+
+  let score = 0;
+
+  if (title.includes(term)) score += 50;
+
+  words.forEach(w => {
+    if (barcode && barcode === w) { score += 100; return; }
+    if (title.includes(w)) score += 15;
+    else if (catName.includes(w)) score += 10;
+    else if (desc.includes(w)) score += 5;
+    else if (country.includes(w)) score += 3;
+    else {
+      if (w.length >= 3) {
+        const stem = w.substring(0, Math.min(w.length, 4));
+        if (title.includes(stem)) score += 4;
+        else if (desc.includes(stem)) score += 2;
+      }
+    }
+  });
+  return score;
+}
+
+  // ============ SEARCH HISTORY ============
+function getSearchHistory(){
+  try { return JSON.parse(localStorage.getItem('tg_search_history') || '[]'); }
+  catch { return []; }
+}
+
+function saveSearchHistory(term){
+  term = (term || '').trim();
+  if (!term || term.length < 2) return;
+  let h = getSearchHistory().filter(t => t.toLowerCase() !== term.toLowerCase());
+  h.unshift(term);
+  h = h.slice(0, 8);
+  localStorage.setItem('tg_search_history', JSON.stringify(h));
+}
+
+function clearSearchHistory(){
+  localStorage.removeItem('tg_search_history');
+  hideSearchHistory();
+}
+
+function showSearchHistory(boxId){
+  boxId = boxId || 'searchHistory';
+  const h = getSearchHistory();
+  const box = document.getElementById(boxId);
+  if (!box) return;
+  if (h.length === 0) { box.classList.add('hidden'); return; }
+  box.innerHTML = `
+    <div class="flex items-center justify-between px-4 py-2 text-[11px] text-slate-400 border-b border-slate-100">
+      <span>Recent searches</span>
+      <button type="button" onclick="clearSearchHistory()" class="text-red-400 font-bold">Clear</button>
+    </div>
+    ${h.map(t => `<button type="button" onclick="pickHistory(this.dataset.term)" data-term="${esc(t)}" class="w-full flex items-center gap-3 px-4 py-2 text-sm hover:bg-slate-50 text-left">
+      <i class="fa-solid fa-clock-rotate-left text-slate-400 w-3"></i>
+      <span class="truncate">${esc(t)}</span>
+    </button>`).join('')}
+  `;
+  box.classList.remove('hidden');
+}
+
+function hideSearchHistory(){
+  ['searchHistory','searchHistoryMobile'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('hidden');
+  });
+}
+
+function pickHistory(term){
+  onSearch(term);
+  hideSearchHistory();
+}
+
+document.addEventListener('click', function(e){
+  const dSearch = document.getElementById('searchInput');
+  const mSearch = document.getElementById('searchInputMobile');
+  const dBox = document.getElementById('searchHistory');
+  const mBox = document.getElementById('searchHistoryMobile');
+  const inSearch = (dSearch && dSearch.contains(e.target)) || (mSearch && mSearch.contains(e.target));
+  const inDBox = dBox && dBox.contains(e.target);
+  const inMBox = mBox && mBox.contains(e.target);
+  if (!inSearch && !inDBox && !inMBox) hideSearchHistory();
+});
+
+  // ============ VOICE SEARCH ============
+function startVoiceSearch(inputId){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    alert('Voice search is not supported in this browser.\nPlease use Chrome on Android.');
+    return;
+  }
+  const input = document.getElementById(inputId);
+  if (!input) return;
+
+  const recognition = new SR();
+  recognition.lang = 'en-US';
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+
+  const origPlaceholder = input.placeholder;
+  const origBg = input.style.background;
+  input.placeholder = '🎤 Listening…';
+  input.style.background = '#fee2e2';
+
+  recognition.onresult = (e) => {
+    const text = e.results[0][0].transcript;
+    onSearch(text);
+    saveSearchHistory(text);
+  };
+  recognition.onerror = (e) => {
+    if (e.error !== 'aborted' && e.error !== 'no-speech') {
+      alert('Voice search failed: ' + e.error);
+    }
+  };
+  recognition.onend = () => {
+    input.placeholder = origPlaceholder;
+    input.style.background = origBg;
+  };
+  try { recognition.start(); } catch (err) { /* already running */ }
+}
+
+  // ============ QR / BARCODE SCANNER ============
+let qrScannerInstance = null;
+
+function openQRScanner(){
+  const modal = document.getElementById('qrScannerModal');
+  modal.classList.remove('hidden');
+  document.getElementById('qrStatus').innerText = 'Loading scanner…';
+
+  if (typeof Html5Qrcode !== 'undefined') {
+    startQRScanner();
+  } else {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js';
+    script.onload = () => startQRScanner();
+    script.onerror = () => {
+      document.getElementById('qrStatus').innerText = 'Failed to load scanner library. Check your internet.';
+    };
+    document.head.appendChild(script);
+  }
+}
+
+function startQRScanner(){
+  document.getElementById('qrStatus').innerText = 'Point camera at a barcode or QR code…';
+
+  qrScannerInstance = new Html5Qrcode('qrReader');
+  qrScannerInstance.start(
+    { facingMode: 'environment' },
+    { fps: 10, qrbox: { width: 250, height: 250 } },
+    (decodedText) => { handleScanResult(decodedText); },
+    () => { /* per-frame errors: ignore */ }
+  ).catch(err => {
+    document.getElementById('qrStatus').innerText = 'Camera error: ' + (err.message || err);
+  });
+}
+
+function closeQRScanner(){
+  const stop = qrScannerInstance;
+  qrScannerInstance = null;
+  if (stop) {
+    try {
+      stop.stop().then(() => stop.clear()).catch(() => {});
+    } catch(e) {}
+  }
+  document.getElementById('qrScannerModal').classList.add('hidden');
+}
+
+function handleScanResult(text){
+  if (navigator.vibrate) navigator.vibrate(80);
+  closeQRScanner();
+
+  const found = allProducts.find(p =>
+    (p.barcode && p.barcode === text) || p.id === text
+  );
+  if (found) {
+    openProduct(found.id);
+    return;
+  }
+
+  onSearch(text);
+  saveSearchHistory(text);
+}
+  
 // ============ INIT ============
 document.getElementById('currency').addEventListener('change', () => {
   renderProducts();
