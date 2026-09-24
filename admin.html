@@ -12,6 +12,8 @@
   body{font-family:'Inter',sans-serif}
   .fade-in{animation:fadeIn .25s ease-out}
   @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+  .spin{animation:spin 1s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body class="bg-slate-100 min-h-screen">
@@ -51,9 +53,7 @@
       <p id="loginMsg" class="text-xs text-center mt-3"></p>
     </div>
     <p class="text-center text-xs text-slate-500 mt-4">
-      <a href="index.html" class="hover:text-blue-400">
-        <i class="fa-solid fa-arrow-left"></i> Back to Store
-      </a>
+      <a href="index.html" class="hover:text-blue-400"><i class="fa-solid fa-arrow-left"></i> Back to Store</a>
     </p>
   </div>
 </div>
@@ -72,23 +72,16 @@
     </div>
   </div>
 </div>
-  <div id="dashboard" class="hidden min-h-screen">
-
+<div id="dashboard" class="hidden min-h-screen">
   <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
     <div class="px-4 py-3 flex items-center gap-3">
-      <button onclick="toggleSidebar()" class="md:hidden w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center">
-        <i class="fa-solid fa-bars"></i>
-      </button>
+      <button onclick="toggleSidebar()" class="md:hidden w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center"><i class="fa-solid fa-bars"></i></button>
       <div class="flex items-center gap-2 font-black text-lg">
-        <div class="w-8 h-8 bg-blue-600 rounded-xl text-white flex items-center justify-center text-sm">
-          <i class="fa-solid fa-earth-americas"></i>
-        </div>
+        <div class="w-8 h-8 bg-blue-600 rounded-xl text-white flex items-center justify-center text-sm"><i class="fa-solid fa-earth-americas"></i></div>
         <span>Zorvex <span class="text-blue-600 text-sm">Admin</span></span>
       </div>
       <div class="ml-auto flex items-center gap-2">
-        <a href="index.html" target="_blank" class="text-xs font-bold bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-xl">
-          <i class="fa-solid fa-store"></i> <span class="hidden sm:inline">View Store</span>
-        </a>
+        <a href="index.html" target="_blank" class="text-xs font-bold bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-xl"><i class="fa-solid fa-store"></i> <span class="hidden sm:inline">View Store</span></a>
         <div class="relative">
           <button onclick="toggleAdminMenu()" class="flex items-center gap-2 text-xs font-bold bg-slate-100 hover:bg-slate-200 pl-1 pr-2 py-1 rounded-xl">
             <img id="adminAvatar" class="w-7 h-7 rounded-full object-cover bg-blue-600 hidden">
@@ -102,337 +95,294 @@
               <p id="adminMenuEmail" class="text-[11px] text-slate-500 truncate">—</p>
               <span id="adminRoleBadge" class="inline-block mt-1 text-[9px] bg-blue-100 text-blue-700 font-bold px-2 py-0.5 rounded-full uppercase">Super Admin</span>
             </div>
-            <button onclick="showPage('dashboard')" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-slate-50 border-b">
-              <i class="fa-solid fa-gauge text-blue-600 w-4"></i> Dashboard
-            </button>
-            <button onclick="adminSignOut()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50">
-              <i class="fa-solid fa-right-from-bracket w-4"></i> Sign Out
-            </button>
+            <button onclick="showPage('dashboard')" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-slate-50 border-b"><i class="fa-solid fa-gauge text-blue-600 w-4"></i> Dashboard</button>
+            <button onclick="adminSignOut()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50"><i class="fa-solid fa-right-from-bracket w-4"></i> Sign Out</button>
           </div>
         </div>
       </div>
     </div>
   </header>
-
-  <div class="flex">
+    <div class="flex">
     <aside id="sidebar" class="hidden md:block fixed md:sticky top-[57px] left-0 w-64 h-[calc(100vh-57px)] bg-white border-r border-slate-200 overflow-y-auto z-20">
       <nav class="p-3 space-y-1">
         <p class="text-[10px] font-bold text-slate-400 uppercase px-3 pt-3 pb-1">Main</p>
-        <button onclick="showPage('dashboard')" data-nav="dashboard" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold">
-          <i class="fa-solid fa-gauge w-4"></i> Dashboard
-        </button>
+        <button onclick="showPage('dashboard')" data-nav="dashboard" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold"><i class="fa-solid fa-gauge w-4"></i> Dashboard</button>
         <p class="text-[10px] font-bold text-slate-400 uppercase px-3 pt-4 pb-1">Store</p>
-        <button onclick="showPage('products')" data-nav="products" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold">
-          <i class="fa-solid fa-box w-4"></i> Products
-        </button>
-        <button onclick="showPage('orders')" data-nav="orders" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold">
-          <i class="fa-solid fa-receipt w-4"></i> Orders
-        </button>
-        <button onclick="showPage('categories')" data-nav="categories" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold">
-          <i class="fa-solid fa-tags w-4"></i> Categories
-        </button>
-        <button onclick="showPage('reviews')" data-nav="reviews" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold">
-          <i class="fa-solid fa-star w-4"></i> Reviews
-        </button>
+        <button onclick="showPage('products')" data-nav="products" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold"><i class="fa-solid fa-box w-4"></i> Products</button>
+        <button onclick="showPage('orders')" data-nav="orders" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold"><i class="fa-solid fa-receipt w-4"></i> Orders</button>
+        <button onclick="showPage('categories')" data-nav="categories" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold"><i class="fa-solid fa-tags w-4"></i> Categories</button>
+        <button onclick="showPage('reviews')" data-nav="reviews" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold"><i class="fa-solid fa-star w-4"></i> Reviews</button>
         <p class="text-[10px] font-bold text-slate-400 uppercase px-3 pt-4 pb-1">Users</p>
-        <button onclick="showPage('team')" data-nav="team" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold">
-          <i class="fa-solid fa-users-gear w-4"></i> Team & Roles
-        </button>
-        <button onclick="showPage('customers')" data-nav="customers" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold">
-          <i class="fa-solid fa-user-group w-4"></i> Customers
-        </button>
-        <button onclick="showPage('sellers')" data-nav="sellers" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold">
-          <i class="fa-solid fa-store w-4"></i> Sellers
-        </button>
+        <button onclick="showPage('team')" data-nav="team" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold"><i class="fa-solid fa-users-gear w-4"></i> Team & Roles</button>
+        <button onclick="showPage('customers')" data-nav="customers" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold"><i class="fa-solid fa-user-group w-4"></i> Customers</button>
+        <button onclick="showPage('sellers')" data-nav="sellers" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold"><i class="fa-solid fa-store w-4"></i> Sellers</button>
         <p class="text-[10px] font-bold text-slate-400 uppercase px-3 pt-4 pb-1">System</p>
-        <button onclick="showPage('settings')" data-nav="settings" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold">
-          <i class="fa-solid fa-gear w-4"></i> Settings
-        </button>
-        <button onclick="showPage('commission')" data-nav="commission" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold">
-          <i class="fa-solid fa-percent w-4"></i> Commission
-        </button>
-        <button onclick="showPage('logs')" data-nav="logs" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold">
-          <i class="fa-solid fa-list-check w-4"></i> Activity Logs
-        </button>
+        <button onclick="showPage('settings')" data-nav="settings" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold"><i class="fa-solid fa-gear w-4"></i> Settings</button>
+        <button onclick="showPage('commission')" data-nav="commission" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold"><i class="fa-solid fa-percent w-4"></i> Commission</button>
+        <button onclick="showPage('logs')" data-nav="logs" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold"><i class="fa-solid fa-list-check w-4"></i> Activity Logs</button>
       </nav>
     </aside>
-
     <div id="sidebarOverlay" onclick="toggleSidebar()" class="hidden fixed inset-0 bg-black/50 z-10 md:hidden"></div>
-
     <main class="flex-1 min-w-0 p-4 md:p-6">
-           <div id="page-dashboard" class="page fade-in">
+
+      <div id="page-dashboard" class="page fade-in">
         <h1 class="text-2xl font-black mb-1">Dashboard</h1>
         <p class="text-sm text-slate-500 mb-6">Welcome back, <span id="welcomeName" class="font-bold text-slate-700">Admin</span> 👋</p>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-          <div class="bg-white rounded-2xl p-4 border border-slate-200">
-            <i class="fa-solid fa-box text-blue-600"></i>
-            <p id="statProducts" class="text-2xl font-black mt-2">—</p>
-            <p class="text-xs text-slate-500">Products</p>
-          </div>
-          <div class="bg-white rounded-2xl p-4 border border-slate-200">
-            <i class="fa-solid fa-receipt text-emerald-600"></i>
-            <p id="statOrders" class="text-2xl font-black mt-2">—</p>
-            <p class="text-xs text-slate-500">Orders</p>
-          </div>
-          <div class="bg-white rounded-2xl p-4 border border-slate-200">
-            <i class="fa-solid fa-users text-purple-600"></i>
-            <p id="statUsers" class="text-2xl font-black mt-2">—</p>
-            <p class="text-xs text-slate-500">Users</p>
-          </div>
-          <div class="bg-white rounded-2xl p-4 border border-slate-200">
-            <i class="fa-solid fa-dollar-sign text-amber-600"></i>
-            <p id="statRevenue" class="text-2xl font-black mt-2">—</p>
-            <p class="text-xs text-slate-500">Revenue (USD)</p>
-          </div>
+          <div class="bg-white rounded-2xl p-4 border border-slate-200"><i class="fa-solid fa-box text-blue-600"></i><p id="statProducts" class="text-2xl font-black mt-2">—</p><p class="text-xs text-slate-500">Products</p></div>
+          <div class="bg-white rounded-2xl p-4 border border-slate-200"><i class="fa-solid fa-receipt text-emerald-600"></i><p id="statOrders" class="text-2xl font-black mt-2">—</p><p class="text-xs text-slate-500">Orders</p></div>
+          <div class="bg-white rounded-2xl p-4 border border-slate-200"><i class="fa-solid fa-users text-purple-600"></i><p id="statUsers" class="text-2xl font-black mt-2">—</p><p class="text-xs text-slate-500">Users</p></div>
+          <div class="bg-white rounded-2xl p-4 border border-slate-200"><i class="fa-solid fa-dollar-sign text-amber-600"></i><p id="statRevenue" class="text-2xl font-black mt-2">—</p><p class="text-xs text-slate-500">Revenue (USD)</p></div>
         </div>
-        <div class="bg-white rounded-2xl p-6 border border-slate-200">
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 mb-4">
           <div class="flex items-center gap-3 mb-3">
-            <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-              <i class="fa-solid fa-rocket text-blue-600"></i>
-            </div>
-            <div>
-              <h2 class="font-black">Getting Started</h2>
-              <p class="text-xs text-slate-500">Configure your store step by step</p>
-            </div>
+            <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center"><i class="fa-solid fa-rocket text-blue-600"></i></div>
+            <div><h2 class="font-black">Quick Actions</h2><p class="text-xs text-slate-500">Jump to common tasks</p></div>
           </div>
-          <div class="space-y-2 text-sm">
-            <button onclick="showPage('settings')" class="w-full flex items-center gap-3 p-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-left">
-              <i class="fa-solid fa-gear text-slate-600 w-4"></i>
-              <span class="flex-1"><b>Setup store settings</b><br><span class="text-xs text-slate-500">WhatsApp, Email, Social links</span></span>
-              <i class="fa-solid fa-arrow-right text-slate-400"></i>
-            </button>
-            <button onclick="showPage('products')" class="w-full flex items-center gap-3 p-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-left">
-              <i class="fa-solid fa-box text-slate-600 w-4"></i>
-              <span class="flex-1"><b>Add your first product</b><br><span class="text-xs text-slate-500">Title, price, image</span></span>
-              <i class="fa-solid fa-arrow-right text-slate-400"></i>
-            </button>
+          <div class="grid grid-cols-2 gap-2 text-sm">
+            <button onclick="showPage('products'); setTimeout(openProductModal, 300)" class="p-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-left"><i class="fa-solid fa-plus text-blue-600"></i><p class="font-bold mt-1">Add Product</p></button>
+            <button onclick="showPage('orders')" class="p-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-left"><i class="fa-solid fa-truck text-emerald-600"></i><p class="font-bold mt-1">View Orders</p></button>
+            <button onclick="showPage('settings')" class="p-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-left"><i class="fa-solid fa-gear text-slate-600"></i><p class="font-bold mt-1">Settings</p></button>
+            <button onclick="showPage('team')" class="p-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-left"><i class="fa-solid fa-users-gear text-purple-600"></i><p class="font-bold mt-1">Team</p></button>
           </div>
         </div>
       </div>
-
-      <div id="page-products" class="page hidden fade-in">
-        <h1 class="text-2xl font-black mb-1">Products</h1>
-        <p class="text-sm text-slate-500 mb-6">Manage all products</p>
-        <div class="bg-white rounded-2xl p-10 border border-slate-200 text-center">
-          <i class="fa-solid fa-box text-slate-300 text-5xl mb-3"></i>
-          <p class="text-slate-500">Product management — coming in Phase 2C</p>
+            <div id="page-products" class="page hidden fade-in">
+        <div class="flex items-center justify-between mb-4">
+          <div><h1 class="text-2xl font-black mb-1">Products</h1><p class="text-sm text-slate-500">Manage all products</p></div>
+          <button onclick="openProductModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2.5 rounded-xl text-sm shrink-0"><i class="fa-solid fa-plus"></i> <span class="hidden sm:inline">Add</span></button>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden mb-4">
+          <div class="p-3 border-b"><input id="productSearch" oninput="renderProductsList()" placeholder="Search products…" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"></div>
+          <div id="productsList" class="divide-y divide-slate-100"><p class="text-center text-slate-400 py-8 text-sm">Loading…</p></div>
         </div>
       </div>
 
       <div id="page-orders" class="page hidden fade-in">
-        <h1 class="text-2xl font-black mb-1">Orders</h1>
-        <p class="text-sm text-slate-500 mb-6">Manage customer orders</p>
-        <div class="bg-white rounded-2xl p-10 border border-slate-200 text-center">
-          <i class="fa-solid fa-receipt text-slate-300 text-5xl mb-3"></i>
-          <p class="text-slate-500">Order management — coming in Phase 2D</p>
+        <div class="flex items-center justify-between mb-4">
+          <div><h1 class="text-2xl font-black mb-1">Orders</h1><p class="text-sm text-slate-500">Manage customer orders</p></div>
+          <button onclick="loadOrders()" class="text-xs font-bold bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-xl"><i class="fa-solid fa-rotate"></i> Refresh</button>
         </div>
+        <div class="flex gap-1 mb-4 overflow-x-auto pb-1">
+          <button onclick="filterOrders('all')" data-oft="all" class="oft px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap bg-blue-600 text-white">All</button>
+          <button onclick="filterOrders('pending')" data-oft="pending" class="oft px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap bg-white border border-slate-200">Pending</button>
+          <button onclick="filterOrders('confirmed')" data-oft="confirmed" class="oft px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap bg-white border border-slate-200">Confirmed</button>
+          <button onclick="filterOrders('shipped')" data-oft="shipped" class="oft px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap bg-white border border-slate-200">Shipped</button>
+          <button onclick="filterOrders('delivered')" data-oft="delivered" class="oft px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap bg-white border border-slate-200">Delivered</button>
+          <button onclick="filterOrders('cancelled')" data-oft="cancelled" class="oft px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap bg-white border border-slate-200">Cancelled</button>
+        </div>
+        <div id="ordersList" class="space-y-3"><p class="text-center text-slate-400 py-8 text-sm">Loading…</p></div>
       </div>
-
-      <div id="page-categories" class="page hidden fade-in">
-        <h1 class="text-2xl font-black mb-1">Categories</h1>
-        <p class="text-sm text-slate-500 mb-6">Manage product categories</p>
-        <div class="bg-white rounded-2xl p-10 border border-slate-200 text-center">
-          <i class="fa-solid fa-tags text-slate-300 text-5xl mb-3"></i>
-          <p class="text-slate-500">Category management — coming soon</p>
+            <div id="page-categories" class="page hidden fade-in">
+        <div class="flex items-center justify-between mb-4">
+          <div><h1 class="text-2xl font-black mb-1">Categories</h1><p class="text-sm text-slate-500">Product categories</p></div>
+          <button onclick="openCategoryModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2.5 rounded-xl text-sm shrink-0"><i class="fa-solid fa-plus"></i> <span class="hidden sm:inline">Add</span></button>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+          <div id="categoriesList" class="divide-y divide-slate-100"><p class="text-center text-slate-400 py-8 text-sm">Loading…</p></div>
         </div>
       </div>
 
       <div id="page-reviews" class="page hidden fade-in">
-        <h1 class="text-2xl font-black mb-1">Reviews</h1>
-        <p class="text-sm text-slate-500 mb-6">Moderate customer reviews</p>
-        <div class="bg-white rounded-2xl p-10 border border-slate-200 text-center">
-          <i class="fa-solid fa-star text-slate-300 text-5xl mb-3"></i>
-          <p class="text-slate-500">Review moderation — coming soon</p>
+        <div class="flex items-center justify-between mb-4">
+          <div><h1 class="text-2xl font-black mb-1">Reviews</h1><p class="text-sm text-slate-500">Moderate customer reviews</p></div>
+          <button onclick="loadReviews()" class="text-xs font-bold bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-xl"><i class="fa-solid fa-rotate"></i> Refresh</button>
         </div>
+        <div id="reviewsList" class="space-y-3"><p class="text-center text-slate-400 py-8 text-sm">Loading…</p></div>
       </div>
 
       <div id="page-team" class="page hidden fade-in">
-        <h1 class="text-2xl font-black mb-1">Team & Roles</h1>
-        <p class="text-sm text-slate-500 mb-6">Manage admin team and permissions</p>
-        <div class="bg-white rounded-2xl p-10 border border-slate-200 text-center">
-          <i class="fa-solid fa-users-gear text-slate-300 text-5xl mb-3"></i>
-          <p class="text-slate-500">Team management — coming in Phase 2B</p>
+        <div class="flex items-center justify-between mb-4">
+          <div><h1 class="text-2xl font-black mb-1">Team & Roles</h1><p class="text-sm text-slate-500">Manage admin team</p></div>
+          <button onclick="openInviteModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2.5 rounded-xl text-sm shrink-0"><i class="fa-solid fa-user-plus"></i> <span class="hidden sm:inline">Add Member</span></button>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden mb-4">
+          <div class="p-3 border-b"><input id="teamSearch" oninput="renderTeam()" placeholder="Search by name…" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"></div>
+          <div id="teamList" class="divide-y divide-slate-100"><p class="text-center text-slate-400 py-8 text-sm">Loading…</p></div>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+          <div class="p-4 border-b"><h2 class="font-black text-sm">Pending Invites</h2><p class="text-[11px] text-slate-500">Users invited but not signed up yet</p></div>
+          <div id="invitesList" class="divide-y divide-slate-100"><p class="text-center text-slate-400 py-6 text-sm">Loading…</p></div>
         </div>
       </div>
-
-      <div id="page-customers" class="page hidden fade-in">
+            <div id="page-customers" class="page hidden fade-in">
         <h1 class="text-2xl font-black mb-1">Customers</h1>
-        <p class="text-sm text-slate-500 mb-6">All registered customers</p>
-        <div class="bg-white rounded-2xl p-10 border border-slate-200 text-center">
-          <i class="fa-solid fa-user-group text-slate-300 text-5xl mb-3"></i>
-          <p class="text-slate-500">Customer list — coming soon</p>
+        <p class="text-sm text-slate-500 mb-4">All registered customers</p>
+        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+          <div class="p-3 border-b"><input id="customerSearch" oninput="renderCustomers()" placeholder="Search customers…" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"></div>
+          <div id="customersList" class="divide-y divide-slate-100"><p class="text-center text-slate-400 py-8 text-sm">Loading…</p></div>
         </div>
       </div>
 
       <div id="page-sellers" class="page hidden fade-in">
         <h1 class="text-2xl font-black mb-1">Sellers</h1>
-        <p class="text-sm text-slate-500 mb-6">Approve and manage sellers</p>
-        <div class="bg-white rounded-2xl p-10 border border-slate-200 text-center">
-          <i class="fa-solid fa-store text-slate-300 text-5xl mb-3"></i>
-          <p class="text-slate-500">Seller management — coming in Phase 2E</p>
-        </div>
+        <p class="text-sm text-slate-500 mb-4">Approve and manage sellers</p>
+        <div id="sellersList" class="space-y-3"><p class="text-center text-slate-400 py-8 text-sm">Loading…</p></div>
       </div>
 
       <div id="page-settings" class="page hidden fade-in">
         <h1 class="text-2xl font-black mb-1">Store Settings</h1>
-        <p class="text-sm text-slate-500 mb-6">Contact info & social links — what customers see</p>
-
+        <p class="text-sm text-slate-500 mb-6">Contact info & social links</p>
         <div class="bg-white rounded-2xl p-5 border border-slate-200 mb-4">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-9 h-9 bg-emerald-100 rounded-xl flex items-center justify-center">
-              <i class="fa-brands fa-whatsapp text-emerald-600"></i>
-            </div>
-            <div>
-              <h2 class="font-black">WhatsApp</h2>
-              <p class="text-[11px] text-slate-500">Customer WhatsApp contact</p>
-            </div>
-          </div>
+          <div class="flex items-center gap-3 mb-4"><div class="w-9 h-9 bg-emerald-100 rounded-xl flex items-center justify-center"><i class="fa-brands fa-whatsapp text-emerald-600"></i></div><div><h2 class="font-black">WhatsApp</h2><p class="text-[11px] text-slate-500">Customer contact</p></div></div>
           <div class="space-y-3">
-            <div>
-              <label class="text-xs font-bold text-slate-500">WhatsApp Number (for link)</label>
-              <input id="set_whatsapp_number" placeholder="8801712345678" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
-              <p class="text-[10px] text-slate-400 mt-1">No + sign, no spaces. Example: 8801712345678</p>
-            </div>
-            <div>
-              <label class="text-xs font-bold text-slate-500">Display Number (what customer sees)</label>
-              <input id="set_whatsapp_display" placeholder="+880 1712-345678" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
-            </div>
+            <div><label class="text-xs font-bold text-slate-500">WhatsApp Number (for link)</label><input id="set_whatsapp_number" placeholder="8801712345678" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"><p class="text-[10px] text-slate-400 mt-1">যেকোনো format — website নিজে ঠিক করবে</p></div>
+            <div><label class="text-xs font-bold text-slate-500">Display Number</label><input id="set_whatsapp_display" placeholder="+880 1712-345678" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"></div>
           </div>
         </div>
-
         <div class="bg-white rounded-2xl p-5 border border-slate-200 mb-4">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-9 h-9 bg-blue-100 rounded-xl flex items-center justify-center">
-              <i class="fa-solid fa-envelope text-blue-600"></i>
-            </div>
-            <div>
-              <h2 class="font-black">Email</h2>
-              <p class="text-[11px] text-slate-500">Support email address</p>
-            </div>
-          </div>
+          <div class="flex items-center gap-3 mb-4"><div class="w-9 h-9 bg-blue-100 rounded-xl flex items-center justify-center"><i class="fa-solid fa-envelope text-blue-600"></i></div><div><h2 class="font-black">Email</h2></div></div>
           <input id="set_support_email" type="email" placeholder="support@example.com" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
         </div>
-
         <div class="bg-white rounded-2xl p-5 border border-slate-200 mb-4">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-9 h-9 bg-purple-100 rounded-xl flex items-center justify-center">
-              <i class="fa-solid fa-hashtag text-purple-600"></i>
-            </div>
-            <div>
-              <h2 class="font-black">Social Links</h2>
-              <p class="text-[11px] text-slate-500">Just the username — no @ sign, no full URL</p>
-            </div>
-          </div>
+          <div class="flex items-center gap-3 mb-4"><div class="w-9 h-9 bg-purple-100 rounded-xl flex items-center justify-center"><i class="fa-solid fa-hashtag text-purple-600"></i></div><div><h2 class="font-black">Social Links</h2><p class="text-[11px] text-slate-500">Username বা full URL — দুটোই কাজ করবে</p></div></div>
           <div class="space-y-3">
-            <div>
-              <label class="text-xs font-bold text-slate-500 flex items-center gap-1.5"><i class="fa-brands fa-facebook text-blue-700"></i> Facebook Page Username</label>
-              <input id="set_facebook_page" placeholder="zorvexstore" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
-            </div>
-            <div>
-              <label class="text-xs font-bold text-slate-500 flex items-center gap-1.5"><i class="fa-brands fa-facebook-messenger text-blue-500"></i> Messenger Username</label>
-              <input id="set_messenger_username" placeholder="zorvexstore" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
-              <p class="text-[10px] text-slate-400 mt-1">Usually same as Facebook page</p>
-            </div>
-            <div>
-              <label class="text-xs font-bold text-slate-500 flex items-center gap-1.5"><i class="fa-brands fa-instagram text-pink-600"></i> Instagram Username</label>
-              <input id="set_instagram_username" placeholder="zorvexstore" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
-            </div>
-            <div>
-              <label class="text-xs font-bold text-slate-500 flex items-center gap-1.5"><i class="fa-brands fa-telegram text-sky-500"></i> Telegram Username</label>
-              <input id="set_telegram_username" placeholder="zorvexstore" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
-            </div>
-            <div>
-              <label class="text-xs font-bold text-slate-500 flex items-center gap-1.5"><i class="fa-brands fa-tiktok"></i> TikTok Username</label>
-              <input id="set_tiktok_username" placeholder="zorvexstore" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
-            </div>
-            <div>
-              <label class="text-xs font-bold text-slate-500 flex items-center gap-1.5"><i class="fa-brands fa-youtube text-red-600"></i> YouTube Channel</label>
-              <input id="set_youtube_channel" placeholder="zorvexstore" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
-            </div>
+            <div><label class="text-xs font-bold text-slate-500 flex items-center gap-1.5"><i class="fa-brands fa-facebook text-blue-700"></i> Facebook Page</label><input id="set_facebook_page" placeholder="zorvexstore বা https://facebook.com/..." class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"></div>
+            <div><label class="text-xs font-bold text-slate-500 flex items-center gap-1.5"><i class="fa-brands fa-facebook-messenger text-blue-500"></i> Messenger</label><input id="set_messenger_username" placeholder="zorvexstore" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"></div>
+            <div><label class="text-xs font-bold text-slate-500 flex items-center gap-1.5"><i class="fa-brands fa-instagram text-pink-600"></i> Instagram</label><input id="set_instagram_username" placeholder="@zorvexstore" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"></div>
+            <div><label class="text-xs font-bold text-slate-500 flex items-center gap-1.5"><i class="fa-brands fa-telegram text-sky-500"></i> Telegram</label><input id="set_telegram_username" placeholder="zorvexstore" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"></div>
+            <div><label class="text-xs font-bold text-slate-500 flex items-center gap-1.5"><i class="fa-brands fa-tiktok"></i> TikTok</label><input id="set_tiktok_username" placeholder="zorvexstore" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"></div>
+            <div><label class="text-xs font-bold text-slate-500 flex items-center gap-1.5"><i class="fa-brands fa-youtube text-red-600"></i> YouTube</label><input id="set_youtube_channel" placeholder="zorvexstore" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"></div>
           </div>
         </div>
-
-        <div class="bg-white rounded-2xl p-5 border border-slate-200 mb-4">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-9 h-9 bg-slate-100 rounded-xl flex items-center justify-center">
-              <i class="fa-solid fa-quote-left text-slate-600"></i>
-            </div>
-            <div>
-              <h2 class="font-black">Store Info</h2>
-            </div>
-          </div>
-          <div>
-            <label class="text-xs font-bold text-slate-500">Homepage Tagline (top bar)</label>
-            <input id="set_site_tagline" placeholder="Worldwide Express Delivery" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
-          </div>
+                <div class="bg-white rounded-2xl p-5 border border-slate-200 mb-4">
+          <div class="flex items-center gap-3 mb-4"><div class="w-9 h-9 bg-slate-100 rounded-xl flex items-center justify-center"><i class="fa-solid fa-quote-left text-slate-600"></i></div><div><h2 class="font-black">Store Info</h2></div></div>
+          <label class="text-xs font-bold text-slate-500">Homepage Tagline</label>
+          <input id="set_site_tagline" placeholder="Worldwide Express Delivery" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
         </div>
-
         <div class="flex gap-2 mb-20">
-          <button onclick="loadSettings()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-3 rounded-xl text-sm">
-            <i class="fa-solid fa-rotate"></i> Reload
-          </button>
-          <button onclick="saveSettings()" id="saveSettingsBtn" class="flex-[2] bg-blue-600 hover:bg-blue-700 text-white font-black py-3 rounded-xl text-sm">
-            <i class="fa-solid fa-check"></i> Save All Changes
-          </button>
+          <button onclick="loadSettings()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-3 rounded-xl text-sm"><i class="fa-solid fa-rotate"></i> Reload</button>
+          <button onclick="saveSettings()" id="saveSettingsBtn" class="flex-[2] bg-blue-600 hover:bg-blue-700 text-white font-black py-3 rounded-xl text-sm"><i class="fa-solid fa-check"></i> Save</button>
         </div>
       </div>
 
       <div id="page-commission" class="page hidden fade-in">
         <h1 class="text-2xl font-black mb-1">Commission</h1>
-        <p class="text-sm text-slate-500 mb-6">Website fee & resell rates</p>
-        <div class="bg-white rounded-2xl p-10 border border-slate-200 text-center">
-          <i class="fa-solid fa-percent text-slate-300 text-5xl mb-3"></i>
-          <p class="text-slate-500">Commission settings — coming soon</p>
+        <p class="text-sm text-slate-500 mb-6">Platform commission rates</p>
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 mb-4">
+          <div class="flex items-center gap-3 mb-4"><div class="w-9 h-9 bg-blue-100 rounded-xl flex items-center justify-center"><i class="fa-solid fa-store text-blue-600"></i></div><div><h2 class="font-black">Seller's Own Products</h2><p class="text-[11px] text-slate-500">When a seller sells their own product</p></div></div>
+          <label class="text-xs font-bold text-slate-500">Commission Rate (%)</label>
+          <input id="set_commission_own_rate" type="number" step="0.1" min="0" max="50" placeholder="5" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
+          <p class="text-[10px] text-slate-400 mt-1">Default: 5%. Admin keeps this % of the selling price.</p>
         </div>
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 mb-4">
+          <div class="flex items-center gap-3 mb-4"><div class="w-9 h-9 bg-amber-100 rounded-xl flex items-center justify-center"><i class="fa-solid fa-arrows-rotate text-amber-600"></i></div><div><h2 class="font-black">Admin Product Resell</h2><p class="text-[11px] text-slate-500">When a seller resells admin's product</p></div></div>
+          <label class="text-xs font-bold text-slate-500">Commission Rate (%)</label>
+          <input id="set_commission_resell_rate" type="number" step="0.1" min="0" max="50" placeholder="10" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
+          <p class="text-[10px] text-slate-400 mt-1">Default: 10%. Includes website fee + resell royalty.</p>
+        </div>
+        <button onclick="saveCommission()" id="saveCommissionBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-3 rounded-xl text-sm mb-20"><i class="fa-solid fa-check"></i> Save Commission Rates</button>
       </div>
 
       <div id="page-logs" class="page hidden fade-in">
-        <h1 class="text-2xl font-black mb-1">Activity Logs</h1>
-        <p class="text-sm text-slate-500 mb-6">Who did what and when</p>
-        <div class="bg-white rounded-2xl p-10 border border-slate-200 text-center">
-          <i class="fa-solid fa-list-check text-slate-300 text-5xl mb-3"></i>
-          <p class="text-slate-500">Activity logs — coming soon</p>
+        <div class="flex items-center justify-between mb-4">
+          <div><h1 class="text-2xl font-black mb-1">Activity Logs</h1><p class="text-sm text-slate-500">Who did what and when</p></div>
+          <button onclick="loadLogs()" class="text-xs font-bold bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-xl"><i class="fa-solid fa-rotate"></i> Refresh</button>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+          <div id="logsList" class="divide-y divide-slate-100"><p class="text-center text-slate-400 py-8 text-sm">Loading…</p></div>
         </div>
       </div>
 
     </main>
   </div>
+</div>
+<div id="inviteModal" class="fixed inset-0 z-50 hidden bg-black/60 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-md w-full p-6">
+    <div class="flex justify-between mb-4"><h3 class="font-black text-lg">Add Team Member</h3><button onclick="closeModal('inviteModal')"><i class="fa-solid fa-xmark"></i></button></div>
+    <p class="text-xs text-slate-500 mb-4">They'll get the role automatically when they sign up with this email.</p>
+    <div class="space-y-3">
+      <div><label class="text-xs font-bold text-slate-500">Email</label><input id="inviteEmail" type="email" placeholder="name@example.com" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"></div>
+      <div><label class="text-xs font-bold text-slate-500">Role</label><select id="inviteRole" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"><option value="admin">Admin</option><option value="acting_admin">Acting Admin</option><option value="sub_admin">Sub Admin</option><option value="manager">Manager</option><option value="moderator">Moderator</option><option value="seller">Seller</option></select></div>
+      <button id="inviteBtn" onclick="sendInvite()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-3 rounded-xl text-sm"><i class="fa-solid fa-paper-plane"></i> Send Invite</button>
+      <p id="inviteMsg" class="text-xs text-center"></p>
+    </div>
   </div>
-  <script src="js/supabase-config.js"></script>
+</div>
+
+<div id="productModal" class="fixed inset-0 z-50 hidden bg-black/60 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6">
+    <div class="flex justify-between mb-4"><h3 id="productModalTitle" class="font-black text-lg">Add Product</h3><button onclick="closeModal('productModal')"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="space-y-3">
+      <input id="pTitle" placeholder="Product title *" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+      <textarea id="pDesc" placeholder="Description" rows="2" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
+      <select id="pCategory" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none"></select>
+      <div class="grid grid-cols-2 gap-2">
+        <input id="pPrice" type="number" step="0.01" placeholder="Price USD *" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+        <input id="pOldPrice" type="number" step="0.01" placeholder="Old price" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <input id="pStock" type="number" placeholder="Stock" value="999" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+        <input id="pCountry" placeholder="Origin (e.g. CN)" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <input id="pBarcode" placeholder="Barcode" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+        <input id="pSKU" placeholder="SKU" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+      </div>
+      <div>
+        <label class="text-xs font-bold text-slate-500">Product Image</label>
+        <input id="pImageFile" type="file" accept="image/*" onchange="handleProductImage(event)" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm mt-1">
+        <input id="pImageUrl" placeholder="Or paste image URL" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-2 focus:ring-2 focus:ring-blue-500 outline-none">
+        <img id="pImagePreview" class="w-full h-32 object-cover rounded-xl mt-2 bg-slate-100 hidden">
+        <p id="pImageStatus" class="text-[11px] mt-1"></p>
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <select id="pType" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none"><option value="own">Own Product</option><option value="admin_resell">Admin Resell</option></select>
+        <select id="pActive" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none"><option value="true">Active</option><option value="false">Hidden</option></select>
+      </div>
+      <div class="flex gap-2 pt-2">
+        <button onclick="closeModal('productModal')" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-3 rounded-xl text-sm">Cancel</button>
+        <button id="saveProductBtn" onclick="saveProduct()" class="flex-[2] bg-blue-600 hover:bg-blue-700 text-white font-black py-3 rounded-xl text-sm"><i class="fa-solid fa-check"></i> Save Product</button>
+      </div>
+      <p id="productMsg" class="text-xs text-center"></p>
+    </div>
+  </div>
+</div>
+
+<div id="categoryModal" class="fixed inset-0 z-50 hidden bg-black/60 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-sm w-full p-6">
+    <div class="flex justify-between mb-4"><h3 class="font-black text-lg">Category</h3><button onclick="closeModal('categoryModal')"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="space-y-3">
+      <input id="catName" placeholder="Category name" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+      <button id="saveCatBtn" onclick="saveCategory()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-3 rounded-xl text-sm">Save</button>
+      <p id="catMsg" class="text-xs text-center"></p>
+    </div>
+  </div>
+</div>
+
+<div id="orderModal" class="fixed inset-0 z-50 hidden bg-black/60 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6">
+    <div class="flex justify-between mb-4"><h3 class="font-black text-lg">Order Details</h3><button onclick="closeModal('orderModal')"><i class="fa-solid fa-xmark"></i></button></div>
+    <div id="orderDetailBox" class="space-y-3 text-sm"></div>
+  </div>
+</div>
+<script src="js/supabase-config.js"></script>
 <script>
-// ============ ADMIN STATE ============
 let adminUser = null;
 let adminProfile = null;
 let settingsCache = {};
+let categoriesCache = [];
+let productsCache = [];
+let ordersCache = [];
+let teamMembers = [];
+let pendingInvites = [];
+let customersCache = [];
+let currentProductId = null;
+let currentProductImageUrl = null;
 const ADMIN_ROLES = ['super_admin','admin','acting_admin','sub_admin','manager','moderator'];
 
-// ============ BOOT ============
 supabaseClient.auth.onAuthStateChange(async (event, session) => {
   adminUser = session?.user || null;
   if (!adminUser) { showLogin(); return; }
-  const { data } = await supabaseClient
-    .from('profiles')
-    .select('full_name, profile_pic_url, role, is_banned')
-    .eq('id', adminUser.id).single();
+  const { data } = await supabaseClient.from('profiles').select('full_name, profile_pic_url, role, is_banned').eq('id', adminUser.id).single();
   adminProfile = data;
-  if (!adminProfile || !ADMIN_ROLES.includes(adminProfile.role) || adminProfile.is_banned) {
-    showDenied(); return;
-  }
+  if (!adminProfile || !ADMIN_ROLES.includes(adminProfile.role) || adminProfile.is_banned) { showDenied(); return; }
   showDashboard();
 });
 
-// ============ SCREENS ============
-function hideAll(){
-  ['loadingScreen','loginScreen','deniedScreen','dashboard'].forEach(id => {
-    document.getElementById(id).classList.add('hidden');
-  });
-}
+function hideAll(){ ['loadingScreen','loginScreen','deniedScreen','dashboard'].forEach(id => document.getElementById(id).classList.add('hidden')); }
 function showLogin(){ hideAll(); document.getElementById('loginScreen').classList.remove('hidden'); }
-function showDenied(){
-  hideAll();
-  document.getElementById('deniedEmail').innerText = adminUser?.email || '';
-  document.getElementById('deniedScreen').classList.remove('hidden');
-}
+function showDenied(){ hideAll(); document.getElementById('deniedEmail').innerText = adminUser?.email || ''; document.getElementById('deniedScreen').classList.remove('hidden'); }
 function showDashboard(){
   hideAll();
   document.getElementById('dashboard').classList.remove('hidden');
@@ -444,8 +394,6 @@ function showDashboard(){
   showPage(page, true);
   if (!hash) window.history.replaceState({ page: 'dashboard' }, '', '#dashboard');
 }
-
-// ============ UI ============
 function updateAdminUI(){
   const name = adminProfile?.full_name || adminUser?.email?.split('@')[0] || 'Admin';
   const pic = adminProfile?.profile_pic_url;
@@ -454,90 +402,55 @@ function updateAdminUI(){
   document.getElementById('adminMenuName').innerText = name;
   document.getElementById('adminMenuEmail').innerText = adminUser?.email || '';
   document.getElementById('welcomeName').innerText = name;
-  const roleText = role.split('_').map(w => w[0].toUpperCase()+w.slice(1)).join(' ');
-  document.getElementById('adminRoleBadge').innerText = roleText;
-  const av = document.getElementById('adminAvatar');
-  const init = document.getElementById('adminAvatarInit');
-  if (pic) {
-    av.src = pic; av.classList.remove('hidden');
-    init.classList.add('hidden');
-  } else {
-    av.classList.add('hidden'); init.classList.remove('hidden');
-    init.innerText = (name[0] || 'A').toUpperCase();
-  }
+  document.getElementById('adminRoleBadge').innerText = role.split('_').map(w => w[0].toUpperCase()+w.slice(1)).join(' ');
+  const av = document.getElementById('adminAvatar'), init = document.getElementById('adminAvatarInit');
+  if (pic) { av.src = pic; av.classList.remove('hidden'); init.classList.add('hidden'); }
+  else { av.classList.add('hidden'); init.classList.remove('hidden'); init.innerText = (name[0] || 'A').toUpperCase(); }
 }
-
-function toggleAdminMenu(){
-  document.getElementById('adminMenu').classList.toggle('hidden');
-}
+function toggleAdminMenu(){ document.getElementById('adminMenu').classList.toggle('hidden'); }
+function toggleSidebar(){ const sb = document.getElementById('sidebar'), ov = document.getElementById('sidebarOverlay'); sb.classList.toggle('hidden'); sb.classList.toggle('block'); ov.classList.toggle('hidden'); }
 document.addEventListener('click', function(e){
   const menu = document.getElementById('adminMenu');
-  if (!menu || menu.classList.contains('hidden')) return;
-  if (!menu.contains(e.target) && !e.target.closest('button[onclick="toggleAdminMenu()"]')) {
-    menu.classList.add('hidden');
-  }
+  if (menu && !menu.classList.contains('hidden') && !menu.contains(e.target) && !e.target.closest('button[onclick="toggleAdminMenu()"]')) menu.classList.add('hidden');
+  if (!e.target.closest('button[onclick^="toggleMemberMenu"]')) document.querySelectorAll('[id^="menu-"]').forEach(el => el.classList.add('hidden'));
 });
-function toggleSidebar(){
-  const sb = document.getElementById('sidebar');
-  const ov = document.getElementById('sidebarOverlay');
-  sb.classList.toggle('hidden');
-  sb.classList.toggle('block');
-  ov.classList.toggle('hidden');
-}
-
-// ============ PAGE ROUTING ============
 function showPage(pageId, fromPop){
   document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
   const target = document.getElementById('page-' + pageId);
   if (target) target.classList.remove('hidden');
   document.querySelectorAll('.nav-btn').forEach(b => {
     const on = b.dataset.nav === pageId;
-    b.className = on
-      ? 'nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold bg-blue-600 text-white'
-      : 'nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold hover:bg-slate-100 text-slate-700';
+    b.className = on ? 'nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold bg-blue-600 text-white'
+                     : 'nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold hover:bg-slate-100 text-slate-700';
   });
-  if (window.innerWidth < 768) {
-    const sb = document.getElementById('sidebar');
-    if (!sb.classList.contains('hidden')) toggleSidebar();
-  }
+  if (window.innerWidth < 768) { const sb = document.getElementById('sidebar'); if (!sb.classList.contains('hidden')) toggleSidebar(); }
   document.getElementById('adminMenu').classList.add('hidden');
-  if (!fromPop && window.location.hash !== '#' + pageId) {
-    window.history.pushState({ page: pageId }, '', '#' + pageId);
-  }
-  // Load data for page
+  if (!fromPop && window.location.hash !== '#' + pageId) window.history.pushState({ page: pageId }, '', '#' + pageId);
   if (pageId === 'settings') loadSettings();
+  if (pageId === 'commission') loadCommission();
+  if (pageId === 'team') { loadTeam(); loadInvites(); }
+  if (pageId === 'logs') loadLogs();
+  if (pageId === 'products') { loadCategories().then(loadProductsList); }
+  if (pageId === 'orders') loadOrders();
+  if (pageId === 'categories') loadCategoriesList();
+  if (pageId === 'reviews') loadReviews();
+  if (pageId === 'customers') loadCustomers();
+  if (pageId === 'sellers') loadSellers();
 }
 window.addEventListener('popstate', function(e){
   const page = (e.state && e.state.page) || (window.location.hash ? window.location.hash.substring(1) : 'dashboard');
   showPage(page, true);
 });
-
-// ============ LOGIN ============
 async function adminLogin(e){
   e.preventDefault();
-  const btn = document.getElementById('loginBtn');
-  const msg = document.getElementById('loginMsg');
-  btn.disabled = true;
-  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Signing in…';
-  msg.innerText = '';
-  const email = document.getElementById('loginEmail').value;
-  const password = document.getElementById('loginPassword').value;
-  const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
-  btn.disabled = false;
-  btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Sign In';
-  if (error) {
-    msg.className = 'text-xs text-center mt-3 text-red-500';
-    msg.innerText = error.message;
-    return false;
-  }
+  const btn = document.getElementById('loginBtn'), msg = document.getElementById('loginMsg');
+  btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Signing in…'; msg.innerText = '';
+  const { error } = await supabaseClient.auth.signInWithPassword({ email: document.getElementById('loginEmail').value, password: document.getElementById('loginPassword').value });
+  btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Sign In';
+  if (error) { msg.className = 'text-xs text-center mt-3 text-red-500'; msg.innerText = error.message; return false; }
   return false;
 }
-async function adminSignOut(){
-  window.history.replaceState(null, '', window.location.pathname);
-  await supabaseClient.auth.signOut();
-}
-
-// ============ STATS ============
+async function adminSignOut(){ window.history.replaceState(null, '', window.location.pathname); await supabaseClient.auth.signOut(); }
 async function loadStats(){
   const [p, o, u] = await Promise.all([
     supabaseClient.from('products').select('id', { count: 'exact', head: true }),
@@ -550,46 +463,450 @@ async function loadStats(){
   const revenue = (o.data || []).reduce((s, x) => s + Number(x.total_usd || 0), 0);
   document.getElementById('statRevenue').innerText = '$' + revenue.toFixed(2);
 }
-
-// ============ SETTINGS ============
-async function loadSettings(){
+function closeModal(id){ document.getElementById(id).classList.add('hidden'); }
+function openModal(id){ document.getElementById(id).classList.remove('hidden'); }
+function esc(s){ return (s==null?'':String(s)).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  async function loadSettings(){
   const { data, error } = await supabaseClient.from('site_settings').select('key, value');
-  if (error) { alert('Failed to load settings: ' + error.message); return; }
+  if (error) { alert('Failed: ' + error.message); return; }
   settingsCache = {};
   (data || []).forEach(s => settingsCache[s.key] = s.value || '');
   const keys = ['whatsapp_number','whatsapp_display','support_email','facebook_page','messenger_username','instagram_username','telegram_username','tiktok_username','youtube_channel','site_tagline'];
-  keys.forEach(k => {
-    const el = document.getElementById('set_' + k);
-    if (el) el.value = settingsCache[k] || '';
+  keys.forEach(k => { const el = document.getElementById('set_' + k); if (el) el.value = settingsCache[k] || ''; });
+}
+async function saveSettings(){
+  const btn = document.getElementById('saveSettingsBtn'), original = btn.innerHTML;
+  btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving…';
+  const keys = ['whatsapp_number','whatsapp_display','support_email','facebook_page','messenger_username','instagram_username','telegram_username','tiktok_username','youtube_channel','site_tagline'];
+  const updates = keys.map(k => ({ key: k, value: (document.getElementById('set_' + k)?.value || '').trim(), updated_at: new Date().toISOString() }));
+  const { error } = await supabaseClient.from('site_settings').upsert(updates, { onConflict: 'key' });
+  btn.disabled = false; btn.innerHTML = original;
+  if (error) { alert('Save failed: ' + error.message); return; }
+  btn.innerHTML = '<i class="fa-solid fa-check"></i> Saved!';
+  await logActivity('update_settings', 'site_settings', null, null);
+  setTimeout(() => { btn.innerHTML = original; }, 1500);
+}
+async function loadCommission(){
+  const { data } = await supabaseClient.from('site_settings').select('key, value').in('key', ['commission_own_rate','commission_resell_rate']);
+  (data || []).forEach(s => { const el = document.getElementById('set_' + s.key); if (el) el.value = s.value || ''; });
+}
+async function saveCommission(){
+  const btn = document.getElementById('saveCommissionBtn'), original = btn.innerHTML;
+  btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving…';
+  const own = document.getElementById('set_commission_own_rate').value || '5';
+  const resell = document.getElementById('set_commission_resell_rate').value || '10';
+  const updates = [
+    { key: 'commission_own_rate', value: own, updated_at: new Date().toISOString() },
+    { key: 'commission_resell_rate', value: resell, updated_at: new Date().toISOString() }
+  ];
+  const { error } = await supabaseClient.from('site_settings').upsert(updates, { onConflict: 'key' });
+  btn.disabled = false; btn.innerHTML = original;
+  if (error) { alert('Save failed: ' + error.message); return; }
+  btn.innerHTML = '<i class="fa-solid fa-check"></i> Saved!';
+  await logActivity('update_commission', 'site_settings', null, { own, resell });
+  setTimeout(() => { btn.innerHTML = original; }, 1500);
+}
+async function loadTeam(){
+  const { data, error } = await supabaseClient.from('profiles').select('id, full_name, phone, role, is_banned, profile_pic_url, created_at').order('created_at', { ascending: false });
+  if (error) { document.getElementById('teamList').innerHTML = '<p class="text-center text-red-500 py-6 text-sm">Failed: ' + esc(error.message) + '</p>'; return; }
+  teamMembers = data || [];
+  renderTeam();
+}
+  function renderTeam(){
+  const q = (document.getElementById('teamSearch')?.value || '').toLowerCase().trim();
+  const filtered = teamMembers.filter(m => !q || (m.full_name || '').toLowerCase().includes(q));
+  const list = document.getElementById('teamList');
+  if (filtered.length === 0) { list.innerHTML = '<p class="text-center text-slate-400 py-6 text-sm">No members found.</p>'; return; }
+  const roleColor = { super_admin:'bg-purple-100 text-purple-700', admin:'bg-blue-100 text-blue-700', acting_admin:'bg-indigo-100 text-indigo-700', sub_admin:'bg-cyan-100 text-cyan-700', manager:'bg-emerald-100 text-emerald-700', moderator:'bg-amber-100 text-amber-700', seller:'bg-orange-100 text-orange-700', customer:'bg-slate-100 text-slate-700' };
+  list.innerHTML = filtered.map(m => {
+    const name = m.full_name || 'Unnamed';
+    const role = m.role || 'customer';
+    const isMe = m.id === adminUser.id;
+    const badge = roleColor[role] || 'bg-slate-100 text-slate-700';
+    const initial = (name[0] || '?').toUpperCase();
+    return `<div class="p-3 flex items-center gap-3">
+      <div class="relative">${m.profile_pic_url ? `<img src="${esc(m.profile_pic_url)}" class="w-10 h-10 rounded-full object-cover">` : `<div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-black">${initial}</div>`}${m.is_banned ? '<span class="absolute -bottom-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white"></span>' : ''}</div>
+      <div class="flex-1 min-w-0"><p class="font-bold text-sm truncate">${esc(name)} ${isMe ? '<span class="text-[10px] text-slate-400">(You)</span>' : ''}</p><div class="flex items-center gap-2 mt-0.5"><span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${badge} uppercase">${esc(role.replace(/_/g,' '))}</span>${m.is_banned ? '<span class="text-[10px] font-bold text-red-500">BANNED</span>' : ''}</div></div>
+      <div class="relative"><button onclick="toggleMemberMenu('${m.id}')" class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center"><i class="fa-solid fa-ellipsis-vertical text-slate-400"></i></button>
+        <div id="menu-${m.id}" class="hidden absolute right-0 top-10 w-48 bg-white rounded-xl shadow-xl border border-slate-200 py-1 z-30">
+          <button onclick="changeRole('${m.id}','admin')" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-50">Make Admin</button>
+          <button onclick="changeRole('${m.id}','acting_admin')" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-50">Acting Admin</button>
+          <button onclick="changeRole('${m.id}','sub_admin')" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-50">Sub Admin</button>
+          <button onclick="changeRole('${m.id}','manager')" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-50">Manager</button>
+          <button onclick="changeRole('${m.id}','moderator')" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-50">Moderator</button>
+          <button onclick="changeRole('${m.id}','seller')" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-50">Seller</button>
+          <button onclick="changeRole('${m.id}','customer')" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-50">Customer</button>
+          <div class="border-t my-1"></div>
+          <button onclick="toggleBan('${m.id}', ${!m.is_banned})" class="w-full text-left px-3 py-2 text-xs hover:bg-red-50 text-red-600">${m.is_banned ? 'Unban' : 'Ban'}</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function toggleMemberMenu(id){
+  document.querySelectorAll('[id^="menu-"]').forEach(el => { if (el.id !== 'menu-' + id) el.classList.add('hidden'); });
+  document.getElementById('menu-' + id)?.classList.toggle('hidden');
+}
+async function changeRole(userId, newRole){
+  if (userId === adminUser.id && !confirm('You are changing YOUR OWN role. Continue?')) return;
+  const { error } = await supabaseClient.from('profiles').update({ role: newRole }).eq('id', userId);
+  if (error) { alert('Failed: ' + error.message); return; }
+  await logActivity('change_role', 'user', userId, { new_role: newRole });
+  await loadTeam();
+}
+async function toggleBan(userId, banned){
+  if (!confirm((banned ? 'Ban' : 'Unban') + ' this user?')) return;
+  const { error } = await supabaseClient.from('profiles').update({ is_banned: banned }).eq('id', userId);
+  if (error) { alert('Failed: ' + error.message); return; }
+  await logActivity(banned ? 'ban_user' : 'unban_user', 'user', userId, null);
+  await loadTeam();
+}
+function openInviteModal(){
+  document.getElementById('inviteEmail').value = '';
+  document.getElementById('inviteRole').value = 'admin';
+  document.getElementById('inviteMsg').innerText = '';
+  openModal('inviteModal');
+}
+async function sendInvite(){
+  const email = document.getElementById('inviteEmail').value.trim().toLowerCase();
+  const role = document.getElementById('inviteRole').value;
+  const msg = document.getElementById('inviteMsg'), btn = document.getElementById('inviteBtn');
+  if (!email) { msg.className = 'text-xs text-center text-red-500'; msg.innerText = 'Email required'; return; }
+  btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending…';
+  const { error } = await supabaseClient.from('invites').insert({ email, role, invited_by: adminUser.id });
+  btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send Invite';
+  if (error) { msg.className = 'text-xs text-center text-red-500'; msg.innerText = error.code === '23505' ? 'Already invited.' : error.message; return; }
+  msg.className = 'text-xs text-center text-emerald-600'; msg.innerText = '✓ Invite created!';
+  await logActivity('send_invite', 'invite', email, { role });
+  await loadInvites();
+  setTimeout(() => closeModal('inviteModal'), 1500);
+}
+async function loadInvites(){
+  const { data } = await supabaseClient.from('invites').select('*').eq('status', 'pending').order('created_at', { ascending: false });
+  pendingInvites = data || [];
+  const list = document.getElementById('invitesList');
+  if (pendingInvites.length === 0) { list.innerHTML = '<p class="text-center text-slate-400 py-6 text-sm">No pending invites.</p>'; return; }
+  list.innerHTML = pendingInvites.map(inv => `<div class="p-3 flex items-center gap-3"><div class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center"><i class="fa-solid fa-envelope text-slate-500 text-xs"></i></div><div class="flex-1 min-w-0"><p class="font-bold text-sm truncate">${esc(inv.email)}</p><p class="text-[10px] text-slate-500">Role: <b class="uppercase">${esc(inv.role)}</b></p></div><button onclick="cancelInvite('${inv.id}')" class="text-xs text-red-500 hover:bg-red-50 px-2 py-1 rounded">Cancel</button></div>`).join('');
+}
+async function cancelInvite(id){
+  if (!confirm('Cancel this invite?')) return;
+  await supabaseClient.from('invites').update({ status: 'cancelled' }).eq('id', id);
+  await loadInvites();
+  }
+  async function logActivity(action, targetType, targetId, details){
+  try { await supabaseClient.from('activity_logs').insert({ user_id: adminUser.id, user_email: adminUser.email, action, target_type: targetType, target_id: String(targetId || ''), details: details || null }); } catch(e) {}
+}
+async function loadLogs(){
+  const list = document.getElementById('logsList');
+  list.innerHTML = '<p class="text-center text-slate-400 py-6 text-sm">Loading…</p>';
+  const { data, error } = await supabaseClient.from('activity_logs').select('*').order('created_at', { ascending: false }).limit(100);
+  if (error) { list.innerHTML = '<p class="text-center text-red-500 py-6 text-sm">Failed: ' + esc(error.message) + '</p>'; return; }
+  if (!data || data.length === 0) { list.innerHTML = '<p class="text-center text-slate-400 py-6 text-sm">No activity yet.</p>'; return; }
+  const iconMap = { change_role:'fa-user-shield text-blue-600', ban_user:'fa-ban text-red-600', unban_user:'fa-circle-check text-emerald-600', send_invite:'fa-paper-plane text-purple-600', update_settings:'fa-gear text-slate-600', update_commission:'fa-percent text-amber-600', create_product:'fa-plus text-blue-600', update_product:'fa-pen text-blue-600', delete_product:'fa-trash text-red-600', update_order:'fa-truck text-emerald-600', delete_review:'fa-star text-red-600' };
+  list.innerHTML = data.map(log => `<div class="p-3 flex items-start gap-3"><div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center shrink-0"><i class="fa-solid ${iconMap[log.action] || 'fa-circle-info text-slate-500'} text-xs"></i></div><div class="flex-1 min-w-0"><p class="text-sm"><b>${esc((log.user_email||'').split('@')[0])}</b> — ${esc(log.action.replace(/_/g,' '))}</p><p class="text-[10px] text-slate-400 mt-0.5">${esc(new Date(log.created_at).toLocaleString())}</p></div></div>`).join('');
+}
+async function loadCategories(){
+  const { data } = await supabaseClient.from('categories').select('*').order('name');
+  categoriesCache = data || [];
+  const sel = document.getElementById('pCategory');
+  if (sel) sel.innerHTML = '<option value="">Select category</option>' + categoriesCache.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
+  return categoriesCache;
+}
+async function loadProductsList(){
+  const list = document.getElementById('productsList');
+  list.innerHTML = '<p class="text-center text-slate-400 py-6 text-sm">Loading…</p>';
+  const { data, error } = await supabaseClient.from('products').select('id,title,price_usd,old_price_usd,image_url,category_id,stock,is_active,product_type,sku,barcode,origin_country,rating,reviews_count,created_at').order('created_at', { ascending: false });
+  if (error) { list.innerHTML = '<p class="text-center text-red-500 py-6 text-sm">Failed: ' + esc(error.message) + '</p>'; return; }
+  productsCache = data || [];
+  renderProductsList();
+}
+function renderProductsList(){
+  const q = (document.getElementById('productSearch')?.value || '').toLowerCase().trim();
+  const filtered = productsCache.filter(p => !q || (p.title||'').toLowerCase().includes(q));
+  const list = document.getElementById('productsList');
+  if (filtered.length === 0) { list.innerHTML = '<p class="text-center text-slate-400 py-6 text-sm">No products.</p>'; return; }
+  list.innerHTML = filtered.map(p => `<div class="p-3 flex items-center gap-3">
+    <img src="${p.image_url || 'https://placehold.co/100x100'}" class="w-14 h-14 rounded-lg object-cover bg-slate-100 shrink-0">
+    <div class="flex-1 min-w-0"><p class="font-bold text-sm truncate">${esc(p.title)}</p><div class="flex items-center gap-2 mt-0.5 flex-wrap"><span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${p.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600'}">${p.is_active ? 'ACTIVE' : 'HIDDEN'}</span><span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${p.product_type === 'admin_resell' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'}">${p.product_type === 'admin_resell' ? 'RESELL' : 'OWN'}</span></div><p class="text-xs text-blue-600 font-bold mt-0.5">$${Number(p.price_usd).toFixed(2)} · Stock: ${p.stock||0}</p></div>
+    <div class="flex gap-1"><button onclick="editProduct('${p.id}')" class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center"><i class="fa-solid fa-pen text-blue-600 text-xs"></i></button><button onclick="deleteProduct('${p.id}')" class="w-8 h-8 rounded-lg hover:bg-red-50 flex items-center justify-center"><i class="fa-solid fa-trash text-red-500 text-xs"></i></button></div>
+  </div>`).join('');
+}
+function openProductModal(){
+  currentProductId = null; currentProductImageUrl = null;
+  document.getElementById('productModalTitle').innerText = 'Add Product';
+  ['pTitle','pDesc','pPrice','pOldPrice','pCountry','pBarcode','pSKU','pImageUrl'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('pStock').value = '999';
+  document.getElementById('pCategory').value = '';
+  document.getElementById('pType').value = 'own';
+  document.getElementById('pActive').value = 'true';
+  document.getElementById('pImagePreview').classList.add('hidden');
+  document.getElementById('pImageStatus').innerText = '';
+  document.getElementById('productMsg').innerText = '';
+  openModal('productModal');
+}
+function editProduct(id){
+  const p = productsCache.find(x => x.id === id);
+  if (!p) return;
+  currentProductId = id; currentProductImageUrl = p.image_url || null;
+  document.getElementById('productModalTitle').innerText = 'Edit Product';
+  document.getElementById('pTitle').value = p.title || '';
+  document.getElementById('pPrice').value = p.price_usd || '';
+  document.getElementById('pOldPrice').value = p.old_price_usd || '';
+  document.getElementById('pCategory').value = p.category_id || '';
+  document.getElementById('pStock').value = p.stock || 999;
+  document.getElementById('pCountry').value = p.origin_country || '';
+  document.getElementById('pBarcode').value = p.barcode || '';
+  document.getElementById('pSKU').value = p.sku || '';
+  document.getElementById('pImageUrl').value = p.image_url || '';
+  document.getElementById('pType').value = p.product_type || 'own';
+  document.getElementById('pActive').value = String(p.is_active);
+  const prev = document.getElementById('pImagePreview');
+  if (p.image_url) { prev.src = p.image_url; prev.classList.remove('hidden'); } else { prev.classList.add('hidden'); }
+  document.getElementById('productMsg').innerText = '';
+  openModal('productModal');
+  }
+  async function compressImage(file, maxSize = 800, quality = 0.85){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let { width, height } = img;
+        if (width > height) { if (width > maxSize) { height = Math.round(height * maxSize / width); width = maxSize; } }
+        else { if (height > maxSize) { width = Math.round(width * maxSize / height); height = maxSize; } }
+        canvas.width = width; canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        canvas.toBlob((blob) => resolve(blob), 'image/jpeg', quality);
+      };
+      img.onerror = reject; img.src = e.target.result;
+    };
+    reader.onerror = reject; reader.readAsDataURL(file);
   });
 }
-
-async function saveSettings(){
-  const btn = document.getElementById('saveSettingsBtn');
-  const original = btn.innerHTML;
-  btn.disabled = true;
-  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving…';
-
-  const keys = ['whatsapp_number','whatsapp_display','support_email','facebook_page','messenger_username','instagram_username','telegram_username','tiktok_username','youtube_channel','site_tagline'];
-  const updates = keys.map(k => ({
-    key: k,
-    value: (document.getElementById('set_' + k)?.value || '').trim(),
-    updated_at: new Date().toISOString()
-  }));
-
-  const { error } = await supabaseClient
-    .from('site_settings')
-    .upsert(updates, { onConflict: 'key' });
-
-  btn.disabled = false;
-  btn.innerHTML = original;
-
-  if (error) {
-    alert('Save failed: ' + error.message);
-    return;
+async function handleProductImage(event){
+  const file = event.target.files[0];
+  if (!file) return;
+  const status = document.getElementById('pImageStatus');
+  if (!file.type.startsWith('image/')) { status.className = 'text-[11px] mt-1 text-red-500'; status.innerText = 'Not an image'; return; }
+  status.className = 'text-[11px] mt-1 text-blue-600'; status.innerText = 'Compressing & uploading…';
+  try {
+    const blob = await compressImage(file, 800, 0.85);
+    const path = `products/${Date.now()}-${Math.random().toString(36).substring(2,8)}.jpg`;
+    const { error: upErr } = await supabaseClient.storage.from('avatars').upload(path, blob, { contentType: 'image/jpeg', upsert: false });
+    if (upErr) throw upErr;
+    const { data: urlData } = supabaseClient.storage.from('avatars').getPublicUrl(path);
+    currentProductImageUrl = urlData.publicUrl;
+    document.getElementById('pImageUrl').value = urlData.publicUrl;
+    const prev = document.getElementById('pImagePreview'); prev.src = urlData.publicUrl; prev.classList.remove('hidden');
+    status.className = 'text-[11px] mt-1 text-emerald-600'; status.innerText = '✓ Uploaded';
+  } catch(err) { status.className = 'text-[11px] mt-1 text-red-500'; status.innerText = 'Upload failed: ' + (err.message || err); }
+}
+async function saveProduct(){
+  const btn = document.getElementById('saveProductBtn'), msg = document.getElementById('productMsg');
+  const title = document.getElementById('pTitle').value.trim();
+  const price = parseFloat(document.getElementById('pPrice').value);
+  if (!title || !price) { msg.className = 'text-xs text-center text-red-500'; msg.innerText = 'Title & price required'; return; }
+  btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving…';
+  const data = {
+    title, price_usd: price,
+    description: document.getElementById('pDesc').value.trim() || null,
+    category_id: parseInt(document.getElementById('pCategory').value) || null,
+    old_price_usd: parseFloat(document.getElementById('pOldPrice').value) || null,
+    stock: parseInt(document.getElementById('pStock').value) || 999,
+    origin_country: document.getElementById('pCountry').value.trim() || 'BD',
+    barcode: document.getElementById('pBarcode').value.trim() || null,
+    sku: document.getElementById('pSKU').value.trim() || null,
+    image_url: document.getElementById('pImageUrl').value.trim() || currentProductImageUrl || null,
+    product_type: document.getElementById('pType').value,
+    is_active: document.getElementById('pActive').value === 'true',
+    owner_id: adminUser.id
+  };
+  let error;
+  if (currentProductId) ({ error } = await supabaseClient.from('products').update(data).eq('id', currentProductId));
+  else ({ error } = await supabaseClient.from('products').insert(data));
+  btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-check"></i> Save Product';
+  if (error) { msg.className = 'text-xs text-center text-red-500'; msg.innerText = error.message; return; }
+  await logActivity(currentProductId ? 'update_product' : 'create_product', 'product', currentProductId || title, null);
+  closeModal('productModal');
+  await loadProductsList();
+}
+async function deleteProduct(id){
+  if (!confirm('Delete this product?')) return;
+  const { error } = await supabaseClient.from('products').delete().eq('id', id);
+  if (error) { alert('Failed: ' + error.message); return; }
+  await logActivity('delete_product', 'product', id, null);
+  await loadProductsList();
+}
+async function loadCategoriesList(){
+  const list = document.getElementById('categoriesList');
+  list.innerHTML = '<p class="text-center text-slate-400 py-6 text-sm">Loading…</p>';
+  const { data, error } = await supabaseClient.from('categories').select('*').order('name');
+  if (error) { list.innerHTML = '<p class="text-center text-red-500 py-6 text-sm">Failed</p>'; return; }
+  categoriesCache = data || [];
+  if (categoriesCache.length === 0) { list.innerHTML = '<p class="text-center text-slate-400 py-6 text-sm">No categories.</p>'; return; }
+  list.innerHTML = categoriesCache.map(c => `<div class="p-3 flex items-center gap-3"><div class="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center"><i class="fa-solid fa-tag text-slate-500 text-xs"></i></div><div class="flex-1 min-w-0"><p class="font-bold text-sm">${esc(c.name)}</p><p class="text-[10px] text-slate-400">slug: ${esc(c.slug)}</p></div><button onclick="deleteCategory(${c.id})" class="w-8 h-8 rounded-lg hover:bg-red-50 flex items-center justify-center"><i class="fa-solid fa-trash text-red-500 text-xs"></i></button></div>`).join('');
+}
+function openCategoryModal(){ document.getElementById('catName').value = ''; document.getElementById('catMsg').innerText = ''; openModal('categoryModal'); }
+async function saveCategory(){
+  const name = document.getElementById('catName').value.trim();
+  const msg = document.getElementById('catMsg');
+  if (!name) { msg.className = 'text-xs text-center text-red-500'; msg.innerText = 'Name required'; return; }
+  const slug = name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  const { error } = await supabaseClient.from('categories').insert({ name, slug });
+  if (error) { msg.className = 'text-xs text-center text-red-500'; msg.innerText = error.message; return; }
+  closeModal('categoryModal');
+  await loadCategoriesList();
+}
+async function deleteCategory(id){
+  if (!confirm('Delete this category?')) return;
+  const { error } = await supabaseClient.from('categories').delete().eq('id', id);
+  if (error) { alert('Failed: ' + error.message); return; }
+  await loadCategoriesList();
+                          }
+  let orderFilter = 'all';
+function filterOrders(f){
+  orderFilter = f;
+  document.querySelectorAll('.oft').forEach(b => {
+    const on = b.dataset.oft === f;
+    b.className = on ? 'oft px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap bg-blue-600 text-white' : 'oft px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap bg-white border border-slate-200';
+  });
+  renderOrdersList();
+}
+async function loadOrders(){
+  const list = document.getElementById('ordersList');
+  list.innerHTML = '<p class="text-center text-slate-400 py-6 text-sm">Loading…</p>';
+  const { data, error } = await supabaseClient.from('orders').select('*').order('created_at', { ascending: false }).limit(200);
+  if (error) { list.innerHTML = '<p class="text-center text-red-500 py-6 text-sm">Failed: ' + esc(error.message) + '</p>'; return; }
+  ordersCache = data || [];
+  renderOrdersList();
+}
+function renderOrdersList(){
+  const list = document.getElementById('ordersList');
+  const filtered = orderFilter === 'all' ? ordersCache : ordersCache.filter(o => o.status === orderFilter);
+  if (filtered.length === 0) { list.innerHTML = '<p class="text-center text-slate-400 py-6 text-sm">No orders.</p>'; return; }
+  const statusColor = { pending:'bg-amber-100 text-amber-700', confirmed:'bg-blue-100 text-blue-700', packaging:'bg-indigo-100 text-indigo-700', shipped:'bg-cyan-100 text-cyan-700', out_for_delivery:'bg-purple-100 text-purple-700', delivered:'bg-emerald-100 text-emerald-700', cancelled:'bg-red-100 text-red-700' };
+  list.innerHTML = filtered.map(o => `<div class="bg-white rounded-2xl border border-slate-200 p-3 cursor-pointer hover:shadow" onclick="openOrderDetail('${o.id}')">
+    <div class="flex justify-between items-start gap-2 mb-2">
+      <div class="min-w-0"><p class="font-bold text-sm truncate">${esc(o.order_code)}</p><p class="text-[11px] text-slate-500 truncate">${esc(o.full_name)} · ${esc(o.phone)}</p></div>
+      <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${statusColor[o.status] || 'bg-slate-100'} uppercase shrink-0">${esc(o.status.replace(/_/g,' '))}</span>
+    </div>
+    <div class="flex justify-between items-center text-xs"><span class="text-slate-500">${new Date(o.created_at).toLocaleDateString()}</span><span class="font-black text-blue-600">$${Number(o.total_usd).toFixed(2)}</span></div>
+  </div>`).join('');
+}
+async function openOrderDetail(id){
+  const o = ordersCache.find(x => x.id === id);
+  if (!o) return;
+  const { data: items } = await supabaseClient.from('order_items').select('*').eq('order_id', id);
+  const statusOptions = ['pending','confirmed','packaging','shipped','out_for_delivery','delivered','cancelled'];
+  const box = document.getElementById('orderDetailBox');
+  box.innerHTML = `
+    <div class="bg-slate-50 rounded-xl p-3">
+      <p class="text-xs text-slate-500">Order Code</p>
+      <p class="font-black">${esc(o.order_code)}</p>
+      <p class="text-[10px] text-slate-400 mt-1">${new Date(o.created_at).toLocaleString()}</p>
+    </div>
+    <div class="bg-slate-50 rounded-xl p-3">
+      <p class="text-xs font-bold text-slate-500 mb-1">Customer</p>
+      <p class="font-bold text-sm">${esc(o.full_name)}</p>
+      <p class="text-xs text-slate-600">${esc(o.phone)}</p>
+      <p class="text-xs text-slate-600 mt-1">${esc(o.address)}</p>
+      <p class="text-[11px] text-slate-500 mt-1">Ship to: ${esc(o.ship_country)}</p>
+    </div>
+    <div class="bg-slate-50 rounded-xl p-3">
+      <p class="text-xs font-bold text-slate-500 mb-2">Items (${(items||[]).length})</p>
+      ${(items||[]).map(i => `<div class="flex justify-between text-xs py-1 border-b border-slate-200 last:border-0"><span class="flex-1 truncate">${esc(i.title_snapshot)} × ${i.qty}</span><span class="font-bold">$${(Number(i.price_usd)*i.qty).toFixed(2)}</span></div>`).join('')}
+    </div>
+    <div class="bg-slate-50 rounded-xl p-3 text-xs">
+      <div class="flex justify-between"><span>Subtotal</span><span>$${Number(o.subtotal_usd).toFixed(2)}</span></div>
+      <div class="flex justify-between"><span>Shipping</span><span>$${Number(o.shipping_usd).toFixed(2)}</span></div>
+      <div class="flex justify-between font-black text-sm pt-1 border-t border-slate-300 mt-1"><span>Total</span><span class="text-blue-600">$${Number(o.total_usd).toFixed(2)}</span></div>
+      ${o.total_local ? `<div class="flex justify-between text-[10px] text-slate-400 mt-1"><span>Local</span><span>${o.local_currency} ${Number(o.total_local).toFixed(0)}</span></div>` : ''}
+    </div>
+    <div class="bg-slate-50 rounded-xl p-3 text-xs">
+      <div class="flex justify-between"><span>Payment</span><b class="uppercase">${esc(o.payment_method)}</b></div>
+      ${o.payment_txn_id ? `<div class="flex justify-between"><span>Txn ID</span><span class="font-mono">${esc(o.payment_txn_id)}</span></div>` : ''}
+    </div>
+    <div><label class="text-xs font-bold text-slate-500">Status</label>
+      <select id="orderStatusSel" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
+        ${statusOptions.map(s => `<option value="${s}" ${o.status === s ? 'selected' : ''}>${s.replace(/_/g,' ').toUpperCase()}</option>`).join('')}
+      </select>
+    </div>
+    <div><label class="text-xs font-bold text-slate-500">Courier Name</label><input id="orderCourier" value="${esc(o.courier_name||'')}" placeholder="e.g. Pathao" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"></div>
+    <div><label class="text-xs font-bold text-slate-500">Tracking Number</label><input id="orderTracking" value="${esc(o.tracking_no||'')}" placeholder="e.g. 9876543210" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"></div>
+    <div class="flex gap-2 pt-1">
+      <button onclick="closeModal('orderModal')" class="flex-1 bg-slate-200 text-slate-800 font-bold py-3 rounded-xl text-sm">Close</button>
+      <button onclick="saveOrderUpdate('${o.id}')" class="flex-[2] bg-blue-600 hover:bg-blue-700 text-white font-black py-3 rounded-xl text-sm"><i class="fa-solid fa-check"></i> Save</button>
+    </div>`;
+  openModal('orderModal');
+}
+async function saveOrderUpdate(id){
+  const updates = {
+    status: document.getElementById('orderStatusSel').value,
+    courier_name: document.getElementById('orderCourier').value.trim() || null,
+    tracking_no: document.getElementById('orderTracking').value.trim() || null
+  };
+  const { error } = await supabaseClient.from('orders').update(updates).eq('id', id);
+  if (error) { alert('Failed: ' + error.message); return; }
+  await logActivity('update_order', 'order', id, updates);
+  closeModal('orderModal');
+  await loadOrders();
   }
-  btn.innerHTML = '<i class="fa-solid fa-check"></i> Saved!';
-  setTimeout(() => { btn.innerHTML = original; }, 1500);
+  async function loadReviews(){
+  const list = document.getElementById('reviewsList');
+  list.innerHTML = '<p class="text-center text-slate-400 py-6 text-sm">Loading…</p>';
+  const { data, error } = await supabaseClient.from('reviews').select('id, rating, comment, created_at, product_id, customer_id, products(title, image_url)').order('created_at', { ascending: false }).limit(100);
+  if (error) { list.innerHTML = '<p class="text-center text-red-500 py-6 text-sm">Failed: ' + esc(error.message) + '</p>'; return; }
+  if (!data || data.length === 0) { list.innerHTML = '<p class="text-center text-slate-400 py-6 text-sm">No reviews.</p>'; return; }
+  list.innerHTML = data.map(r => `<div class="bg-white rounded-2xl border border-slate-200 p-3 flex gap-3">
+    <img src="${r.products?.image_url || 'https://placehold.co/100x100'}" class="w-14 h-14 rounded-lg object-cover bg-slate-100 shrink-0">
+    <div class="flex-1 min-w-0"><p class="font-bold text-xs truncate">${esc(r.products?.title || 'Product')}</p><p class="text-amber-400 text-xs">${'★'.repeat(r.rating)}</p><p class="text-slate-600 text-[11px] mt-1">${esc(r.comment || '(no comment)')}</p><p class="text-[10px] text-slate-400 mt-1">${new Date(r.created_at).toLocaleDateString()}</p></div>
+    <button onclick="deleteReview('${r.id}')" class="w-8 h-8 rounded-lg hover:bg-red-50 flex items-center justify-center shrink-0"><i class="fa-solid fa-trash text-red-500 text-xs"></i></button>
+  </div>`).join('');
+}
+async function deleteReview(id){
+  if (!confirm('Delete this review?')) return;
+  const { error } = await supabaseClient.from('reviews').delete().eq('id', id);
+  if (error) { alert('Failed: ' + error.message); return; }
+  await logActivity('delete_review', 'review', id, null);
+  await loadReviews();
+}
+async function loadCustomers(){
+  const { data, error } = await supabaseClient.from('profiles').select('id, full_name, phone, role, is_banned, profile_pic_url, created_at').eq('role', 'customer').order('created_at', { ascending: false });
+  if (error) { document.getElementById('customersList').innerHTML = '<p class="text-center text-red-500 py-6 text-sm">Failed</p>'; return; }
+  customersCache = data || [];
+  renderCustomers();
+}
+function renderCustomers(){
+  const q = (document.getElementById('customerSearch')?.value || '').toLowerCase().trim();
+  const filtered = customersCache.filter(c => !q || (c.full_name||'').toLowerCase().includes(q) || (c.phone||'').includes(q));
+  const list = document.getElementById('customersList');
+  if (filtered.length === 0) { list.innerHTML = '<p class="text-center text-slate-400 py-6 text-sm">No customers.</p>'; return; }
+  list.innerHTML = filtered.map(c => {
+    const name = c.full_name || 'Unnamed';
+    const initial = (name[0] || '?').toUpperCase();
+    return `<div class="p-3 flex items-center gap-3">
+      ${c.profile_pic_url ? `<img src="${esc(c.profile_pic_url)}" class="w-10 h-10 rounded-full object-cover">` : `<div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-black">${initial}</div>`}
+      <div class="flex-1 min-w-0"><p class="font-bold text-sm truncate">${esc(name)}</p><p class="text-[11px] text-slate-500">${esc(c.phone || 'No phone')}</p><p class="text-[10px] text-slate-400">Joined ${new Date(c.created_at).toLocaleDateString()}</p></div>
+      <button onclick="changeRole('${c.id}','seller')" class="text-[10px] bg-orange-100 text-orange-700 font-bold px-2 py-1 rounded">Make Seller</button>
+    </div>`;
+  }).join('');
+}
+async function loadSellers(){
+  const list = document.getElementById('sellersList');
+  list.innerHTML = '<p class="text-center text-slate-400 py-6 text-sm">Loading…</p>';
+  const { data, error } = await supabaseClient.from('profiles').select('id, full_name, phone, role, is_banned, profile_pic_url, shop_name, shop_logo_url, shop_bio, created_at').eq('role', 'seller').order('created_at', { ascending: false });
+  if (error) { list.innerHTML = '<p class="text-center text-red-500 py-6 text-sm">Failed</p>'; return; }
+  if (!data || data.length === 0) { list.innerHTML = '<div class="bg-white rounded-2xl border border-slate-200 p-10 text-center"><i class="fa-solid fa-store text-slate-300 text-5xl mb-3"></i><p class="text-slate-500 text-sm">No sellers yet.</p><p class="text-xs text-slate-400 mt-1">Sellers appear here after they sign up from the customer site.</p></div>'; return; }
+  list.innerHTML = data.map(s => `<div class="bg-white rounded-2xl border border-slate-200 p-4">
+    <div class="flex items-center gap-3 mb-3">
+      ${s.shop_logo_url || s.profile_pic_url ? `<img src="${esc(s.shop_logo_url || s.profile_pic_url)}" class="w-12 h-12 rounded-xl object-cover">` : `<div class="w-12 h-12 rounded-xl bg-orange-500 text-white flex items-center justify-center font-black text-lg">${esc((s.shop_name || s.full_name || 'S')[0].toUpperCase())}</div>`}
+      <div class="flex-1 min-w-0"><p class="font-black truncate">${esc(s.shop_name || s.full_name || 'Unnamed Store')}</p><p class="text-xs text-slate-500 truncate">${esc(s.full_name || '')} · ${esc(s.phone || 'No phone')}</p></div>
+      ${s.is_banned ? '<span class="text-[10px] font-bold text-red-500 bg-red-50 px-2 py-1 rounded">BANNED</span>' : '<span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded">ACTIVE</span>'}
+    </div>
+    ${s.shop_bio ? `<p class="text-xs text-slate-600 mb-3">${esc(s.shop_bio)}</p>` : ''}
+    <div class="flex gap-2"><button onclick="changeRole('${s.id}','customer')" class="flex-1 bg-slate-100 text-slate-700 font-bold py-2 rounded-xl text-xs">Remove Seller</button><button onclick="toggleBan('${s.id}', ${!s.is_banned})" class="flex-1 ${s.is_banned ? 'bg-emerald-600' : 'bg-red-600'} text-white font-bold py-2 rounded-xl text-xs">${s.is_banned ? 'Unban' : 'Ban'}</button></div>
+  </div>`).join('');
 }
 </script>
 </body>
