@@ -21,7 +21,7 @@
 <body class="bg-slate-50 text-slate-800 min-h-screen">
 
 <div class="bg-slate-900 text-white text-xs py-2 px-4 flex flex-wrap gap-2 justify-between items-center">
-  <span class="flex items-center gap-1.5"><i class="fa-solid fa-globe text-blue-400"></i> Worldwide Express Delivery</span>
+  <span class="flex items-center gap-1.5"><i class="fa-solid fa-globe text-blue-400"></i> <span id="topbarTagline">Worldwide Express Delivery</span></span>
   <div class="flex items-center gap-3">
     <select id="shipCountry" class="bg-slate-800 text-white text-xs rounded px-2 py-1 outline-none">
       <option value="BD">🇧🇩 Bangladesh</option>
@@ -284,18 +284,11 @@
 </div>
 
 <div id="supportModal" class="fixed inset-0 z-50 hidden bg-black/60 flex items-center justify-center p-4">
-  <div class="bg-white rounded-2xl max-w-md w-full p-6">
+  <div class="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto p-6">
     <div class="flex justify-between mb-4"><h3 class="font-black text-lg">Help & Support</h3><button onclick="closeModal('supportModal')"><i class="fa-solid fa-xmark"></i></button></div>
-    <p class="text-sm text-slate-600 mb-4">Contact us for any issue — we usually reply within 24 hours.</p>
-    <div class="space-y-2">
-      <a href="https://wa.me/8801000000000" target="_blank" class="flex items-center gap-3 p-3 border rounded-xl hover:bg-slate-50">
-        <i class="fa-brands fa-whatsapp text-green-600 text-xl"></i>
-        <div><p class="text-sm font-bold">WhatsApp</p><p class="text-[11px] text-slate-400">+880 1000-000000</p></div>
-      </a>
-      <a href="mailto:support@zorvex.com" class="flex items-center gap-3 p-3 border rounded-xl hover:bg-slate-50">
-        <i class="fa-solid fa-envelope text-blue-600 text-xl"></i>
-        <div><p class="text-sm font-bold">Email</p><p class="text-[11px] text-slate-400">support@zorvex.com</p></div>
-      </a>
+    <p class="text-sm text-slate-600 mb-4">Contact us for any issue — we usually reply within a few hours.</p>
+    <div id="contactLinksBox" class="space-y-2">
+      <p class="text-sm text-slate-400 text-center py-4">Loading…</p>
     </div>
   </div>
 </div>
@@ -1093,6 +1086,93 @@ function handleScanResult(text){
   onSearch(text);
   saveSearchHistory(text);
 }
+
+  // ============ SITE SETTINGS / CONTACT ============
+let siteSettings = {};
+
+async function loadSiteSettings(){
+  const { data, error } = await supabaseClient.from('site_settings').select('key, value');
+  if (error) { console.warn('Settings load failed:', error.message); return; }
+  siteSettings = {};
+  (data || []).forEach(s => { siteSettings[s.key] = (s.value || '').trim(); });
+  applySiteSettings();
+}
+
+function applySiteSettings(){
+  const tagline = siteSettings.site_tagline || 'Worldwide Express Delivery';
+  const tagEl = document.getElementById('topbarTagline');
+  if (tagEl) tagEl.innerText = tagline;
+  buildContactLinks();
+}
+
+function smartWhatsAppLink(raw){
+  if (!raw) return null;
+  const digits = String(raw).replace(/\D/g, '');
+  if (!digits) return null;
+  if (digits.startsWith('880')) return 'https://wa.me/' + digits;
+  if (digits.startsWith('0')) return 'https://wa.me/88' + digits;
+  return 'https://wa.me/' + digits;
+}
+
+function smartSocialLink(raw, platform){
+  if (!raw) return null;
+  const val = String(raw).trim();
+  if (/^https?:\/\//i.test(val)) return val;
+  const clean = val.replace(/^@/, '');
+  const map = {
+    facebook: 'https://facebook.com/',
+    messenger: 'https://m.me/',
+    instagram: 'https://instagram.com/',
+    telegram: 'https://t.me/',
+    tiktok: 'https://tiktok.com/@',
+    youtube: 'https://youtube.com/@'
+  };
+  return (map[platform] || '') + clean;
+}
+
+function buildContactLinks(){
+  const box = document.getElementById('contactLinksBox');
+  if (!box) return;
+
+  const links = [];
+  const s = siteSettings;
+
+  const wa = smartWhatsAppLink(s.whatsapp_number);
+  if (wa) links.push({ href: wa, icon: 'fa-brands fa-whatsapp text-green-600', title: 'WhatsApp', sub: s.whatsapp_display || s.whatsapp_number, ext: true });
+
+  const ms = smartSocialLink(s.messenger_username, 'messenger');
+  if (ms) links.push({ href: ms, icon: 'fa-brands fa-facebook-messenger text-blue-500', title: 'Messenger', sub: 'Chat with us on Messenger', ext: true });
+
+  const fb = smartSocialLink(s.facebook_page, 'facebook');
+  if (fb) links.push({ href: fb, icon: 'fa-brands fa-facebook text-blue-700', title: 'Facebook', sub: 'Follow our page', ext: true });
+
+  const ig = smartSocialLink(s.instagram_username, 'instagram');
+  if (ig) links.push({ href: ig, icon: 'fa-brands fa-instagram text-pink-600', title: 'Instagram', sub: 'DM us on Instagram', ext: true });
+
+  const tg = smartSocialLink(s.telegram_username, 'telegram');
+  if (tg) links.push({ href: tg, icon: 'fa-brands fa-telegram text-sky-500', title: 'Telegram', sub: 'Chat on Telegram', ext: true });
+
+  const tt = smartSocialLink(s.tiktok_username, 'tiktok');
+  if (tt) links.push({ href: tt, icon: 'fa-brands fa-tiktok', title: 'TikTok', sub: 'Follow on TikTok', ext: true });
+
+  const yt = smartSocialLink(s.youtube_channel, 'youtube');
+  if (yt) links.push({ href: yt, icon: 'fa-brands fa-youtube text-red-600', title: 'YouTube', sub: 'Watch on YouTube', ext: true });
+
+  if (s.support_email) links.push({ href: 'mailto:' + s.support_email, icon: 'fa-solid fa-envelope text-blue-600', title: 'Email', sub: s.support_email, ext: false });
+
+  if (links.length === 0){
+    box.innerHTML = '<p class="text-sm text-slate-400 text-center py-4">Contact information will be available soon.</p>';
+    return;
+  }
+
+  box.innerHTML = links.map(l => `
+    <a href="${esc(l.href)}" ${l.ext ? 'target="_blank" rel="noopener"' : ''} class="flex items-center gap-3 p-3 border rounded-xl hover:bg-slate-50">
+      <i class="${l.icon} text-xl w-5 text-center"></i>
+      <div class="min-w-0 flex-1"><p class="text-sm font-bold">${esc(l.title)}</p><p class="text-[11px] text-slate-400 truncate">${esc(l.sub)}</p></div>
+      <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-300"></i>
+    </a>
+  `).join('');
+}
   
 // ============ INIT ============
 document.getElementById('currency').addEventListener('change', () => {
@@ -1103,6 +1183,7 @@ document.getElementById('currency').addEventListener('change', () => {
 loadCategories();
 loadProducts();
 renderCartCount();
+loadSiteSettings();
 </script>
 </body>
 </html>
