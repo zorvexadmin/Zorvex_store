@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zorvex Admin Panel</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  body{font-family:'Inter',sans-serif}
+  .fade-in{animation:fadeIn .25s ease-out}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body class="bg-slate-100 min-h-screen">
+
+<div id="loadingScreen" class="fixed inset-0 bg-slate-900 flex items-center justify-center z-50">
+  <div class="text-center">
+    <div class="w-14 h-14 bg-blue-600 rounded-2xl text-white flex items-center justify-center text-2xl mx-auto mb-3 animate-pulse">
+      <i class="fa-solid fa-earth-americas"></i>
+    </div>
+    <p class="text-white text-sm">Loading…</p>
+  </div>
+</div>
+
+<div id="loginScreen" class="hidden fixed inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4 z-40">
+  <div class="w-full max-w-sm fade-in">
+    <div class="text-center mb-6">
+      <div class="w-16 h-16 bg-blue-600 rounded-2xl text-white flex items-center justify-center text-3xl mx-auto mb-3">
+        <i class="fa-solid fa-earth-americas"></i>
+      </div>
+      <h1 class="text-white font-black text-2xl">Zorvex <span class="text-blue-400">Admin</span></h1>
+      <p class="text-slate-400 text-xs mt-1">Sign in to your admin panel</p>
+    </div>
+    <div class="bg-white rounded-2xl p-6 shadow-2xl">
+      <form onsubmit="return adminLogin(event)" class="space-y-3">
+        <div>
+          <label class="text-xs font-bold text-slate-500">Email</label>
+          <input id="loginEmail" type="email" required class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+        <div>
+          <label class="text-xs font-bold text-slate-500">Password</label>
+          <input id="loginPassword" type="password" required class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+        <button type="submit" id="loginBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-3 rounded-xl text-sm mt-2 transition">
+          <i class="fa-solid fa-right-to-bracket"></i> Sign In
+        </button>
+      </form>
+      <p id="loginMsg" class="text-xs text-center mt-3"></p>
+    </div>
+    <p class="text-center text-xs text-slate-500 mt-4">
+      <a href="index.html" class="hover:text-blue-400">
+        <i class="fa-solid fa-arrow-left"></i> Back to Store
+      </a>
+    </p>
+  </div>
+</div>
+
+<div id="deniedScreen" class="hidden fixed inset-0 bg-slate-900 flex items-center justify-center p-4 z-40">
+  <div class="bg-white rounded-2xl max-w-sm w-full p-6 text-center fade-in">
+    <div class="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
+      <i class="fa-solid fa-shield-halved text-red-600 text-2xl"></i>
+    </div>
+    <h2 class="font-black text-lg mb-2">Access Denied</h2>
+    <p class="text-sm text-slate-600 mb-4">Your account does not have admin access.</p>
+    <p id="deniedEmail" class="text-xs text-slate-400 mb-4"></p>
+    <div class="flex gap-2">
+      <button onclick="adminSignOut()" class="flex-1 bg-slate-900 text-white font-bold py-2.5 rounded-xl text-xs">Sign Out</button>
+      <a href="index.html" class="flex-1 bg-blue-600 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center">Back to Store</a>
+    </div>
+  </div>
+</div>
+<div id="dashboard" class="hidden min-h-screen">
+
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
+    <div class="px-4 py-3 flex items-center gap-3">
+      <button onclick="toggleSidebar()" class="md:hidden w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+      <div class="flex items-center gap-2 font-black text-lg">
+        <div class="w-8 h-8 bg-blue-600 rounded-xl text-white flex items-center justify-center text-sm">
+          <i class="fa-solid fa-earth-americas"></i>
+        </div>
+        <span>Zorvex <span class="text-blue-600 text-sm">Admin</span></span>
+      </div>
+      <div class="ml-auto flex items-center gap-2">
+        <a href="index.html" target="_blank" class="text-xs font-bold bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-xl">
+          <i class="fa-solid fa-store"></i> <span class="hidden sm:inline">View Store</span>
+        </a>
+        <div class="relative">
+          <button onclick="toggleAdminMenu()" class="flex items-center gap-2 text-xs font-bold bg-slate-100 hover:bg-slate-200 pl-1 pr-2 py-1 rounded-xl">
+            <img id="adminAvatar" class="w-7 h-7 rounded-full object-cover bg-blue-600 hidden">
+            <div id="adminAvatarInit" class="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-black">A</div>
+            <span id="adminName" class="hidden sm:inline max-w-[120px] truncate">Admin</span>
+            <i class="fa-solid fa-chevron-down text-[10px] text-slate-500"></i>
+          </button>
+          <div id="adminMenu" class="hidden absolute right-0 top-11 w-56 bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden z-50">
+            <div class="p-3 border-b bg-slate-50">
+              <p id="adminMenuName" class="font-bold text-sm truncate">Admin</p>
+              <p id="adminMenuEmail" class="text-[11px] text-slate-500 truncate">—</p>
+              <span id="adminRoleBadge" class="inline-block mt-1 text-[9px] bg-blue-100 text-blue-700 font-bold px-2 py-0.5 rounded-full uppercase">Super Admin</span>
+            </div>
+            <button onclick="showPage('dashboard')" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-slate-50 border-b">
+              <i class="fa-solid fa-gauge text-blue-600 w-4"></i> Dashboard
+            </button>
+            <button onclick="adminSignOut()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50">
+              <i class="fa-solid fa-right-from-bracket w-4"></i> Sign Out
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="flex">
+
+    <aside id="sidebar" class="hidden md:block fixed md:sticky top-[57px] left-0 w-64 h-[calc(100vh-57px)] bg-white border-r border-slate-200 overflow-y-auto z-20">
+      <nav class="p-3 space-y-1">
+        <p class="text-[10px] font-bold text-slate-400 uppercase px-3 pt-3 pb-1">Main</p>
+        <button onclick="showPage('dashboard')" data-nav="dashboard" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold">
+          <i class="fa-solid fa-gauge w-4"></i> Dashboard
+        </button>
+        <p class="text-[10px] font-bold text-slate-400 uppercase px-3 pt-4 pb-1">Store</p>
+        <button onclick="showPage('products')" data-nav="products" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold">
+          <i class="fa-solid fa-box w-4"></i> Products
+        </button>
+        <button onclick="showPage('orders')" data-nav="orders" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold">
+          <i class="fa-solid fa-receipt w-4"></i> Orders
+        </button>
+        <button onclick="showPage('categories')" data-nav="categories" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold">
+          <i class="fa-solid fa-tags w-4"></i> Categories
+        </button>
+        <button onclick="showPage('reviews')" data-nav="reviews" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold">
+          <i class="fa-solid fa-star w-4"></i> Reviews
+        </button>
+        <p class="text-[10px] font-bold text-slate-400 uppercase px-3 pt-4 pb-1">Users</p>
+        <button onclick="showPage('team')" data-nav="team" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold">
+          <i class="fa-solid fa-users-gear w-4"></i> Team & Roles
+        </button>
+        <button onclick="showPage('customers')" data-nav="customers" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold">
+          <i class="fa-solid fa-user-group w-4"></i> Customers
+        </button>
+        <button onclick="showPage('sellers')" data-nav="sellers" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold">
+          <i class="fa-solid fa-store w-4"></i> Sellers
+        </button>
+        <p class="text-[10px] font-bold text-slate-400 uppercase px-3 pt-4 pb-1">System</p>
+        <button onclick="showPage('settings')" data-nav="settings" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold">
+          <i class="fa-solid fa-gear w-4"></i> Settings
+        </button>
+        <button onclick="showPage('commission')" data-nav="commission" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold">
+          <i class="fa-solid fa-percent w-4"></i> Commission
+        </button>
+        <button onclick="showPage('logs')" data-nav="logs" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold">
+          <i class="fa-solid fa-list-check w-4"></i> Activity Logs
+        </button>
+      </nav>
+    </aside>
+
+    <div id="sidebarOverlay" onclick="toggleSidebar()" class="hidden fixed inset-0 bg-black/50 z-10 md:hidden"></div>
+
+    <main class="flex-1 min-w-0 p-4 md:p-6">
+            <div id="page-dashboard" class="page fade-in">
+        <h1 class="text-2xl font-black mb-1">Dashboard</h1>
+        <p class="text-sm text-slate-500 mb-6">Welcome back, <span id="welcomeName" class="font-bold text-slate-700">Admin</span> 👋</p>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+          <div class="bg-white rounded-2xl p-4 border border-slate-200">
+            <i class="fa-solid fa-box text-blue-600"></i>
+            <p id="statProducts" class="text-2xl font-black mt-2">—</p>
+            <p class="text-xs text-slate-500">Products</p>
+          </div>
+          <div class="bg-white rounded-2xl p-4 border border-slate-200">
+            <i class="fa-solid fa-receipt text-emerald-600"></i>
+            <p id="statOrders" class="text-2xl font-black mt-2">—</p>
+            <p class="text-xs text-slate-500">Orders</p>
+          </div>
+          <div class="bg-white rounded-2xl p-4 border border-slate-200">
+            <i class="fa-solid fa-users text-purple-600"></i>
+            <p id="statUsers" class="text-2xl font-black mt-2">—</p>
+            <p class="text-xs text-slate-500">Users</p>
+          </div>
+          <div class="bg-white rounded-2xl p-4 border border-slate-200">
+            <i class="fa-solid fa-dollar-sign text-amber-600"></i>
+            <p id="statRevenue" class="text-2xl font-black mt-2">—</p>
+            <p class="text-xs text-slate-500">Revenue (USD)</p>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-6 border border-slate-200">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+              <i class="fa-solid fa-rocket text-blue-600"></i>
+            </div>
+            <div>
+              <h2 class="font-black">Getting Started</h2>
+              <p class="text-xs text-slate-500">Configure your store step by step</p>
+            </div>
+          </div>
+          <div class="space-y-2 text-sm">
+            <button onclick="showPage('settings')" class="w-full flex items-center gap-3 p-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-left">
+              <i class="fa-solid fa-gear text-slate-600 w-4"></i>
+              <span class="flex-1"><b>Setup store settings</b><br><span class="text-xs text-slate-500">WhatsApp, Email, Social links</span></span>
+              <i class="fa-solid fa-arrow-right text-slate-400"></i>
+            </button>
+            <button onclick="showPage('products')" class="w-full flex items-center gap-3 p-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-left">
+              <i class="fa-solid fa-box text-slate-600 w-4"></i>
+              <span class="flex-1"><b>Add your first product</b><br><span class="text-xs text-slate-500">Title, price, image</span></span>
+              <i class="fa-solid fa-arrow-right text-slate-400"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="page-products" class="page hidden fade-in">
+        <h1 class="text-2xl font-black mb-1">Products</h1>
+        <p class="text-sm text-slate-500 mb-6">Manage all products</p>
+        <div class="bg-white rounded-2xl p-10 border border-slate-200 text-center">
+          <i class="fa-solid fa-box text-slate-300 text-5xl mb-3"></i>
+          <p class="text-slate-500">Product management — coming in next step</p>
+        </div>
+      </div>
+
+      <div id="page-orders" class="page hidden fade-in">
+        <h1 class="text-2xl font-black mb-1">Orders</h1>
+        <p class="text-sm text-slate-500 mb-6">Manage customer orders</p>
+        <div class="bg-white rounded-2xl p-10 border border-slate-200 text-center">
+          <i class="fa-solid fa-receipt text-slate-300 text-5xl mb-3"></i>
+          <p class="text-slate-500">Order management — coming soon</p>
+        </div>
+      </div>
+
+      <div id="page-categories" class="page hidden fade-in">
+        <h1 class="text-2xl font-black mb-1">Categories</h1>
+        <p class="text-sm text-slate-500 mb-6">Manage product categories</p>
+        <div class="bg-white rounded-2xl p-10 border border-slate-200 text-center">
+          <i class="fa-solid fa-tags text-slate-300 text-5xl mb-3"></i>
+          <p class="text-slate-500">Category management — coming soon</p>
+        </div>
+      </div>
+
+      <div id="page-reviews" class="page hidden fade-in">
+        <h1 class="text-2xl font-black mb-1">Reviews</h1>
+        <p class="text-sm text-slate-500 mb-6">Moderate customer reviews</p>
+        <div class="bg-white rounded-2xl p-10 border border-slate-200 text-center">
+          <i class="fa-solid fa-star text-slate-300 text-5xl mb-3"></i>
+          <p class="text-slate-500">Review moderation — coming soon</p>
+        </div>
+      </div>
+
+      <div id="page-team" class="page hidden fade-in">
+        <h1 class="text-2xl font-black mb-1">Team & Roles</h1>
+        <p class="text-sm text-slate-500 mb-6">Manage admin team and permissions</p>
+        <div class="bg-white rounded-2xl p-10 border border-slate-200 text-center">
+          <i class="fa-solid fa-users-gear text-slate-300 text-5xl mb-3"></i>
+          <p class="text-slate-500">Team management — coming soon</p>
+        </div>
+      </div>
+
+      <div id="page-customers" class="page hidden fade-in">
+        <h1 class="text-2xl font-black mb-1">Customers</h1>
+        <p class="text-sm text-slate-500 mb-6">All registered customers</p>
+        <div class="bg-white rounded-2xl p-10 border border-slate-200 text-center">
+          <i class="fa-solid fa-user-group text-slate-300 text-5xl mb-3"></i>
+          <p class="text-slate-500">Customer list — coming soon</p>
+        </div>
+      </div>
+
+      <div id="page-sellers" class="page hidden fade-in">
+        <h1 class="text-2xl font-black mb-1">Sellers</h1>
+        <p class="text-sm text-slate-500 mb-6">Approve and manage sellers</p>
+        <div class="bg-white rounded-2xl p-10 border border-slate-200 text-center">
+          <i class="fa-solid fa-store text-slate-300 text-5xl mb-3"></i>
+          <p class="text-slate-500">Seller management — coming soon</p>
+        </div>
+      </div>
+
+      <div id="page-settings" class="page hidden fade-in">
+        <h1 class="text-2xl font-black mb-1">Store Settings</h1>
+        <p class="text-sm text-slate-500 mb-6">Contact info, social links, taglines</p>
+        <div class="bg-white rounded-2xl p-10 border border-slate-200 text-center">
+          <i class="fa-solid fa-gear text-slate-300 text-5xl mb-3"></i>
+          <p class="text-slate-500">Settings form — coming next step</p>
+        </div>
+      </div>
+
+      <div id="page-commission" class="page hidden fade-in">
+        <h1 class="text-2xl font-black mb-1">Commission</h1>
+        <p class="text-sm text-slate-500 mb-6">Website fee & resell rates</p>
+        <div class="bg-white rounded-2xl p-10 border border-slate-200 text-center">
+          <i class="fa-solid fa-percent text-slate-300 text-5xl mb-3"></i>
+          <p class="text-slate-500">Commission settings — coming soon</p>
+        </div>
+      </div>
+
+      <div id="page-logs" class="page hidden fade-in">
+        <h1 class="text-2xl font-black mb-1">Activity Logs</h1>
+        <p class="text-sm text-slate-500 mb-6">Who did what and when</p>
+        <div class="bg-white rounded-2xl p-10 border border-slate-200 text-center">
+          <i class="fa-solid fa-list-check text-slate-300 text-5xl mb-3"></i>
+          <p class="text-slate-500">Activity logs — coming soon</p>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+<script src="js/supabase-config.js"></script>
+<script>
+// ============ ADMIN STATE ============
+let adminUser = null;
+let adminProfile = null;
+const ADMIN_ROLES = ['super_admin','admin','acting_admin','sub_admin','manager','moderator'];
+
+// ============ BOOT ============
+supabaseClient.auth.onAuthStateChange(async (event, session) => {
+  adminUser = session?.user || null;
+
+  if (!adminUser) {
+    showLogin();
+    return;
+  }
+
+  const { data } = await supabaseClient
+    .from('profiles')
+    .select('full_name, profile_pic_url, role, is_banned')
+    .eq('id', adminUser.id)
+    .single();
+
+  adminProfile = data;
+
+  if (!adminProfile || !ADMIN_ROLES.includes(adminProfile.role) || adminProfile.is_banned) {
+    showDenied();
+    return;
+  }
+
+  showDashboard();
+});
+
+// ============ SCREENS ============
+function hideAll(){
+  ['loadingScreen','loginScreen','deniedScreen','dashboard'].forEach(id => {
+    document.getElementById(id).classList.add('hidden');
+  });
+}
+function showLogin(){
+  hideAll();
+  document.getElementById('loginScreen').classList.remove('hidden');
+}
+function showDenied(){
+  hideAll();
+  document.getElementById('deniedEmail').innerText = adminUser?.email || '';
+  document.getElementById('deniedScreen').classList.remove('hidden');
+}
+function showDashboard(){
+  hideAll();
+  document.getElementById('dashboard').classList.remove('hidden');
+  updateAdminUI();
+  loadStats();
+  showPage('dashboard');
+}
+
+// ============ UI ============
+function updateAdminUI(){
+  const name = adminProfile?.full_name || adminUser?.email?.split('@')[0] || 'Admin';
+  const pic = adminProfile?.profile_pic_url;
+  const role = adminProfile?.role || '';
+
+  document.getElementById('adminName').innerText = name;
+  document.getElementById('adminMenuName').innerText = name;
+  document.getElementById('adminMenuEmail').innerText = adminUser?.email || '';
+  document.getElementById('welcomeName').innerText = name;
+
+  const roleText = role.split('_').map(w => w[0].toUpperCase()+w.slice(1)).join(' ');
+  document.getElementById('adminRoleBadge').innerText = roleText;
+
+  const av = document.getElementById('adminAvatar');
+  const init = document.getElementById('adminAvatarInit');
+  if (pic) {
+    av.src = pic;
+    av.classList.remove('hidden');
+    init.classList.add('hidden');
+  } else {
+    av.classList.add('hidden');
+    init.classList.remove('hidden');
+    init.innerText = (name[0] || 'A').toUpperCase();
+  }
+}
+
+function toggleAdminMenu(){
+  document.getElementById('adminMenu').classList.toggle('hidden');
+}
+
+document.addEventListener('click', function(e){
+  const menu = document.getElementById('adminMenu');
+  if (!menu || menu.classList.contains('hidden')) return;
+  if (!menu.contains(e.target) && !e.target.closest('button[onclick="toggleAdminMenu()"]')) {
+    menu.classList.add('hidden');
+  }
+});
+
+function toggleSidebar(){
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('sidebarOverlay');
+  sb.classList.toggle('hidden');
+  sb.classList.toggle('block');
+  ov.classList.toggle('hidden');
+}
+
+// ============ PAGE ROUTING ============
+function showPage(pageId){
+  document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+  const target = document.getElementById('page-' + pageId);
+  if (target) target.classList.remove('hidden');
+
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    const on = b.dataset.nav === pageId;
+    b.className = on
+      ? 'nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold bg-blue-600 text-white'
+      : 'nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold hover:bg-slate-100 text-slate-700';
+  });
+
+  if (window.innerWidth < 768) {
+    const sb = document.getElementById('sidebar');
+    if (!sb.classList.contains('hidden')) toggleSidebar();
+  }
+
+  document.getElementById('adminMenu').classList.add('hidden');
+}
+
+// ============ LOGIN ============
+async function adminLogin(e){
+  e.preventDefault();
+  const btn = document.getElementById('loginBtn');
+  const msg = document.getElementById('loginMsg');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Signing in…';
+  msg.innerText = '';
+
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
+
+  const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+
+  btn.disabled = false;
+  btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Sign In';
+
+  if (error) {
+    msg.className = 'text-xs text-center mt-3 text-red-500';
+    msg.innerText = error.message;
+    return false;
+  }
+
+  return false;
+}
+
+async function adminSignOut(){
+  await supabaseClient.auth.signOut();
+}
+
+// ============ STATS ============
+async function loadStats(){
+  const [p, o, u] = await Promise.all([
+    supabaseClient.from('products').select('id', { count: 'exact', head: true }),
+    supabaseClient.from('orders').select('total_usd', { count: 'exact' }),
+    supabaseClient.from('profiles').select('id', { count: 'exact', head: true })
+  ]);
+
+  document.getElementById('statProducts').innerText = p.count ?? '—';
+  document.getElementById('statOrders').innerText = o.count ?? '—';
+  document.getElementById('statUsers').innerText = u.count ?? '—';
+
+  const revenue = (o.data || []).reduce((s, x) => s + Number(x.total_usd || 0), 0);
+  document.getElementById('statRevenue').innerText = '$' + revenue.toFixed(2);
+}
+</script>
+</body>
+</html>
