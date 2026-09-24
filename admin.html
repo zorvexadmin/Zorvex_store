@@ -358,7 +358,12 @@ function showDashboard(){
   document.getElementById('dashboard').classList.remove('hidden');
   updateAdminUI();
   loadStats();
-  showPage('dashboard');
+
+  const hash = window.location.hash.substring(1);
+  const validPages = ['dashboard','products','orders','categories','reviews','team','customers','sellers','settings','commission','logs'];
+  const page = validPages.includes(hash) ? hash : 'dashboard';
+  showPage(page, true);
+  if (!hash) window.history.replaceState({ page: 'dashboard' }, '', '#dashboard');
 }
 
 // ============ UI ============
@@ -409,7 +414,7 @@ function toggleSidebar(){
 }
 
 // ============ PAGE ROUTING ============
-function showPage(pageId){
+function showPage(pageId, fromPop){
   document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
   const target = document.getElementById('page-' + pageId);
   if (target) target.classList.remove('hidden');
@@ -427,8 +432,17 @@ function showPage(pageId){
   }
 
   document.getElementById('adminMenu').classList.add('hidden');
+
+  if (!fromPop && window.location.hash !== '#' + pageId) {
+    window.history.pushState({ page: pageId }, '', '#' + pageId);
+  }
 }
 
+window.addEventListener('popstate', function(e){
+  const page = (e.state && e.state.page) || (window.location.hash ? window.location.hash.substring(1) : 'dashboard');
+  showPage(page, true);
+});
+  
 // ============ LOGIN ============
 async function adminLogin(e){
   e.preventDefault();
@@ -456,6 +470,7 @@ async function adminLogin(e){
 }
 
 async function adminSignOut(){
+  window.history.replaceState(null, '', window.location.pathname);
   await supabaseClient.auth.signOut();
 }
 
