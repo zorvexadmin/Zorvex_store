@@ -96,9 +96,8 @@
             <button onclick="openAboutModal()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-slate-50">
               <i class="fa-solid fa-circle-info text-slate-600 w-4"></i> About Zorvex
             </button>
-            <button onclick="openSellerModal()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-slate-50">
-              <i class="fa-solid fa-store text-slate-600 w-4"></i> Become a Seller
-              <span class="ml-auto text-[9px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-bold">SOON</span>
+            <button onclick="openSellerFlow()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-slate-50">
+  <i class="fa-solid fa-store text-slate-600 w-4"></i> Become a Seller
             </button>
           </div>
           <div class="border-t border-slate-100 py-1">
@@ -134,8 +133,11 @@
       <h3 class="font-bold">Product Details</h3>
       <button onclick="closeModal('productModal')"><i class="fa-solid fa-xmark"></i></button>
     </div>
-    <div class="grid sm:grid-cols-2 gap-4 p-4">
-      <img id="pImg" class="w-full aspect-square object-cover rounded-xl bg-slate-100">
+          <div class="grid sm:grid-cols-2 gap-4 p-4">
+      <div class="relative">
+        <img id="pImg" class="w-full aspect-square object-cover rounded-xl bg-slate-100">
+        <span id="pDiscountBadge" class="hidden absolute top-2 right-2 bg-red-600 text-white text-[11px] font-bold px-2 py-1 rounded-lg shadow"></span>
+      </div>
       <div>
         <h2 id="pTitle" class="text-lg font-black mb-1"></h2>
         <p class="text-xs text-slate-500 mb-2"><i class="fa-solid fa-location-dot"></i> Ships from <span id="pCountry"></span></p>
@@ -314,28 +316,187 @@
 </div>
 
 <div id="sellerModal" class="fixed inset-0 z-50 hidden bg-black/60 flex items-center justify-center p-4">
-  <div class="bg-white rounded-2xl max-w-md w-full p-6 text-center">
-    <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-3">
-      <i class="fa-solid fa-store text-amber-600 text-2xl"></i>
+  <div class="bg-white rounded-2xl max-w-lg w-full max-h-[92vh] overflow-y-auto">
+    <div class="sticky top-0 bg-white border-b border-slate-200 p-4 flex items-center justify-between z-10">
+      <div>
+        <h3 class="font-black text-lg">Become a Seller</h3>
+        <p class="text-[11px] text-slate-500">Complete KYC to start selling on Zorvex</p>
+      </div>
+      <button onclick="closeModal('sellerModal')"><i class="fa-solid fa-xmark"></i></button>
     </div>
-    <h3 class="font-black text-lg mb-1">Become a Seller</h3>
-    <p class="text-[11px] text-amber-600 font-bold mb-3">COMING SOON</p>
-    <p class="text-sm text-slate-600 mb-4">The ability to sell your own products on Zorvex is coming soon. Contact us if you'd like to know more.</p>
-    <a href="https://wa.me/8801000000000" target="_blank" class="inline-block bg-slate-900 text-white font-bold py-2.5 px-6 rounded-xl text-xs">
-      <i class="fa-brands fa-whatsapp"></i> Contact on WhatsApp
-    </a>
+
+    <!-- STEP INDICATOR -->
+    <div class="px-4 pt-4">
+      <div class="flex items-center gap-1">
+        <div id="sellerStepDot1" class="flex-1 h-1.5 rounded bg-blue-600"></div>
+        <div id="sellerStepDot2" class="flex-1 h-1.5 rounded bg-slate-200"></div>
+        <div id="sellerStepDot3" class="flex-1 h-1.5 rounded bg-slate-200"></div>
+        <div id="sellerStepDot4" class="flex-1 h-1.5 rounded bg-slate-200"></div>
+      </div>
+      <p id="sellerStepLabel" class="text-[11px] text-slate-500 mt-2">Step 1 of 4 · Basic Information</p>
+    </div>
+
+    <!-- STEP 1 -->
+    <div id="sellerStep1" class="p-4 space-y-3">
+      <div>
+        <label class="text-xs font-bold text-slate-500">Full Name (as on NID) *</label>
+        <input id="sk_full_name" placeholder="Your full name" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
+      </div>
+      <div>
+        <label class="text-xs font-bold text-slate-500">Phone Number *</label>
+        <input id="sk_phone" placeholder="+8801XXXXXXXXX" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
+      </div>
+      <div>
+        <label class="text-xs font-bold text-slate-500">Address</label>
+        <textarea id="sk_address" rows="2" placeholder="Your full address" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
+      </div>
+      <p id="sellerStep1Msg" class="text-xs text-center"></p>
+      <button onclick="sellerNext(1)" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-3 rounded-xl text-sm">
+        Continue <i class="fa-solid fa-arrow-right"></i>
+      </button>
+    </div>
+
+    <!-- STEP 2 -->
+    <div id="sellerStep2" class="p-4 space-y-3 hidden">
+      <div>
+        <label class="text-xs font-bold text-slate-500">Shop Name *</label>
+        <input id="sk_shop_name" placeholder="e.g. Zorvex Electronics" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
+      </div>
+      <div>
+        <label class="text-xs font-bold text-slate-500">Shop Description</label>
+        <textarea id="sk_shop_desc" rows="2" placeholder="What will you sell?" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
+      </div>
+      <div>
+        <label class="text-xs font-bold text-slate-500">Business Type</label>
+        <select id="sk_business_type" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
+          <option value="">Select</option>
+          <option value="individual">Individual</option>
+          <option value="shop">Physical Shop</option>
+          <option value="online">Online Business</option>
+          <option value="brand">Brand / Company</option>
+        </select>
+      </div>
+      <div>
+        <label class="text-xs font-bold text-slate-500">Business Proof (Optional)</label>
+        <p class="text-[10px] text-slate-400 mb-1">Facebook page, YouTube channel, Instagram, TikTok, or shop photo URL</p>
+        <input id="sk_business_proof" placeholder="https://facebook.com/yourpage" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+      </div>
+      <p id="sellerStep2Msg" class="text-xs text-center"></p>
+      <div class="flex gap-2">
+        <button onclick="sellerBack(1)" class="flex-1 bg-slate-200 text-slate-800 font-bold py-3 rounded-xl text-sm">Back</button>
+        <button onclick="sellerNext(2)" class="flex-[2] bg-blue-600 hover:bg-blue-700 text-white font-black py-3 rounded-xl text-sm">Continue <i class="fa-solid fa-arrow-right"></i></button>
+      </div>
+    </div>
+
+    <!-- STEP 3 — KYC DOCUMENTS -->
+    <div id="sellerStep3" class="p-4 hidden">
+      <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4">
+        <p class="text-xs font-bold text-amber-800 mb-1"><i class="fa-solid fa-shield-halved"></i> KYC Verification</p>
+        <p class="text-[11px] text-amber-700">We need 6 photos to verify your identity. Your data is safe and only visible to admins.</p>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div onclick="openKycCamera('nid_front')" class="border-2 border-dashed border-slate-300 rounded-xl p-3 text-center cursor-pointer hover:border-blue-500 transition">
+          <img id="thumb_nid_front" class="w-full aspect-square object-cover rounded-lg bg-slate-100 mb-2">
+          <p class="text-[10px] font-bold text-slate-600">NID Front</p>
+          <p class="text-[9px] text-slate-400">Tap to capture</p>
+        </div>
+        <div onclick="openKycCamera('nid_back')" class="border-2 border-dashed border-slate-300 rounded-xl p-3 text-center cursor-pointer hover:border-blue-500 transition">
+          <img id="thumb_nid_back" class="w-full aspect-square object-cover rounded-lg bg-slate-100 mb-2">
+          <p class="text-[10px] font-bold text-slate-600">NID Back</p>
+          <p class="text-[9px] text-slate-400">Tap to capture</p>
+        </div>
+        <div onclick="openKycCamera('face_front')" class="border-2 border-dashed border-slate-300 rounded-xl p-3 text-center cursor-pointer hover:border-blue-500 transition">
+          <img id="thumb_face_front" class="w-full aspect-square object-cover rounded-lg bg-slate-100 mb-2">
+          <p class="text-[10px] font-bold text-slate-600">Face Front</p>
+          <p class="text-[9px] text-slate-400">Tap to capture</p>
+        </div>
+        <div onclick="openKycCamera('face_left')" class="border-2 border-dashed border-slate-300 rounded-xl p-3 text-center cursor-pointer hover:border-blue-500 transition">
+          <img id="thumb_face_left" class="w-full aspect-square object-cover rounded-lg bg-slate-100 mb-2">
+          <p class="text-[10px] font-bold text-slate-600">Face Left</p>
+          <p class="text-[9px] text-slate-400">Turn head left</p>
+        </div>
+        <div onclick="openKycCamera('face_right')" class="border-2 border-dashed border-slate-300 rounded-xl p-3 text-center cursor-pointer hover:border-blue-500 transition">
+          <img id="thumb_face_right" class="w-full aspect-square object-cover rounded-lg bg-slate-100 mb-2">
+          <p class="text-[10px] font-bold text-slate-600">Face Right</p>
+          <p class="text-[9px] text-slate-400">Turn head right</p>
+        </div>
+        <div onclick="openKycCamera('selfie_nid')" class="border-2 border-dashed border-slate-300 rounded-xl p-3 text-center cursor-pointer hover:border-blue-500 transition">
+          <img id="thumb_selfie_nid" class="w-full aspect-square object-cover rounded-lg bg-slate-100 mb-2">
+          <p class="text-[10px] font-bold text-slate-600">Selfie + NID</p>
+          <p class="text-[9px] text-slate-400">Hold NID beside face</p>
+        </div>
+      </div>
+
+      <p class="text-[10px] text-slate-500 mt-3 text-center">All 6 photos are required</p>
+      <p id="sellerStep3Msg" class="text-xs text-center mt-2"></p>
+      <div class="flex gap-2 mt-3">
+        <button onclick="sellerBack(2)" class="flex-1 bg-slate-200 text-slate-800 font-bold py-3 rounded-xl text-sm">Back</button>
+        <button onclick="sellerNext(3)" class="flex-[2] bg-blue-600 hover:bg-blue-700 text-white font-black py-3 rounded-xl text-sm">Continue <i class="fa-solid fa-arrow-right"></i></button>
+      </div>
+    </div>
+
+    <!-- STEP 4 — REVIEW & SUBMIT -->
+    <div id="sellerStep4" class="p-4 hidden">
+      <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 mb-4">
+        <p class="text-xs font-bold text-blue-800 mb-1"><i class="fa-solid fa-circle-check"></i> Almost Done!</p>
+        <p class="text-[11px] text-blue-700">Your information is ready. Please review before submitting.</p>
+      </div>
+      <div id="sellerReviewBox" class="space-y-2 text-xs bg-slate-50 rounded-xl p-3 mb-4"></div>
+      <p id="sellerStep4Msg" class="text-xs text-center"></p>
+      <div class="flex gap-2 mt-3">
+        <button onclick="sellerBack(3)" class="flex-1 bg-slate-200 text-slate-800 font-bold py-3 rounded-xl text-sm">Back</button>
+        <button id="sellerSubmitBtn" onclick="submitSellerApp()" class="flex-[2] bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 rounded-xl text-sm"><i class="fa-solid fa-paper-plane"></i> Submit Application</button>
+      </div>
+    </div>
+
+    <!-- SUCCESS -->
+    <div id="sellerSuccessBox" class="p-6 text-center hidden">
+      <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3">
+        <i class="fa-solid fa-check text-emerald-600 text-2xl"></i>
+      </div>
+      <h3 class="font-black text-lg mb-1">Application Submitted!</h3>
+      <p class="text-xs text-slate-500 mb-4">We'll review your application within 24-48 hours. Once approved, you can start selling on Zorvex.</p>
+      <button onclick="closeModal('sellerModal')" class="w-full bg-slate-900 text-white font-bold py-3 rounded-xl text-sm">Got it</button>
+    </div>
   </div>
 </div>
-  <div id="qrScannerModal" class="fixed inset-0 z-[60] hidden bg-black/90 flex items-center justify-center p-4">
-  <div class="bg-white rounded-2xl max-w-md w-full overflow-hidden">
-    <div class="flex justify-between items-center p-4 border-b">
-      <h3 class="font-bold text-sm">Scan Barcode / QR Code</h3>
-      <button onclick="closeQRScanner()"><i class="fa-solid fa-xmark"></i></button>
+<div id="kycCameraModal" class="fixed inset-0 z-[70] hidden bg-black flex flex-col">
+  <div class="bg-slate-900 text-white p-4 flex items-center justify-between">
+    <div>
+      <p class="text-[11px] text-slate-400 uppercase tracking-wide" id="kycStepIndicator">Step 1 of 6</p>
+      <h3 class="font-black" id="kycTitle">NID Front</h3>
     </div>
-    <div id="qrReader" class="w-full bg-black"></div>
-    <p id="qrStatus" class="text-xs text-center p-3 text-slate-500">Point camera at a barcode or QR code…</p>
+    <button onclick="closeKycCamera()" class="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
   </div>
+
+  <div class="flex-1 relative bg-black overflow-hidden flex items-center justify-center">
+    <video id="kycVideo" autoplay playsinline muted class="w-full h-full object-cover"></video>
+
+    <!-- Scan frame overlay -->
+    <div id="kycGuideFrame" class="absolute inset-0 pointer-events-none flex items-center justify-center">
+      <div class="relative w-[80%] aspect-[16/10] border-2 border-blue-400 rounded-2xl shadow-[0_0_0_9999px_rgba(0,0,0,0.6)]">
+        <div class="absolute -top-1 -left-1 w-6 h-6 border-t-4 border-l-4 border-blue-400 rounded-tl-2xl"></div>
+        <div class="absolute -top-1 -right-1 w-6 h-6 border-t-4 border-r-4 border-blue-400 rounded-tr-2xl"></div>
+        <div class="absolute -bottom-1 -left-1 w-6 h-6 border-b-4 border-l-4 border-blue-400 rounded-bl-2xl"></div>
+        <div class="absolute -bottom-1 -right-1 w-6 h-6 border-b-4 border-r-4 border-blue-400 rounded-br-2xl"></div>
+      </div>
+    </div>
+
+    <!-- Hint text -->
+    <p id="kycHint" class="absolute bottom-32 left-4 right-4 text-center text-white text-sm bg-black/60 backdrop-blur px-4 py-2 rounded-xl"></p>
   </div>
+
+  <div class="bg-slate-900 p-5 pb-8">
+    <p id="kycError" class="text-red-400 text-xs text-center mb-3 hidden"></p>
+    <div class="flex items-center justify-center">
+      <button id="kycCaptureBtn" onclick="captureKycPhoto()" class="w-20 h-20 rounded-full bg-white border-4 border-slate-400 flex items-center justify-center active:scale-95 transition">
+        <div class="w-16 h-16 rounded-full bg-white border-2 border-slate-900"></div>
+      </button>
+    </div>
+    <p class="text-center text-[11px] text-slate-400 mt-3">Tap the button to capture</p>
+  </div>
+</div>
   
 <script src="js/supabase-config.js"></script>
 <script>
@@ -395,6 +556,17 @@ function updateProfileUI(){
   const email = currentUser.email || '';
   document.getElementById('menuName').innerText = name;
   document.getElementById('menuEmail').innerText = email;
+
+  // Trusted badge
+  const oldBadge = document.getElementById('menuTrustedBadge');
+  if (oldBadge) oldBadge.remove();
+  if (userProfile?.is_trusted) {
+    const badge = document.createElement('span');
+    badge.id = 'menuTrustedBadge';
+    badge.className = 'inline-flex items-center gap-1 text-[9px] font-bold text-blue-100 bg-white/20 px-1.5 py-0.5 rounded-full mt-1';
+    badge.innerHTML = '<i class="fa-solid fa-circle-check text-[8px]"></i> Trusted';
+    document.getElementById('menuName').parentElement.appendChild(badge);
+  }
 
   const menuAv = document.getElementById('menuAvatar');
   const menuInit = document.getElementById('menuAvatarInitial');
@@ -612,7 +784,7 @@ function onSearch(val){
 }
 function resetSearch(){ onSearch(''); activeCat = null; loadProducts(); }
   // ============ PRODUCTS ============
-const SAFE_COLS = 'id,title,description,category_id,price_usd,old_price_usd,origin_country,image_url,default_courier,is_active,stock,rating,reviews_count,created_at,barcode';
+const SAFE_COLS = 'id,title,description,category_id,price_usd,old_price_usd,origin_country,image_url,default_courier,is_active,stock,rating,reviews_count,created_at,barcode,display_discount_percent,is_trusted';
 let categoriesMap = {};
 async function loadCategories(){
   const { data } = await supabaseClient.from('categories').select('*').order('name');
@@ -659,6 +831,14 @@ async function loadProducts(){
   renderProducts();
 }
 
+function calcDiscountPercent(p){
+  if (p.display_discount_percent) return Math.round(p.display_discount_percent);
+  if (!p.old_price_usd || !p.price_usd || p.old_price_usd <= p.price_usd) return 0;
+  const raw = ((p.old_price_usd - p.price_usd) / p.old_price_usd) * 100;
+  const withBoost = Math.min(90, Math.round(raw + 10));
+  return withBoost;
+}
+
 function renderProducts(){
   const grid = document.getElementById('productGrid');
   const em = document.getElementById('emptyMsg');
@@ -668,19 +848,27 @@ function renderProducts(){
   } else {
     em.classList.add('hidden');
   }
-  grid.innerHTML = allProducts.map(p => `
+  grid.innerHTML = allProducts.map(p => {
+    const off = calcDiscountPercent(p);
+    return `
     <div class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition cursor-pointer" onclick="openProduct('${p.id}')">
-      <img src="${p.image_url || 'https://placehold.co/400x400?text=No+Image'}" loading="lazy" class="w-full aspect-square object-cover bg-slate-100">
+      <div class="relative">
+        <img src="${p.image_url || 'https://placehold.co/400x400?text=No+Image'}" loading="lazy" class="w-full aspect-square object-cover bg-slate-100">
+        ${off > 0 ? `<span class="absolute top-1.5 right-1.5 bg-red-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded shadow">${off}% OFF</span>` : ''}
+      </div>
       <div class="p-3">
         <p class="text-xs font-semibold line-clamp-2 h-8">${esc(p.title)}</p>
-        <p class="text-[10px] text-slate-400 mb-1"><i class="fa-solid fa-location-dot"></i> ${esc(p.origin_country||'—')}</p>
+        <div class="flex items-center gap-1.5 mb-1">
+          <p class="text-[10px] text-slate-400"><i class="fa-solid fa-location-dot"></i> ${esc(p.origin_country||'—')}</p>
+          ${p.is_trusted ? `<span class="inline-flex items-center gap-0.5 text-[9px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded-full"><i class="fa-solid fa-circle-check text-[8px]"></i>Trusted</span>` : ''}
+        </div>
         <div class="flex items-center gap-1">
           <p class="font-black text-blue-600 text-sm">${fmt(p.price_usd)}</p>
           ${p.old_price_usd ? `<p class="text-[10px] text-slate-400 line-through">${fmt(p.old_price_usd)}</p>` : ''}
         </div>
       </div>
     </div>
-  `).join('');
+  `}).join('');
 }
 
 function openProduct(id){
@@ -696,6 +884,16 @@ function openProduct(id){
   document.getElementById('pRating').innerText = p.rating ?? '—';
   document.getElementById('pReviewCount').innerText = `(${p.reviews_count ?? 0} reviews)`;
   document.getElementById('pStars').innerHTML = '★'.repeat(Math.round(p.rating || 0));
+
+  const off = calcDiscountPercent(p);
+  const badge = document.getElementById('pDiscountBadge');
+  if (off > 0) {
+    badge.innerText = off + '% OFF';
+    badge.classList.remove('hidden');
+  } else {
+    badge.classList.add('hidden');
+  }
+
   document.getElementById('reviewForm').classList.toggle('hidden', !currentUser);
   loadReviews(id);
   openModal('productModal');
@@ -752,7 +950,6 @@ async function openReviewsModal(){
 // ============ MODALS FOR MENU ============
 function openSupportModal(){ document.getElementById('profileMenu').classList.add('hidden'); openModal('supportModal'); }
 function openAboutModal(){ document.getElementById('profileMenu').classList.add('hidden'); openModal('aboutModal'); }
-function openSellerModal(){ document.getElementById('profileMenu').classList.add('hidden'); openModal('sellerModal'); }
 
 // ============ CART ============
 function saveCart(){ localStorage.setItem('tg_cart', JSON.stringify(cart)); renderCartCount(); }
@@ -884,10 +1081,19 @@ async function openOrdersModal(){
           <span>${esc(o.order_code)}</span>
           <span>${fmt(o.total_usd)}${local ? ` <span class="text-slate-400 font-normal">(${esc(local)})</span>` : ''}</span>
         </div>
-        <p class="text-slate-400 mb-2">Status: <b class="${cancelled ? 'text-red-500' : 'text-blue-600'}">${esc(o.status.replace(/_/g,' '))}</b> ${o.tracking_no ? '· Tracking: '+esc(o.tracking_no) : ''}</p>
-        ${!cancelled ? `<div class="flex gap-1">
-          ${STAGES.map(s => `<div class="flex-1 h-1.5 rounded ${idx >= STAGES.indexOf(s) ? 'bg-blue-600' : 'bg-slate-200'}"></div>`).join('')}
-        </div>` : ''}
+        <p class="text-slate-400 mb-2">Status: <b class="${cancelled ? 'text-red-500' : 'text-blue-600'}">${esc(o.status.replace(/_/g,' '))}</b></p>
+        ${!cancelled ? `
+          <div class="flex gap-1 mb-2">
+            ${STAGES.map(s => `<div class="flex-1 h-1.5 rounded ${idx >= STAGES.indexOf(s) ? 'bg-blue-600' : 'bg-slate-200'}"></div>`).join('')}
+          </div>
+          <div class="flex justify-between text-[9px] text-slate-400 mb-2">
+            <span>Pending</span>
+            <span class="${idx >= 3 ? 'text-blue-600 font-bold' : ''}">Shipped</span>
+            <span class="${idx >= 5 ? 'text-emerald-600 font-bold' : ''}">Delivered</span>
+          </div>
+        ` : ''}
+        ${o.courier_name ? `<p class="text-[11px] text-slate-500 mt-1"><i class="fa-solid fa-truck"></i> ${esc(o.courier_name)}${o.tracking_no ? ' · ' + esc(o.tracking_no) : ''}</p>` : ''}
+        ${o.delivery_notes ? `<div class="bg-blue-50 border border-blue-100 rounded-lg p-2 mt-2 text-[11px] text-blue-800"><i class="fa-solid fa-circle-info"></i> ${esc(o.delivery_notes)}</div>` : ''}
       </div>`;
   }).join('') || '<p class="text-slate-400">No orders yet.</p>';
   openModal('ordersModal');
@@ -1172,6 +1378,248 @@ function buildContactLinks(){
       <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-300"></i>
     </a>
   `).join('');
+}
+  
+  // ============ SELLER KYC APPLICATION ============
+let kycStream = null;
+let kycCurrentSlot = null;
+let kycPhotos = {}; // { nid_front: {blob, url}, ... }
+let sellerStep = 1;
+
+const KYC_SLOTS = {
+  nid_front:  { step: 1, title: 'NID Front',      hint: 'Place the FRONT of your NID card inside the frame' },
+  nid_back:   { step: 2, title: 'NID Back',       hint: 'Place the BACK of your NID card inside the frame' },
+  face_front: { step: 3, title: 'Face — Front',   hint: 'Look straight at the camera. Remove glasses/cap.' },
+  face_left:  { step: 4, title: 'Face — Left',    hint: 'Turn your head slowly to the LEFT' },
+  face_right: { step: 5, title: 'Face — Right',   hint: 'Turn your head slowly to the RIGHT' },
+  selfie_nid: { step: 6, title: 'Selfie with NID', hint: 'Hold your NID card beside your face' }
+};
+
+function openSellerFlow(){
+  document.getElementById('profileMenu').classList.add('hidden');
+  if (!currentUser) return openAuthModal();
+  sellerStep = 1;
+  kycPhotos = {};
+  // Reset thumbs
+  Object.keys(KYC_SLOTS).forEach(k => {
+    const t = document.getElementById('thumb_' + k);
+    if (t) t.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="%23cbd5e1" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 4a3 3 0 110 6 3 3 0 010-6zm0 14a8 8 0 01-6-3c0-1.5 2-3 6-3s6 1.5 6 3a8 8 0 01-6 3z"/></svg>';
+  });
+  // Reset inputs
+  ['sk_full_name','sk_phone','sk_address','sk_shop_name','sk_shop_desc','sk_business_proof'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  const bt = document.getElementById('sk_business_type'); if (bt) bt.value = '';
+  const em = document.getElementById('sk_full_name');
+  if (em && userProfile?.full_name) em.value = userProfile.full_name;
+  const ph = document.getElementById('sk_phone');
+  if (ph && userProfile?.phone) ph.value = userProfile.phone;
+
+  document.getElementById('sellerSuccessBox').classList.add('hidden');
+  document.getElementById('sellerStep1').classList.remove('hidden');
+  document.getElementById('sellerStep2').classList.add('hidden');
+  document.getElementById('sellerStep3').classList.add('hidden');
+  document.getElementById('sellerStep4').classList.add('hidden');
+  sellerGoToStep(1);
+  openModal('sellerModal');
+}
+
+function sellerGoToStep(n){
+  sellerStep = n;
+  [1,2,3,4].forEach(i => {
+    const dot = document.getElementById('sellerStepDot' + i);
+    if (dot) dot.className = i <= n ? 'flex-1 h-1.5 rounded bg-blue-600' : 'flex-1 h-1.5 rounded bg-slate-200';
+    const sec = document.getElementById('sellerStep' + i);
+    if (sec) sec.classList.toggle('hidden', i !== n);
+  });
+  const labels = { 1: 'Basic Information', 2: 'Shop Information', 3: 'KYC Documents', 4: 'Review & Submit' };
+  const el = document.getElementById('sellerStepLabel');
+  if (el) el.innerText = `Step ${n} of 4 · ${labels[n]}`;
+}
+
+function sellerNext(current){
+  const msg = document.getElementById('sellerStep' + current + 'Msg');
+  if (msg) msg.innerText = '';
+
+  if (current === 1){
+    const name = document.getElementById('sk_full_name').value.trim();
+    const phone = document.getElementById('sk_phone').value.trim();
+    if (!name || !phone) {
+      if (msg) { msg.className = 'text-xs text-center text-red-500'; msg.innerText = 'Name and phone are required'; }
+      return;
+    }
+    sellerGoToStep(2);
+  } else if (current === 2){
+    const shop = document.getElementById('sk_shop_name').value.trim();
+    if (!shop) {
+      if (msg) { msg.className = 'text-xs text-center text-red-500'; msg.innerText = 'Shop name is required'; }
+      return;
+    }
+    sellerGoToStep(3);
+  } else if (current === 3){
+    const missing = Object.keys(KYC_SLOTS).filter(k => !kycPhotos[k]);
+    if (missing.length > 0) {
+      if (msg) { msg.className = 'text-xs text-center text-red-500'; msg.innerText = `Missing ${missing.length} photo(s). All 6 required.`; }
+      return;
+    }
+    buildSellerReview();
+    sellerGoToStep(4);
+  }
+}
+
+function sellerBack(n){ sellerGoToStep(n); }
+
+function buildSellerReview(){
+  const box = document.getElementById('sellerReviewBox');
+  if (!box) return;
+  const row = (label, val) => `<div class="flex justify-between gap-3"><span class="text-slate-500">${esc(label)}</span><span class="font-bold text-slate-800 text-right truncate">${esc(val || '—')}</span></div>`;
+  const photos = Object.keys(KYC_SLOTS).filter(k => kycPhotos[k]).length;
+  box.innerHTML =
+    row('Full Name', document.getElementById('sk_full_name').value) +
+    row('Phone', document.getElementById('sk_phone').value) +
+    row('Shop', document.getElementById('sk_shop_name').value) +
+    row('Business Type', document.getElementById('sk_business_type').value) +
+    row('KYC Photos', photos + ' / 6 captured');
+}
+
+  // ============ KYC CAMERA ============
+async function openKycCamera(slot){
+  if (!currentUser) return openAuthModal();
+  kycCurrentSlot = slot;
+  const info = KYC_SLOTS[slot];
+  document.getElementById('kycStepIndicator').innerText = `Step ${info.step} of 6`;
+  document.getElementById('kycTitle').innerText = info.title;
+  document.getElementById('kycHint').innerText = info.hint;
+  document.getElementById('kycError').classList.add('hidden');
+  const modal = document.getElementById('kycCameraModal');
+  modal.classList.remove('hidden');
+
+  try {
+    kycStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: slot.startsWith('face') || slot === 'selfie_nid' ? 'user' : 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
+      audio: false
+    });
+    document.getElementById('kycVideo').srcObject = kycStream;
+  } catch (err) {
+    document.getElementById('kycError').classList.remove('hidden');
+    document.getElementById('kycError').innerText = 'Camera error: ' + (err.message || err);
+  }
+}
+
+function closeKycCamera(){
+  if (kycStream) {
+    kycStream.getTracks().forEach(t => t.stop());
+    kycStream = null;
+  }
+  document.getElementById('kycCameraModal').classList.add('hidden');
+  kycCurrentSlot = null;
+}
+
+async function captureKycPhoto(){
+  const video = document.getElementById('kycVideo');
+  if (!video || !kycStream) return;
+
+  const btn = document.getElementById('kycCaptureBtn');
+  btn.disabled = true;
+  const errEl = document.getElementById('kycError');
+  errEl.classList.add('hidden');
+
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth || 720;
+    canvas.height = video.videoHeight || 720;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.8));
+    if (!blob) throw new Error('Capture failed');
+
+    const path = `seller-kyc/${currentUser.id}/${kycCurrentSlot}-${Date.now()}.jpg`;
+    const { error: upErr } = await supabaseClient.storage
+      .from('avatars').upload(path, blob, { contentType: 'image/jpeg', upsert: false });
+    if (upErr) throw upErr;
+
+    const { data: urlData } = supabaseClient.storage.from('avatars').getPublicUrl(path);
+
+    kycPhotos[kycCurrentSlot] = { url: urlData.publicUrl, path };
+
+    const thumb = document.getElementById('thumb_' + kycCurrentSlot);
+    if (thumb) thumb.src = urlData.publicUrl;
+
+    closeKycCamera();
+  } catch (err) {
+    errEl.classList.remove('hidden');
+    errEl.innerText = 'Failed: ' + (err.message || err);
+    btn.disabled = false;
+  }
+}
+
+  // ============ SUBMIT SELLER APPLICATION ============
+async function submitSellerApp(){
+  const btn = document.getElementById('sellerSubmitBtn');
+  const msg = document.getElementById('sellerStep4Msg');
+  const original = btn.innerHTML;
+
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting…';
+  msg.innerText = '';
+
+  try {
+    // Double-check all 6 photos
+    const missing = Object.keys(KYC_SLOTS).filter(k => !kycPhotos[k]);
+    if (missing.length > 0) throw new Error(`Missing ${missing.length} photo(s)`);
+
+    // Check if user already has a pending application
+    const { data: existing } = await supabaseClient
+      .from('seller_applications')
+      .select('id, status')
+      .eq('user_id', currentUser.id)
+      .eq('status', 'pending')
+      .maybeSingle();
+
+    if (existing) throw new Error('You already have a pending application. Please wait for admin review.');
+
+    const app = {
+      user_id: currentUser.id,
+      full_name: document.getElementById('sk_full_name').value.trim(),
+      phone: document.getElementById('sk_phone').value.trim(),
+      address: document.getElementById('sk_address').value.trim() || null,
+      shop_name: document.getElementById('sk_shop_name').value.trim(),
+      shop_description: document.getElementById('sk_shop_desc').value.trim() || null,
+      business_type: document.getElementById('sk_business_type').value || null,
+      business_proof_url: document.getElementById('sk_business_proof').value.trim() || null,
+      nid_front_url: kycPhotos.nid_front.url,
+      nid_back_url: kycPhotos.nid_back.url,
+      face_front_url: kycPhotos.face_front.url,
+      face_left_url: kycPhotos.face_left.url,
+      face_right_url: kycPhotos.face_right.url,
+      selfie_with_nid_url: kycPhotos.selfie_nid.url,
+      status: 'pending'
+    };
+
+    const { error } = await supabaseClient.from('seller_applications').insert(app);
+    if (error) throw error;
+
+    // Update profile with phone if not set
+    if (!userProfile?.phone && app.phone) {
+      await supabaseClient.from('profiles').update({ phone: app.phone }).eq('id', currentUser.id);
+    }
+
+    // Show success screen
+    document.getElementById('sellerStep1').classList.add('hidden');
+    document.getElementById('sellerStep2').classList.add('hidden');
+    document.getElementById('sellerStep3').classList.add('hidden');
+    document.getElementById('sellerStep4').classList.add('hidden');
+    document.getElementById('sellerSuccessBox').classList.remove('hidden');
+
+    // Clear the form data
+    kycPhotos = {};
+  } catch (err) {
+    msg.className = 'text-xs text-center text-red-500';
+    msg.innerText = 'Failed: ' + (err.message || err);
+    btn.disabled = false;
+    btn.innerHTML = original;
+  }
 }
   
 // ============ INIT ============
