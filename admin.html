@@ -3,11 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Zorvex Admin Panel</title>
+<title>Zorvex Admin</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
   body{font-family:'Inter',sans-serif}
   .fade-in{animation:fadeIn .25s ease-out}
@@ -107,15 +108,27 @@
       <nav class="p-3 space-y-1">
         <p class="text-[10px] font-bold text-slate-400 uppercase px-3 pt-3 pb-1">Main</p>
         <button onclick="showPage('dashboard')" data-nav="dashboard" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold"><i class="fa-solid fa-gauge w-4"></i> Dashboard</button>
+
         <p class="text-[10px] font-bold text-slate-400 uppercase px-3 pt-4 pb-1">Store</p>
         <button onclick="showPage('products')" data-nav="products" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold"><i class="fa-solid fa-box w-4"></i> Products</button>
+        <button onclick="showPage('bulk')" data-nav="bulk" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold"><i class="fa-solid fa-upload w-4"></i> Bulk Upload</button>
         <button onclick="showPage('orders')" data-nav="orders" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold"><i class="fa-solid fa-receipt w-4"></i> Orders</button>
         <button onclick="showPage('categories')" data-nav="categories" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold"><i class="fa-solid fa-tags w-4"></i> Categories</button>
         <button onclick="showPage('reviews')" data-nav="reviews" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold"><i class="fa-solid fa-star w-4"></i> Reviews</button>
+        <button onclick="showPage('coupons')" data-nav="coupons" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold"><i class="fa-solid fa-ticket w-4"></i> Coupons</button>
+        <button onclick="showPage('shipping')" data-nav="shipping" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold"><i class="fa-solid fa-truck w-4"></i> Shipping</button>
+
         <p class="text-[10px] font-bold text-slate-400 uppercase px-3 pt-4 pb-1">Users</p>
         <button onclick="showPage('team')" data-nav="team" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold"><i class="fa-solid fa-users-gear w-4"></i> Team & Roles</button>
         <button onclick="showPage('customers')" data-nav="customers" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold"><i class="fa-solid fa-user-group w-4"></i> Customers</button>
         <button onclick="showPage('sellers')" data-nav="sellers" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold"><i class="fa-solid fa-store w-4"></i> Sellers</button>
+
+        <p class="text-[10px] font-bold text-slate-400 uppercase px-3 pt-4 pb-1">Growth</p>
+        <button onclick="showPage('analytics')" data-nav="analytics" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold"><i class="fa-solid fa-chart-line w-4"></i> Analytics</button>
+        <button onclick="showPage('referrals')" data-nav="referrals" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold"><i class="fa-solid fa-user-plus w-4"></i> Referrals</button>
+        <button onclick="showPage('affiliates')" data-nav="affiliates" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold"><i class="fa-solid fa-handshake w-4"></i> Affiliates</button>
+        <button onclick="showPage('marketing')" data-nav="marketing" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold"><i class="fa-solid fa-bullhorn w-4"></i> Marketing</button>
+
         <p class="text-[10px] font-bold text-slate-400 uppercase px-3 pt-4 pb-1">System</p>
         <button onclick="showPage('settings')" data-nav="settings" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold"><i class="fa-solid fa-gear w-4"></i> Settings</button>
         <button onclick="showPage('commission')" data-nav="commission" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold"><i class="fa-solid fa-percent w-4"></i> Commission</button>
@@ -124,41 +137,71 @@
     </aside>
     <div id="sidebarOverlay" onclick="toggleSidebar()" class="hidden fixed inset-0 bg-black/50 z-10 md:hidden"></div>
     <main class="flex-1 min-w-0 p-4 md:p-6">
-
-      <div id="page-dashboard" class="page fade-in">
+            <div id="page-dashboard" class="page fade-in">
         <h1 class="text-2xl font-black mb-1">Dashboard</h1>
         <p class="text-sm text-slate-500 mb-6">Welcome back, <span id="welcomeName" class="font-bold text-slate-700">Admin</span> 👋</p>
+
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
           <div class="bg-white rounded-2xl p-4 border border-slate-200"><i class="fa-solid fa-box text-blue-600"></i><p id="statProducts" class="text-2xl font-black mt-2">—</p><p class="text-xs text-slate-500">Products</p></div>
           <div class="bg-white rounded-2xl p-4 border border-slate-200"><i class="fa-solid fa-receipt text-emerald-600"></i><p id="statOrders" class="text-2xl font-black mt-2">—</p><p class="text-xs text-slate-500">Orders</p></div>
           <div class="bg-white rounded-2xl p-4 border border-slate-200"><i class="fa-solid fa-users text-purple-600"></i><p id="statUsers" class="text-2xl font-black mt-2">—</p><p class="text-xs text-slate-500">Users</p></div>
           <div class="bg-white rounded-2xl p-4 border border-slate-200"><i class="fa-solid fa-dollar-sign text-amber-600"></i><p id="statRevenue" class="text-2xl font-black mt-2">—</p><p class="text-xs text-slate-500">Revenue (USD)</p></div>
         </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+          <div class="bg-white rounded-2xl p-4 border border-slate-200"><i class="fa-solid fa-eye text-cyan-600"></i><p id="statViews" class="text-2xl font-black mt-2">—</p><p class="text-xs text-slate-500">Page Views (7d)</p></div>
+          <div class="bg-white rounded-2xl p-4 border border-slate-200"><i class="fa-solid fa-ticket text-pink-600"></i><p id="statCoupons" class="text-2xl font-black mt-2">—</p><p class="text-xs text-slate-500">Active Coupons</p></div>
+          <div class="bg-white rounded-2xl p-4 border border-slate-200"><i class="fa-solid fa-user-plus text-indigo-600"></i><p id="statReferrals" class="text-2xl font-black mt-2">—</p><p class="text-xs text-slate-500">Referrals</p></div>
+          <div class="bg-white rounded-2xl p-4 border border-slate-200"><i class="fa-solid fa-handshake text-orange-600"></i><p id="statAffiliates" class="text-2xl font-black mt-2">—</p><p class="text-xs text-slate-500">Affiliates</p></div>
+        </div>
+
         <div class="bg-white rounded-2xl p-5 border border-slate-200 mb-4">
           <div class="flex items-center gap-3 mb-3">
             <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center"><i class="fa-solid fa-rocket text-blue-600"></i></div>
             <div><h2 class="font-black">Quick Actions</h2><p class="text-xs text-slate-500">Jump to common tasks</p></div>
           </div>
-          <div class="grid grid-cols-2 gap-2 text-sm">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
             <button onclick="showPage('products'); setTimeout(openProductModal, 300)" class="p-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-left"><i class="fa-solid fa-plus text-blue-600"></i><p class="font-bold mt-1">Add Product</p></button>
             <button onclick="showPage('orders')" class="p-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-left"><i class="fa-solid fa-truck text-emerald-600"></i><p class="font-bold mt-1">View Orders</p></button>
-            <button onclick="showPage('settings')" class="p-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-left"><i class="fa-solid fa-gear text-slate-600"></i><p class="font-bold mt-1">Settings</p></button>
+            <button onclick="showPage('coupons')" class="p-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-left"><i class="fa-solid fa-ticket text-pink-600"></i><p class="font-bold mt-1">Coupons</p></button>
             <button onclick="showPage('team')" class="p-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-left"><i class="fa-solid fa-users-gear text-purple-600"></i><p class="font-bold mt-1">Team</p></button>
           </div>
         </div>
-      </div>
-            <div id="page-products" class="page hidden fade-in">
+            </div>
+                  <div id="page-products" class="page hidden fade-in">
         <div class="flex items-center justify-between mb-4">
           <div><h1 class="text-2xl font-black mb-1">Products</h1><p class="text-sm text-slate-500">Manage all products</p></div>
           <button onclick="openProductModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2.5 rounded-xl text-sm shrink-0"><i class="fa-solid fa-plus"></i> <span class="hidden sm:inline">Add</span></button>
         </div>
         <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden mb-4">
-          <div class="p-3 border-b"><input id="productSearch" oninput="renderProductsList()" placeholder="Search products…" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"></div>
+          <div class="p-3 border-b flex gap-2">
+            <input id="productSearch" oninput="renderProductsList()" placeholder="Search products…" class="flex-1 border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            <select id="productTypeFilter" onchange="renderProductsList()" class="border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+              <option value="">All Types</option>
+              <option value="own">Own</option>
+              <option value="dropship">Dropship</option>
+              <option value="seller">Seller</option>
+            </select>
+          </div>
           <div id="productsList" class="divide-y divide-slate-100"><p class="text-center text-slate-400 py-8 text-sm">Loading…</p></div>
         </div>
       </div>
 
-      <div id="page-orders" class="page hidden fade-in">
+      <div id="page-bulk" class="page hidden fade-in">
+        <h1 class="text-2xl font-black mb-1">Bulk Upload</h1>
+        <p class="text-sm text-slate-500 mb-6">Upload multiple products via CSV</p>
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 mb-4">
+          <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 mb-4">
+            <p class="text-xs font-bold text-blue-800 mb-1"><i class="fa-solid fa-circle-info"></i> CSV Format</p>
+            <p class="text-[11px] text-blue-700">Columns: <b>title, description, price_usd, old_price_usd, category_id, stock, origin_country, image_url, barcode, sku</b></p>
+            <button onclick="downloadCSVTemplate()" class="mt-2 text-[11px] text-blue-700 underline font-bold">Download Template CSV</button>
+          </div>
+          <input id="bulkCSVFile" type="file" accept=".csv" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm">
+          <button id="bulkUploadBtn" onclick="handleBulkUpload()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-3 rounded-xl text-sm mt-3"><i class="fa-solid fa-upload"></i> Upload & Import</button>
+          <div id="bulkResults" class="mt-3 text-xs space-y-1"></div>
+        </div>
+      </div>
+            <div id="page-orders" class="page hidden fade-in">
         <div class="flex items-center justify-between mb-4">
           <div><h1 class="text-2xl font-black mb-1">Orders</h1><p class="text-sm text-slate-500">Manage customer orders</p></div>
           <button onclick="loadOrders()" class="text-xs font-bold bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-xl"><i class="fa-solid fa-rotate"></i> Refresh</button>
@@ -167,13 +210,15 @@
           <button onclick="filterOrders('all')" data-oft="all" class="oft px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap bg-blue-600 text-white">All</button>
           <button onclick="filterOrders('pending')" data-oft="pending" class="oft px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap bg-white border border-slate-200">Pending</button>
           <button onclick="filterOrders('confirmed')" data-oft="confirmed" class="oft px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap bg-white border border-slate-200">Confirmed</button>
+          <button onclick="filterOrders('packaging')" data-oft="packaging" class="oft px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap bg-white border border-slate-200">Packaging</button>
           <button onclick="filterOrders('shipped')" data-oft="shipped" class="oft px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap bg-white border border-slate-200">Shipped</button>
           <button onclick="filterOrders('delivered')" data-oft="delivered" class="oft px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap bg-white border border-slate-200">Delivered</button>
           <button onclick="filterOrders('cancelled')" data-oft="cancelled" class="oft px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap bg-white border border-slate-200">Cancelled</button>
         </div>
         <div id="ordersList" class="space-y-3"><p class="text-center text-slate-400 py-8 text-sm">Loading…</p></div>
       </div>
-            <div id="page-categories" class="page hidden fade-in">
+
+      <div id="page-categories" class="page hidden fade-in">
         <div class="flex items-center justify-between mb-4">
           <div><h1 class="text-2xl font-black mb-1">Categories</h1><p class="text-sm text-slate-500">Product categories</p></div>
           <button onclick="openCategoryModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2.5 rounded-xl text-sm shrink-0"><i class="fa-solid fa-plus"></i> <span class="hidden sm:inline">Add</span></button>
@@ -182,18 +227,36 @@
           <div id="categoriesList" class="divide-y divide-slate-100"><p class="text-center text-slate-400 py-8 text-sm">Loading…</p></div>
         </div>
       </div>
-
-      <div id="page-reviews" class="page hidden fade-in">
+            <div id="page-reviews" class="page hidden fade-in">
         <div class="flex items-center justify-between mb-4">
-          <div><h1 class="text-2xl font-black mb-1">Reviews</h1><p class="text-sm text-slate-500">Moderate customer reviews</p></div>
+          <div><h1 class="text-2xl font-black mb-1">Reviews</h1><p class="text-sm text-slate-500">Moderate customer reviews (with images)</p></div>
           <button onclick="loadReviews()" class="text-xs font-bold bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-xl"><i class="fa-solid fa-rotate"></i> Refresh</button>
         </div>
         <div id="reviewsList" class="space-y-3"><p class="text-center text-slate-400 py-8 text-sm">Loading…</p></div>
       </div>
 
+      <div id="page-coupons" class="page hidden fade-in">
+        <div class="flex items-center justify-between mb-4">
+          <div><h1 class="text-2xl font-black mb-1">Coupons</h1><p class="text-sm text-slate-500">Discount codes for customers</p></div>
+          <button onclick="openCouponModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2.5 rounded-xl text-sm shrink-0"><i class="fa-solid fa-plus"></i> <span class="hidden sm:inline">Add</span></button>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+          <div id="couponsList" class="divide-y divide-slate-100"><p class="text-center text-slate-400 py-8 text-sm">Loading…</p></div>
+        </div>
+      </div>
+            <div id="page-shipping" class="page hidden fade-in">
+        <div class="flex items-center justify-between mb-4">
+          <div><h1 class="text-2xl font-black mb-1">Shipping Rates</h1><p class="text-sm text-slate-500">Country-wise shipping cost & delivery time</p></div>
+          <button onclick="openShippingModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2.5 rounded-xl text-sm shrink-0"><i class="fa-solid fa-plus"></i> <span class="hidden sm:inline">Add</span></button>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+          <div id="shippingList" class="divide-y divide-slate-100"><p class="text-center text-slate-400 py-8 text-sm">Loading…</p></div>
+        </div>
+      </div>
+
       <div id="page-team" class="page hidden fade-in">
         <div class="flex items-center justify-between mb-4">
-          <div><h1 class="text-2xl font-black mb-1">Team & Roles</h1><p class="text-sm text-slate-500">Manage admin team</p></div>
+          <div><h1 class="text-2xl font-black mb-1">Team & Roles</h1><p class="text-sm text-slate-500">Manage admin team + Trusted badges</p></div>
           <button onclick="openInviteModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2.5 rounded-xl text-sm shrink-0"><i class="fa-solid fa-user-plus"></i> <span class="hidden sm:inline">Add Member</span></button>
         </div>
         <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden mb-4">
@@ -216,17 +279,110 @@
 
       <div id="page-sellers" class="page hidden fade-in">
         <h1 class="text-2xl font-black mb-1">Sellers</h1>
-        <p class="text-sm text-slate-500 mb-4">Approve and manage sellers</p>
+        <p class="text-sm text-slate-500 mb-4">Approve and manage seller applications</p>
         <div id="sellersList" class="space-y-3"><p class="text-center text-slate-400 py-8 text-sm">Loading…</p></div>
       </div>
+            <div id="page-analytics" class="page hidden fade-in">
+        <h1 class="text-2xl font-black mb-1">Analytics</h1>
+        <p class="text-sm text-slate-500 mb-6">Store performance overview</p>
 
-      <div id="page-settings" class="page hidden fade-in">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+          <div class="bg-white rounded-2xl p-4 border border-slate-200"><i class="fa-solid fa-eye text-cyan-600"></i><p id="anViews7" class="text-2xl font-black mt-2">—</p><p class="text-xs text-slate-500">Views (7 days)</p></div>
+          <div class="bg-white rounded-2xl p-4 border border-slate-200"><i class="fa-solid fa-eye text-blue-600"></i><p id="anViews30" class="text-2xl font-black mt-2">—</p><p class="text-xs text-slate-500">Views (30 days)</p></div>
+          <div class="bg-white rounded-2xl p-4 border border-slate-200"><i class="fa-solid fa-shopping-cart text-emerald-600"></i><p id="anOrders30" class="text-2xl font-black mt-2">—</p><p class="text-xs text-slate-500">Orders (30d)</p></div>
+          <div class="bg-white rounded-2xl p-4 border border-slate-200"><i class="fa-solid fa-dollar-sign text-amber-600"></i><p id="anRevenue30" class="text-2xl font-black mt-2">—</p><p class="text-xs text-slate-500">Revenue (30d)</p></div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 mb-4">
+          <h2 class="font-black mb-3">Views — Last 14 Days</h2>
+          <canvas id="viewsChart" height="80"></canvas>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 mb-4">
+          <h2 class="font-black mb-3">Top Pages (30 days)</h2>
+          <div id="topPagesList" class="space-y-2 text-sm"></div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 border border-slate-200">
+          <h2 class="font-black mb-3">Recent Activity</h2>
+          <div id="recentActivityList" class="space-y-2 text-xs"></div>
+        </div>
+      </div>
+
+      <div id="page-referrals" class="page hidden fade-in">
+        <h1 class="text-2xl font-black mb-1">Referrals</h1>
+        <p class="text-sm text-slate-500 mb-6">User-to-user referral tracking</p>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+          <div class="bg-white rounded-2xl p-4 border border-slate-200"><i class="fa-solid fa-user-plus text-indigo-600"></i><p id="refTotal" class="text-2xl font-black mt-2">—</p><p class="text-xs text-slate-500">Total Referrals</p></div>
+          <div class="bg-white rounded-2xl p-4 border border-slate-200"><i class="fa-solid fa-clock text-amber-600"></i><p id="refPending" class="text-2xl font-black mt-2">—</p><p class="text-xs text-slate-500">Pending</p></div>
+          <div class="bg-white rounded-2xl p-4 border border-slate-200"><i class="fa-solid fa-check text-emerald-600"></i><p id="refCompleted" class="text-2xl font-black mt-2">—</p><p class="text-xs text-slate-500">Completed</p></div>
+          <div class="bg-white rounded-2xl p-4 border border-slate-200"><i class="fa-solid fa-gift text-pink-600"></i><p id="refRewards" class="text-2xl font-black mt-2">—</p><p class="text-xs text-slate-500">Rewards Paid</p></div>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+          <div class="p-4 border-b"><h2 class="font-black text-sm">All Referrals</h2></div>
+          <div id="referralsList" class="divide-y divide-slate-100"><p class="text-center text-slate-400 py-8 text-sm">Loading…</p></div>
+        </div>
+      </div>
+            <div id="page-affiliates" class="page hidden fade-in">
+        <h1 class="text-2xl font-black mb-1">Affiliates</h1>
+        <p class="text-sm text-slate-500 mb-6">Affiliate program management</p>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+          <div class="bg-white rounded-2xl p-4 border border-slate-200"><i class="fa-solid fa-handshake text-orange-600"></i><p id="affTotal" class="text-2xl font-black mt-2">—</p><p class="text-xs text-slate-500">Total Affiliates</p></div>
+          <div class="bg-white rounded-2xl p-4 border border-slate-200"><i class="fa-solid fa-mouse-pointer text-blue-600"></i><p id="affClicks" class="text-2xl font-black mt-2">—</p><p class="text-xs text-slate-500">Total Clicks</p></div>
+          <div class="bg-white rounded-2xl p-4 border border-slate-200"><i class="fa-solid fa-cart-shopping text-emerald-600"></i><p id="affSales" class="text-2xl font-black mt-2">—</p><p class="text-xs text-slate-500">Sales (USD)</p></div>
+          <div class="bg-white rounded-2xl p-4 border border-slate-200"><i class="fa-solid fa-dollar-sign text-amber-600"></i><p id="affEarnings" class="text-2xl font-black mt-2">—</p><p class="text-xs text-slate-500">Paid Earnings</p></div>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+          <div class="p-4 border-b"><h2 class="font-black text-sm">All Affiliates</h2></div>
+          <div id="affiliatesList" class="divide-y divide-slate-100"><p class="text-center text-slate-400 py-8 text-sm">Loading…</p></div>
+        </div>
+      </div>
+
+      <div id="page-marketing" class="page hidden fade-in">
+        <h1 class="text-2xl font-black mb-1">Marketing Tools</h1>
+        <p class="text-sm text-slate-500 mb-6">Promote your store</p>
+
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 mb-4">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-9 h-9 bg-purple-100 rounded-xl flex items-center justify-center"><i class="fa-solid fa-share-nodes text-purple-600"></i></div>
+            <div><h2 class="font-black">Share Store</h2><p class="text-[11px] text-slate-500">Share your store link everywhere</p></div>
+          </div>
+          <div class="flex gap-2">
+            <input id="storeShareLink" readonly class="flex-1 border border-slate-300 rounded-xl px-3 py-2.5 text-sm bg-slate-50">
+            <button onclick="copyStoreLink()" class="bg-blue-600 text-white font-bold px-4 py-2.5 rounded-xl text-xs"><i class="fa-solid fa-copy"></i> Copy</button>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 mb-4">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-9 h-9 bg-pink-100 rounded-xl flex items-center justify-center"><i class="fa-solid fa-ticket text-pink-600"></i></div>
+            <div><h2 class="font-black">Quick Coupon Generator</h2><p class="text-[11px] text-slate-500">Generate a random discount code</p></div>
+          </div>
+          <div class="flex gap-2">
+            <input id="quickCouponCode" placeholder="Click generate" class="flex-1 border border-slate-300 rounded-xl px-3 py-2.5 text-sm font-mono">
+            <button onclick="generateQuickCoupon()" class="bg-blue-600 text-white font-bold px-4 py-2.5 rounded-xl text-xs"><i class="fa-solid fa-dice"></i> Generate</button>
+            <button onclick="copyCouponCode()" class="bg-slate-200 text-slate-700 font-bold px-4 py-2.5 rounded-xl text-xs"><i class="fa-solid fa-copy"></i></button>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 border border-slate-200">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-9 h-9 bg-emerald-100 rounded-xl flex items-center justify-center"><i class="fa-solid fa-image text-emerald-600"></i></div>
+            <div><h2 class="font-black">Store QR Code</h2><p class="text-[11px] text-slate-500">Scan to visit Zorvex</p></div>
+          </div>
+          <div id="storeQRBox" class="flex items-center justify-center p-4 bg-slate-50 rounded-xl">
+            <img id="storeQRImg" class="w-48 h-48" alt="QR Code">
+          </div>
+          <button onclick="downloadQR()" class="w-full mt-3 bg-slate-900 text-white font-bold py-2.5 rounded-xl text-xs"><i class="fa-solid fa-download"></i> Download QR</button>
+        </div>
+      </div>
+           <div id="page-settings" class="page hidden fade-in">
         <h1 class="text-2xl font-black mb-1">Store Settings</h1>
         <p class="text-sm text-slate-500 mb-6">Contact info & social links</p>
         <div class="bg-white rounded-2xl p-5 border border-slate-200 mb-4">
           <div class="flex items-center gap-3 mb-4"><div class="w-9 h-9 bg-emerald-100 rounded-xl flex items-center justify-center"><i class="fa-brands fa-whatsapp text-emerald-600"></i></div><div><h2 class="font-black">WhatsApp</h2><p class="text-[11px] text-slate-500">Customer contact</p></div></div>
           <div class="space-y-3">
-            <div><label class="text-xs font-bold text-slate-500">WhatsApp Number (for link)</label><input id="set_whatsapp_number" placeholder="8801712345678" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"><p class="text-[10px] text-slate-400 mt-1">যেকোনো format — website নিজে ঠিক করবে</p></div>
+            <div><label class="text-xs font-bold text-slate-500">WhatsApp Number (for link)</label><input id="set_whatsapp_number" placeholder="8801712345678" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"><p class="text-[10px] text-slate-400 mt-1">Any format works — the website will handle it</p></div>
             <div><label class="text-xs font-bold text-slate-500">Display Number</label><input id="set_whatsapp_display" placeholder="+880 1712-345678" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"></div>
           </div>
         </div>
@@ -235,9 +391,9 @@
           <input id="set_support_email" type="email" placeholder="support@example.com" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
         </div>
         <div class="bg-white rounded-2xl p-5 border border-slate-200 mb-4">
-          <div class="flex items-center gap-3 mb-4"><div class="w-9 h-9 bg-purple-100 rounded-xl flex items-center justify-center"><i class="fa-solid fa-hashtag text-purple-600"></i></div><div><h2 class="font-black">Social Links</h2><p class="text-[11px] text-slate-500">Username বা full URL — দুটোই কাজ করবে</p></div></div>
+          <div class="flex items-center gap-3 mb-4"><div class="w-9 h-9 bg-purple-100 rounded-xl flex items-center justify-center"><i class="fa-solid fa-hashtag text-purple-600"></i></div><div><h2 class="font-black">Social Links</h2><p class="text-[11px] text-slate-500">Username or full URL — both work</p></div></div>
           <div class="space-y-3">
-            <div><label class="text-xs font-bold text-slate-500 flex items-center gap-1.5"><i class="fa-brands fa-facebook text-blue-700"></i> Facebook Page</label><input id="set_facebook_page" placeholder="zorvexstore বা https://facebook.com/..." class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"></div>
+            <div><label class="text-xs font-bold text-slate-500 flex items-center gap-1.5"><i class="fa-brands fa-facebook text-blue-700"></i> Facebook Page</label><input id="set_facebook_page" placeholder="zorvexstore or https://facebook.com/..." class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"></div>
             <div><label class="text-xs font-bold text-slate-500 flex items-center gap-1.5"><i class="fa-brands fa-facebook-messenger text-blue-500"></i> Messenger</label><input id="set_messenger_username" placeholder="zorvexstore" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"></div>
             <div><label class="text-xs font-bold text-slate-500 flex items-center gap-1.5"><i class="fa-brands fa-instagram text-pink-600"></i> Instagram</label><input id="set_instagram_username" placeholder="@zorvexstore" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"></div>
             <div><label class="text-xs font-bold text-slate-500 flex items-center gap-1.5"><i class="fa-brands fa-telegram text-sky-500"></i> Telegram</label><input id="set_telegram_username" placeholder="zorvexstore" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"></div>
@@ -245,7 +401,7 @@
             <div><label class="text-xs font-bold text-slate-500 flex items-center gap-1.5"><i class="fa-brands fa-youtube text-red-600"></i> YouTube</label><input id="set_youtube_channel" placeholder="zorvexstore" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"></div>
           </div>
         </div>
-                <div class="bg-white rounded-2xl p-5 border border-slate-200 mb-4">
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 mb-4">
           <div class="flex items-center gap-3 mb-4"><div class="w-9 h-9 bg-slate-100 rounded-xl flex items-center justify-center"><i class="fa-solid fa-quote-left text-slate-600"></i></div><div><h2 class="font-black">Store Info</h2></div></div>
           <label class="text-xs font-bold text-slate-500">Homepage Tagline</label>
           <input id="set_site_tagline" placeholder="Worldwide Express Delivery" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
@@ -261,55 +417,36 @@
         <p class="text-sm text-slate-500 mb-6">Platform rates & customer pricing</p>
 
         <div class="bg-white rounded-2xl p-5 border border-slate-200 mb-4">
-          <div class="flex items-center gap-3 mb-4"><div class="w-9 h-9 bg-blue-100 rounded-xl flex items-center justify-center"><i class="fa-solid fa-store text-blue-600"></i></div><div><h2 class="font-black">Seller's Own Products</h2><p class="text-[11px] text-slate-500">When a seller sells their own product</p></div></div>
-          <label class="text-xs font-bold text-slate-500">Commission Rate (%)</label>
-          <input id="set_commission_own_rate" type="number" step="0.1" min="0" max="50" placeholder="5" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
-          <p class="text-[10px] text-slate-400 mt-1">Default: 5%. Admin keeps this % of the selling price.</p>
-        </div>
-
-        <div class="bg-white rounded-2xl p-5 border border-slate-200 mb-4">
-          <div class="flex items-center gap-3 mb-4"><div class="w-9 h-9 bg-amber-100 rounded-xl flex items-center justify-center"><i class="fa-solid fa-arrows-rotate text-amber-600"></i></div><div><h2 class="font-black">Admin Product Resell</h2><p class="text-[11px] text-slate-500">When a seller resells admin's product</p></div></div>
-          <label class="text-xs font-bold text-slate-500">Commission Rate (%)</label>
+          <h2 class="font-black mb-3">Seller Commission</h2>
+          <label class="text-xs font-bold text-slate-500">Own Product Rate (%)</label>
+          <input id="set_commission_own_rate" type="number" step="0.1" min="0" max="50" placeholder="5" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none mb-3">
+          <label class="text-xs font-bold text-slate-500">Resell Product Rate (%)</label>
           <input id="set_commission_resell_rate" type="number" step="0.1" min="0" max="50" placeholder="10" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
-          <p class="text-[10px] text-slate-400 mt-1">Default: 10%. Includes website fee + resell royalty.</p>
         </div>
 
         <div class="bg-white rounded-2xl p-5 border border-emerald-200 mb-4">
-          <div class="flex items-center gap-3 mb-4"><div class="w-9 h-9 bg-emerald-100 rounded-xl flex items-center justify-center"><i class="fa-solid fa-tags text-emerald-600"></i></div><div><h2 class="font-black">Prepaid Discount</h2><p class="text-[11px] text-slate-500">Customer saves this % when paying online</p></div></div>
-          <label class="text-xs font-bold text-slate-500">Discount (%)</label>
-          <input id="set_prepaid_discount" type="number" step="0.1" min="0" max="30" placeholder="5" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
-          <p class="text-[10px] text-slate-400 mt-1">Default: 5%. Customer pays less than base price.</p>
+          <h2 class="font-black mb-3">Prepaid Discount (%)</h2>
+          <input id="set_prepaid_discount" type="number" step="0.1" min="0" max="30" placeholder="5" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+          <p class="text-[10px] text-slate-400 mt-1">Customer saves this % when paying online</p>
         </div>
 
         <div class="bg-white rounded-2xl p-5 border border-red-200 mb-4">
-          <div class="flex items-center gap-3 mb-4"><div class="w-9 h-9 bg-red-100 rounded-xl flex items-center justify-center"><i class="fa-solid fa-money-bill-wave text-red-600"></i></div><div><h2 class="font-black">COD Charge</h2><p class="text-[11px] text-slate-500">Extra charge for Cash on Delivery</p></div></div>
-          <label class="text-xs font-bold text-slate-500">Extra Charge (%)</label>
-          <input id="set_cod_charge" type="number" step="0.1" min="0" max="30" placeholder="10" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
-          <p class="text-[10px] text-slate-400 mt-1">Default: 10%. Customer pays more for COD.</p>
-        </div>
-
-        <div class="bg-white rounded-2xl p-5 border border-slate-200 mb-4">
-          <div class="flex items-center gap-3 mb-4"><div class="w-9 h-9 bg-sky-100 rounded-xl flex items-center justify-center"><i class="fa-solid fa-globe text-sky-600"></i></div><div><h2 class="font-black">COD Availability</h2><p class="text-[11px] text-slate-500">Which countries allow COD</p></div></div>
-          <label class="flex items-center gap-2 text-sm">
+          <h2 class="font-black mb-3">COD Charge (%)</h2>
+          <input id="set_cod_charge" type="number" step="0.1" min="0" max="30" placeholder="10" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+          <p class="text-[10px] text-slate-400 mt-1">Extra charge for Cash on Delivery</p>
+          <label class="flex items-center gap-2 text-sm mt-3">
             <input id="set_cod_bd_only" type="checkbox" class="w-4 h-4 accent-blue-600">
-            <span class="font-bold">Only Bangladesh</span>
+            <span class="font-bold">COD only for Bangladesh</span>
           </label>
-          <p class="text-[10px] text-slate-400 mt-2">Unchecked → COD available everywhere (not recommended)</p>
         </div>
 
-         <div class="bg-white rounded-2xl p-5 border border-indigo-200 mb-4">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-9 h-9 bg-indigo-100 rounded-xl flex items-center justify-center"><i class="fa-solid fa-coins text-indigo-600"></i></div>
-            <div>
-              <h2 class="font-black">Currency Rate (Fallback)</h2>
-              <p class="text-[11px] text-slate-500">Only used if live API fails</p>
-            </div>
-          </div>
+        <div class="bg-white rounded-2xl p-5 border border-indigo-200 mb-4">
+          <h2 class="font-black mb-3">Currency Rate (Fallback)</h2>
           <label class="text-xs font-bold text-slate-500">$1 USD = ৳ (BDT)</label>
           <input id="set_currency_bdt_rate" type="number" step="0.01" min="1" placeholder="118" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
           <p class="text-[10px] text-slate-400 mt-1">Live API rate is used normally. This is fallback only.</p>
         </div>
-        
+
         <button onclick="saveCommission()" id="saveCommissionBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-3 rounded-xl text-sm mb-20"><i class="fa-solid fa-check"></i> Save All Rates</button>
       </div>
 
@@ -325,8 +462,8 @@
 
     </main>
   </div>
-</div>
-<div id="inviteModal" class="fixed inset-0 z-50 hidden bg-black/60 flex items-center justify-center p-4">
+</div> 
+  <div id="inviteModal" class="fixed inset-0 z-50 hidden bg-black/60 flex items-center justify-center p-4">
   <div class="bg-white rounded-2xl max-w-md w-full p-6">
     <div class="flex justify-between mb-4"><h3 class="font-black text-lg">Add Team Member</h3><button onclick="closeModal('inviteModal')"><i class="fa-solid fa-xmark"></i></button></div>
     <p class="text-xs text-slate-500 mb-4">They'll get the role automatically when they sign up with this email.</p>
@@ -347,17 +484,13 @@
       <textarea id="pDesc" placeholder="Description" rows="2" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
       <select id="pCategory" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none"></select>
 
-            <div class="grid grid-cols-3 gap-2">
+      <div class="grid grid-cols-3 gap-2">
         <input id="pPrice" type="number" step="0.01" placeholder="Price *" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
         <input id="pOldPrice" type="number" step="0.01" placeholder="Old price" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
         <select id="pCurrency" class="w-full border border-slate-300 rounded-xl px-2 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-          <option value="BDT">৳ BDT</option>
-          <option value="USD">$ USD</option>
-          <option value="INR">₹ INR</option>
-          <option value="EUR">€ EUR</option>
-          <option value="GBP">£ GBP</option>
+          <option value="BDT">৳ BDT</option><option value="USD">$ USD</option><option value="INR">₹ INR</option><option value="EUR">€ EUR</option><option value="GBP">£ GBP</option>
         </select>
-            </div>
+      </div>
 
       <div class="grid grid-cols-2 gap-2">
         <input id="pStock" type="number" placeholder="Stock" value="999" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
@@ -377,41 +510,43 @@
         <p id="pImageStatus" class="text-[11px] mt-1"></p>
       </div>
 
-            <div>
+      <div>
         <label class="text-xs font-bold text-slate-500">Product Video (YouTube URL - optional)</label>
         <input id="pVideoUrl" placeholder="https://youtube.com/watch?v=..." class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
         <p class="text-[10px] text-slate-400 mt-1">Leave empty if no video</p>
-            </div>
-      
+      </div>
+
       <div class="grid grid-cols-2 gap-2">
         <select id="pType" onchange="toggleDropshipFields()" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
           <option value="own">Own Product</option>
           <option value="dropship">Drop Shipping</option>
         </select>
         <select id="pActive" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-          <option value="true">Active</option>
-          <option value="false">Hidden</option>
+          <option value="true">Active</option><option value="false">Hidden</option>
         </select>
       </div>
 
       <div>
         <label class="text-xs font-bold text-slate-500">Display Discount % (optional)</label>
         <input id="pDiscount" type="number" step="0.1" min="0" max="90" placeholder="Leave empty for auto" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
-        <p class="text-[10px] text-slate-400 mt-1">Customer দেখবে এই % OFF</p>
       </div>
 
       <div class="border-t border-slate-200 pt-3">
         <p class="text-xs font-bold text-slate-600 mb-2"><i class="fa-solid fa-truck"></i> Shipping Info (Customer দেখবে)</p>
         <input id="pCourier" placeholder="Courier name (e.g. Pathao, DHL)" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mb-2 focus:ring-2 focus:ring-blue-500 outline-none">
-        <input id="pDeliveryProcess" placeholder="Delivery time (e.g. 7-14 days)" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+        <input id="pDeliveryProcess" placeholder="Delivery time (e.g. 7-14 days)" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mb-2 focus:ring-2 focus:ring-blue-500 outline-none">
+        <div class="grid grid-cols-2 gap-2">
+          <input id="pDeliveryMin" type="number" placeholder="Delivery min days" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+          <input id="pDeliveryMax" type="number" placeholder="Delivery max days" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
       </div>
 
       <div id="dropshipFields" class="hidden border-t border-amber-200 pt-3 bg-amber-50 rounded-xl p-3">
         <p class="text-xs font-bold text-amber-700 mb-2"><i class="fa-solid fa-lock"></i> Supplier Info (Admin-only)</p>
         <input id="pSupplierUrl" placeholder="Supplier URL" class="w-full border border-amber-200 rounded-xl px-3 py-2.5 text-sm mb-2 focus:ring-2 focus:ring-amber-500 outline-none bg-white">
         <input id="pSupplierName" placeholder="Supplier name" class="w-full border border-amber-200 rounded-xl px-3 py-2.5 text-sm mb-2 focus:ring-2 focus:ring-amber-500 outline-none bg-white">
-        <input id="pSupplierPrice" type="number" step="0.01" placeholder="Supplier price USD (your cost)" class="w-full border border-amber-200 rounded-xl px-3 py-2.5 text-sm mb-2 focus:ring-2 focus:ring-amber-500 outline-none bg-white">
-        <textarea id="pSupplierNotes" rows="2" placeholder="Supplier notes (e.g. blind shipping)" class="w-full border border-amber-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-amber-500 outline-none bg-white"></textarea>
+        <input id="pSupplierPrice" type="number" step="0.01" placeholder="Supplier price USD" class="w-full border border-amber-200 rounded-xl px-3 py-2.5 text-sm mb-2 focus:ring-2 focus:ring-amber-500 outline-none bg-white">
+        <textarea id="pSupplierNotes" rows="2" placeholder="Supplier notes" class="w-full border border-amber-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-amber-500 outline-none bg-white"></textarea>
       </div>
 
       <div class="flex gap-2 pt-2">
@@ -422,7 +557,6 @@
     </div>
   </div>
 </div>
-
 <div id="categoryModal" class="fixed inset-0 z-50 hidden bg-black/60 flex items-center justify-center p-4">
   <div class="bg-white rounded-2xl max-w-sm w-full p-6">
     <div class="flex justify-between mb-4"><h3 class="font-black text-lg">Category</h3><button onclick="closeModal('categoryModal')"><i class="fa-solid fa-xmark"></i></button></div>
@@ -440,8 +574,59 @@
     <div id="orderDetailBox" class="space-y-3 text-sm"></div>
   </div>
 </div>
+
+<div id="couponModal" class="fixed inset-0 z-50 hidden bg-black/60 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-md w-full p-6">
+    <div class="flex justify-between mb-4"><h3 class="font-black text-lg">Coupon</h3><button onclick="closeModal('couponModal')"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="space-y-3">
+      <div><label class="text-xs font-bold text-slate-500">Code</label><input id="cCode" placeholder="SAVE10" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none uppercase font-mono"></div>
+      <div><label class="text-xs font-bold text-slate-500">Type</label><select id="cType" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"><option value="percent">Percent (%)</option><option value="fixed">Fixed ($)</option></select></div>
+      <div><label class="text-xs font-bold text-slate-500">Value</label><input id="cValue" type="number" step="0.01" placeholder="10" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"></div>
+      <div><label class="text-xs font-bold text-slate-500">Min Order (USD)</label><input id="cMinOrder" type="number" step="0.01" placeholder="0" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"></div>
+      <div><label class="text-xs font-bold text-slate-500">Max Uses (leave empty for unlimited)</label><input id="cMaxUses" type="number" placeholder="100" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"></div>
+      <div><label class="text-xs font-bold text-slate-500">Valid Until</label><input id="cValidUntil" type="date" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"></div>
+      <button id="saveCouponBtn" onclick="saveCoupon()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-3 rounded-xl text-sm"><i class="fa-solid fa-check"></i> Save</button>
+      <p id="couponMsg" class="text-xs text-center"></p>
+    </div>
+  </div>
+</div>
+<div id="shippingModal" class="fixed inset-0 z-50 hidden bg-black/60 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-md w-full p-6">
+    <div class="flex justify-between mb-4"><h3 id="shippingModalTitle" class="font-black text-lg">Shipping Rate</h3><button onclick="closeModal('shippingModal')"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="space-y-3">
+      <div><label class="text-xs font-bold text-slate-500">Country Code (2 letters)</label><input id="sCountryCode" placeholder="BD" maxlength="2" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none uppercase"></div>
+      <div><label class="text-xs font-bold text-slate-500">Country Name</label><input id="sCountryName" placeholder="Bangladesh" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"></div>
+      <div><label class="text-xs font-bold text-slate-500">Shipping Cost (USD)</label><input id="sCost" type="number" step="0.01" placeholder="5" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"></div>
+      <div class="grid grid-cols-2 gap-2">
+        <div><label class="text-xs font-bold text-slate-500">Min Days</label><input id="sMinDays" type="number" placeholder="7" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"></div>
+        <div><label class="text-xs font-bold text-slate-500">Max Days</label><input id="sMaxDays" type="number" placeholder="14" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"></div>
+      </div>
+      <div class="flex items-center gap-2"><input id="sActive" type="checkbox" checked class="w-4 h-4 accent-blue-600"><span class="text-sm font-bold">Active</span></div>
+      <button id="saveShippingBtn" onclick="saveShipping()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-3 rounded-xl text-sm"><i class="fa-solid fa-check"></i> Save</button>
+      <p id="shippingMsg" class="text-xs text-center"></p>
+    </div>
+  </div>
+</div>
+
+<div id="trustedModal" class="fixed inset-0 z-50 hidden bg-black/60 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-md w-full p-6">
+    <div class="flex justify-between mb-4"><h3 class="font-black text-lg">Trusted Badge</h3><button onclick="closeModal('trustedModal')"><i class="fa-solid fa-xmark"></i></button></div>
+    <p class="text-xs text-slate-500 mb-4">এই user-কে Trusted badge দিতে চাও? Customer-রা দেখবে "Verified" popup।</p>
+    <div class="space-y-3">
+      <div><label class="text-xs font-bold text-slate-500">Note (internal only, customer দেখবে না)</label><textarea id="trustedNote" rows="2" placeholder="e.g. Verified NID + 10+ orders" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"></textarea></div>
+      <button id="saveTrustedBtn" onclick="saveTrustedBadge()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 rounded-xl text-sm"><i class="fa-solid fa-circle-check"></i> Give Trusted Badge</button>
+      <p id="trustedMsg" class="text-xs text-center"></p>
+    </div>
+  </div>
+</div>
+<div id="kycPhotoModal" class="fixed inset-0 z-[100] hidden bg-black/95 flex items-center justify-center p-4" onclick="closeModal('kycPhotoModal')">
+  <img id="kycPhotoImg" class="max-w-full max-h-full rounded-lg">
+</div>
+
 <script src="js/supabase-config.js"></script>
 <script>
+  
+// ============ STATE ============
 let adminUser = null;
 let adminProfile = null;
 let settingsCache = {};
@@ -451,10 +636,16 @@ let ordersCache = [];
 let teamMembers = [];
 let pendingInvites = [];
 let customersCache = [];
+let couponsCache = [];
+let shippingCache = [];
 let currentProductId = null;
 let currentProductImageUrl = null;
+let currentShippingCode = null;
+let currentTrustedUserId = null;
+let viewsChartInstance = null;
 const ADMIN_ROLES = ['super_admin','admin','acting_admin','sub_admin','manager','moderator'];
 
+// ============ BOOT ============
 supabaseClient.auth.onAuthStateChange(async (event, session) => {
   adminUser = session?.user || null;
   if (!adminUser) { showLogin(); return; }
@@ -464,6 +655,7 @@ supabaseClient.auth.onAuthStateChange(async (event, session) => {
   showDashboard();
 });
 
+// ============ SCREENS ============
 function hideAll(){ ['loadingScreen','loginScreen','deniedScreen','dashboard'].forEach(id => document.getElementById(id).classList.add('hidden')); }
 function showLogin(){ hideAll(); document.getElementById('loginScreen').classList.remove('hidden'); }
 function showDenied(){ hideAll(); document.getElementById('deniedEmail').innerText = adminUser?.email || ''; document.getElementById('deniedScreen').classList.remove('hidden'); }
@@ -473,11 +665,13 @@ function showDashboard(){
   updateAdminUI();
   loadStats();
   const hash = window.location.hash.substring(1);
-  const validPages = ['dashboard','products','orders','categories','reviews','team','customers','sellers','settings','commission','logs'];
+  const validPages = ['dashboard','products','bulk','orders','categories','reviews','coupons','shipping','team','customers','sellers','analytics','referrals','affiliates','marketing','settings','commission','logs'];
   const page = validPages.includes(hash) ? hash : 'dashboard';
   showPage(page, true);
   if (!hash) window.history.replaceState({ page: 'dashboard' }, '', '#dashboard');
 }
+
+// ============ UI ============
 function updateAdminUI(){
   const name = adminProfile?.full_name || adminUser?.email?.split('@')[0] || 'Admin';
   const pic = adminProfile?.profile_pic_url;
@@ -491,6 +685,7 @@ function updateAdminUI(){
   if (pic) { av.src = pic; av.classList.remove('hidden'); init.classList.add('hidden'); }
   else { av.classList.add('hidden'); init.classList.remove('hidden'); init.innerText = (name[0] || 'A').toUpperCase(); }
 }
+
 function toggleAdminMenu(){ document.getElementById('adminMenu').classList.toggle('hidden'); }
 function toggleSidebar(){ const sb = document.getElementById('sidebar'), ov = document.getElementById('sidebarOverlay'); sb.classList.toggle('hidden'); sb.classList.toggle('block'); ov.classList.toggle('hidden'); }
 document.addEventListener('click', function(e){
@@ -498,18 +693,23 @@ document.addEventListener('click', function(e){
   if (menu && !menu.classList.contains('hidden') && !menu.contains(e.target) && !e.target.closest('button[onclick="toggleAdminMenu()"]')) menu.classList.add('hidden');
   if (!e.target.closest('button[onclick^="toggleMemberMenu"]')) document.querySelectorAll('[id^="menu-"]').forEach(el => el.classList.add('hidden'));
 });
+
+// ============ PAGE ROUTING ============
 function showPage(pageId, fromPop){
   document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
   const target = document.getElementById('page-' + pageId);
   if (target) target.classList.remove('hidden');
   document.querySelectorAll('.nav-btn').forEach(b => {
     const on = b.dataset.nav === pageId;
-    b.className = on ? 'nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold bg-blue-600 text-white'
-                     : 'nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold hover:bg-slate-100 text-slate-700';
+    b.className = on
+      ? 'nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold bg-blue-600 text-white'
+      : 'nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold hover:bg-slate-100 text-slate-700';
   });
   if (window.innerWidth < 768) { const sb = document.getElementById('sidebar'); if (!sb.classList.contains('hidden')) toggleSidebar(); }
   document.getElementById('adminMenu').classList.add('hidden');
   if (!fromPop && window.location.hash !== '#' + pageId) window.history.pushState({ page: pageId }, '', '#' + pageId);
+
+  // Load data per page
   if (pageId === 'settings') loadSettings();
   if (pageId === 'commission') loadCommission();
   if (pageId === 'team') { loadTeam(); loadInvites(); }
@@ -520,11 +720,20 @@ function showPage(pageId, fromPop){
   if (pageId === 'reviews') loadReviews();
   if (pageId === 'customers') loadCustomers();
   if (pageId === 'sellers') loadSellers();
+  if (pageId === 'coupons') loadCoupons();
+  if (pageId === 'shipping') loadShipping();
+  if (pageId === 'analytics') loadAnalytics();
+  if (pageId === 'referrals') loadReferrals();
+  if (pageId === 'affiliates') loadAffiliates();
+  if (pageId === 'marketing') loadMarketing();
 }
+
 window.addEventListener('popstate', function(e){
   const page = (e.state && e.state.page) || (window.location.hash ? window.location.hash.substring(1) : 'dashboard');
   showPage(page, true);
 });
+
+// ============ AUTH ============
 async function adminLogin(e){
   e.preventDefault();
   const btn = document.getElementById('loginBtn'), msg = document.getElementById('loginMsg');
@@ -535,22 +744,41 @@ async function adminLogin(e){
   return false;
 }
 async function adminSignOut(){ window.history.replaceState(null, '', window.location.pathname); await supabaseClient.auth.signOut(); }
+
+// ============ HELPERS ============
+function closeModal(id){ document.getElementById(id).classList.add('hidden'); }
+function openModal(id){ document.getElementById(id).classList.remove('hidden'); }
+function esc(s){ return (s==null?'':String(s)).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+async function logActivity(action, targetType, targetId, details){
+  try { await supabaseClient.from('activity_logs').insert({ user_id: adminUser.id, user_email: adminUser.email, action, target_type: targetType, target_id: String(targetId || ''), details: details || null }); } catch(e) {}
+}
+
+// ============ STATS ============
 async function loadStats(){
-  const [p, o, u] = await Promise.all([
+  const since30 = new Date(Date.now() - 30*24*60*60*1000).toISOString();
+  const since7 = new Date(Date.now() - 7*24*60*60*1000).toISOString();
+  const [p, o, u, views7, coupons, referrals, affiliates] = await Promise.all([
     supabaseClient.from('products').select('id', { count: 'exact', head: true }),
     supabaseClient.from('orders').select('total_usd', { count: 'exact' }),
-    supabaseClient.from('profiles').select('id', { count: 'exact', head: true })
+    supabaseClient.from('profiles').select('id', { count: 'exact', head: true }),
+    supabaseClient.from('page_views').select('id', { count: 'exact', head: true }).gte('created_at', since7),
+    supabaseClient.from('coupons').select('id', { count: 'exact', head: true }).eq('is_active', true),
+    supabaseClient.from('referrals').select('id', { count: 'exact', head: true }),
+    supabaseClient.from('affiliates').select('id', { count: 'exact', head: true })
   ]);
   document.getElementById('statProducts').innerText = p.count ?? '—';
   document.getElementById('statOrders').innerText = o.count ?? '—';
   document.getElementById('statUsers').innerText = u.count ?? '—';
   const revenue = (o.data || []).reduce((s, x) => s + Number(x.total_usd || 0), 0);
   document.getElementById('statRevenue').innerText = '$' + revenue.toFixed(2);
-}
-function closeModal(id){ document.getElementById(id).classList.add('hidden'); }
-function openModal(id){ document.getElementById(id).classList.remove('hidden'); }
-function esc(s){ return (s==null?'':String(s)).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-  async function loadSettings(){
+  document.getElementById('statViews').innerText = views7.count ?? '—';
+  document.getElementById('statCoupons').innerText = coupons.count ?? '—';
+  document.getElementById('statReferrals').innerText = referrals.count ?? '—';
+  document.getElementById('statAffiliates').innerText = affiliates.count ?? '—';
+  }
+  // ============ SETTINGS ============
+async function loadSettings(){
   const { data, error } = await supabaseClient.from('site_settings').select('key, value');
   if (error) { alert('Failed: ' + error.message); return; }
   settingsCache = {};
@@ -566,10 +794,12 @@ async function saveSettings(){
   const { error } = await supabaseClient.from('site_settings').upsert(updates, { onConflict: 'key' });
   btn.disabled = false; btn.innerHTML = original;
   if (error) { alert('Save failed: ' + error.message); return; }
-  btn.innerconstHTML = '<i class="fa-solid fa-check"></i> Saved!';
+  btn.innerHTML = '<i class="fa-solid fa-check"></i> Saved!';
   await logActivity('update_settings', 'site_settings', null, null);
   setTimeout(() => { btn.innerHTML = original; }, 1500);
-} 
+}
+
+// ============ COMMISSION ============
 async function loadCommission(){
   const { data } = await supabaseClient.from('site_settings').select('key, value')
     .in('key', ['commission_own_rate','commission_resell_rate','prepaid_discount','cod_charge','cod_bd_only','currency_bdt_rate']);
@@ -580,18 +810,15 @@ async function loadCommission(){
     else el.value = s.value || '';
   });
 }
-
 async function saveCommission(){
   const btn = document.getElementById('saveCommissionBtn'), original = btn.innerHTML;
   btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving…';
-
   const own = document.getElementById('set_commission_own_rate').value || '5';
   const resell = document.getElementById('set_commission_resell_rate').value || '10';
   const prepaid = document.getElementById('set_prepaid_discount').value || '5';
   const cod = document.getElementById('set_cod_charge').value || '10';
   const codBdOnly = document.getElementById('set_cod_bd_only').checked ? 'true' : 'false';
   const bdtRate = document.getElementById('set_currency_bdt_rate').value || '118';
-
   const updates = [
     { key: 'commission_own_rate', value: own, updated_at: new Date().toISOString() },
     { key: 'commission_resell_rate', value: resell, updated_at: new Date().toISOString() },
@@ -600,21 +827,21 @@ async function saveCommission(){
     { key: 'cod_bd_only', value: codBdOnly, updated_at: new Date().toISOString() },
     { key: 'currency_bdt_rate', value: bdtRate, updated_at: new Date().toISOString() }
   ];
-
   const { error } = await supabaseClient.from('site_settings').upsert(updates, { onConflict: 'key' });
   btn.disabled = false; btn.innerHTML = original;
   if (error) { alert('Save failed: ' + error.message); return; }
   btn.innerHTML = '<i class="fa-solid fa-check"></i> Saved!';
   await logActivity('update_commission', 'site_settings', null, { own, resell, prepaid, cod, codBdOnly, bdtRate });
   setTimeout(() => { btn.innerHTML = original; }, 1500);
-}
+    }
+  // ============ TEAM ============
 async function loadTeam(){
-  const { data, error } = await supabaseClient.from('profiles').select('id, full_name, phone, role, is_banned, profile_pic_url, created_at').order('created_at', { ascending: false });
+  const { data, error } = await supabaseClient.from('profiles').select('id, full_name, phone, role, is_banned, profile_pic_url, is_trusted, created_at').order('created_at', { ascending: false });
   if (error) { document.getElementById('teamList').innerHTML = '<p class="text-center text-red-500 py-6 text-sm">Failed: ' + esc(error.message) + '</p>'; return; }
   teamMembers = data || [];
   renderTeam();
 }
-  function renderTeam(){
+function renderTeam(){
   const q = (document.getElementById('teamSearch')?.value || '').toLowerCase().trim();
   const filtered = teamMembers.filter(m => !q || (m.full_name || '').toLowerCase().includes(q));
   const list = document.getElementById('teamList');
@@ -626,11 +853,12 @@ async function loadTeam(){
     const isMe = m.id === adminUser.id;
     const badge = roleColor[role] || 'bg-slate-100 text-slate-700';
     const initial = (name[0] || '?').toUpperCase();
+    const trustedBadge = m.is_trusted ? '<span class="text-[9px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded-full ml-1"><i class="fa-solid fa-circle-check"></i> Trusted</span>' : '';
     return `<div class="p-3 flex items-center gap-3">
       <div class="relative">${m.profile_pic_url ? `<img src="${esc(m.profile_pic_url)}" class="w-10 h-10 rounded-full object-cover">` : `<div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-black">${initial}</div>`}${m.is_banned ? '<span class="absolute -bottom-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white"></span>' : ''}</div>
-      <div class="flex-1 min-w-0"><p class="font-bold text-sm truncate">${esc(name)} ${isMe ? '<span class="text-[10px] text-slate-400">(You)</span>' : ''}</p><div class="flex items-center gap-2 mt-0.5"><span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${badge} uppercase">${esc(role.replace(/_/g,' '))}</span>${m.is_banned ? '<span class="text-[10px] font-bold text-red-500">BANNED</span>' : ''}</div></div>
+      <div class="flex-1 min-w-0"><p class="font-bold text-sm truncate">${esc(name)} ${isMe ? '<span class="text-[10px] text-slate-400">(You)</span>' : ''}${trustedBadge}</p><div class="flex items-center gap-2 mt-0.5 flex-wrap"><span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${badge} uppercase">${esc(role.replace(/_/g,' '))}</span>${m.is_banned ? '<span class="text-[10px] font-bold text-red-500">BANNED</span>' : ''}</div></div>
       <div class="relative"><button onclick="toggleMemberMenu('${m.id}')" class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center"><i class="fa-solid fa-ellipsis-vertical text-slate-400"></i></button>
-        <div id="menu-${m.id}" class="hidden absolute right-0 top-10 w-48 bg-white rounded-xl shadow-xl border border-slate-200 py-1 z-30">
+        <div id="menu-${m.id}" class="hidden absolute right-0 top-10 w-52 bg-white rounded-xl shadow-xl border border-slate-200 py-1 z-30">
           <button onclick="changeRole('${m.id}','admin')" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-50">Make Admin</button>
           <button onclick="changeRole('${m.id}','acting_admin')" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-50">Acting Admin</button>
           <button onclick="changeRole('${m.id}','sub_admin')" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-50">Sub Admin</button>
@@ -639,6 +867,7 @@ async function loadTeam(){
           <button onclick="changeRole('${m.id}','seller')" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-50">Seller</button>
           <button onclick="changeRole('${m.id}','customer')" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-50">Customer</button>
           <div class="border-t my-1"></div>
+          <button onclick="openTrustedModal('${m.id}', ${m.is_trusted})" class="w-full text-left px-3 py-2 text-xs hover:bg-emerald-50 text-emerald-700 font-bold"><i class="fa-solid fa-circle-check"></i> ${m.is_trusted ? 'Remove Trusted' : 'Give Trusted Badge'}</button>
           <button onclick="toggleBan('${m.id}', ${!m.is_banned})" class="w-full text-left px-3 py-2 text-xs hover:bg-red-50 text-red-600">${m.is_banned ? 'Unban' : 'Ban'}</button>
         </div>
       </div>
@@ -663,6 +892,40 @@ async function toggleBan(userId, banned){
   await logActivity(banned ? 'ban_user' : 'unban_user', 'user', userId, null);
   await loadTeam();
 }
+
+// ============ TRUSTED BADGE ============
+function openTrustedModal(userId, isTrusted){
+  currentTrustedUserId = userId;
+  document.getElementById('trustedNote').value = '';
+  document.getElementById('trustedMsg').innerText = '';
+  const btn = document.getElementById('saveTrustedBtn');
+  if (isTrusted) {
+    btn.innerText = 'Remove Trusted Badge';
+    btn.className = 'w-full bg-red-600 hover:bg-red-700 text-white font-black py-3 rounded-xl text-sm';
+  } else {
+    btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Give Trusted Badge';
+    btn.className = 'w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 rounded-xl text-sm';
+  }
+  openModal('trustedModal');
+  document.querySelectorAll('[id^="menu-"]').forEach(el => el.classList.add('hidden'));
+}
+async function saveTrustedBadge(){
+  const btn = document.getElementById('saveTrustedBtn'), msg = document.getElementById('trustedMsg');
+  btn.disabled = true;
+  const target = teamMembers.find(m => m.id === currentTrustedUserId);
+  const newValue = !target?.is_trusted;
+  const note = document.getElementById('trustedNote').value.trim() || null;
+  const updates = { is_trusted: newValue, trusted_badge_note: note };
+  if (newValue) updates.trusted_since = new Date().toISOString();
+  const { error } = await supabaseClient.from('profiles').update(updates).eq('id', currentTrustedUserId);
+  btn.disabled = false;
+  if (error) { msg.className = 'text-xs text-center text-red-500'; msg.innerText = error.message; return; }
+  await logActivity(newValue ? 'give_trusted' : 'remove_trusted', 'user', currentTrustedUserId, { note });
+  closeModal('trustedModal');
+  await loadTeam();
+}
+
+// ============ INVITES ============
 function openInviteModal(){
   document.getElementById('inviteEmail').value = '';
   document.getElementById('inviteRole').value = 'admin';
@@ -694,19 +957,19 @@ async function cancelInvite(id){
   if (!confirm('Cancel this invite?')) return;
   await supabaseClient.from('invites').update({ status: 'cancelled' }).eq('id', id);
   await loadInvites();
-  }
-  async function logActivity(action, targetType, targetId, details){
-  try { await supabaseClient.from('activity_logs').insert({ user_id: adminUser.id, user_email: adminUser.email, action, target_type: targetType, target_id: String(targetId || ''), details: details || null }); } catch(e) {}
 }
+
+// ============ LOGS ============
 async function loadLogs(){
   const list = document.getElementById('logsList');
   list.innerHTML = '<p class="text-center text-slate-400 py-6 text-sm">Loading…</p>';
   const { data, error } = await supabaseClient.from('activity_logs').select('*').order('created_at', { ascending: false }).limit(100);
   if (error) { list.innerHTML = '<p class="text-center text-red-500 py-6 text-sm">Failed: ' + esc(error.message) + '</p>'; return; }
   if (!data || data.length === 0) { list.innerHTML = '<p class="text-center text-slate-400 py-6 text-sm">No activity yet.</p>'; return; }
-  const iconMap = { change_role:'fa-user-shield text-blue-600', ban_user:'fa-ban text-red-600', unban_user:'fa-circle-check text-emerald-600', send_invite:'fa-paper-plane text-purple-600', update_settings:'fa-gear text-slate-600', update_commission:'fa-percent text-amber-600', create_product:'fa-plus text-blue-600', update_product:'fa-pen text-blue-600', delete_product:'fa-trash text-red-600', update_order:'fa-truck text-emerald-600', delete_review:'fa-star text-red-600' };
+  const iconMap = { change_role:'fa-user-shield text-blue-600', ban_user:'fa-ban text-red-600', unban_user:'fa-circle-check text-emerald-600', send_invite:'fa-paper-plane text-purple-600', update_settings:'fa-gear text-slate-600', update_commission:'fa-percent text-amber-600', create_product:'fa-plus text-blue-600', update_product:'fa-pen text-blue-600', delete_product:'fa-trash text-red-600', update_order:'fa-truck text-emerald-600', delete_review:'fa-star text-red-600', give_trusted:'fa-circle-check text-blue-600', remove_trusted:'fa-circle-xmark text-slate-500', create_coupon:'fa-ticket text-pink-600', delete_coupon:'fa-ticket text-red-600', update_shipping:'fa-truck text-cyan-600', bulk_upload:'fa-upload text-indigo-600' };
   list.innerHTML = data.map(log => `<div class="p-3 flex items-start gap-3"><div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center shrink-0"><i class="fa-solid ${iconMap[log.action] || 'fa-circle-info text-slate-500'} text-xs"></i></div><div class="flex-1 min-w-0"><p class="text-sm"><b>${esc((log.user_email||'').split('@')[0])}</b> — ${esc(log.action.replace(/_/g,' '))}</p><p class="text-[10px] text-slate-400 mt-0.5">${esc(new Date(log.created_at).toLocaleString())}</p></div></div>`).join('');
-}
+  }
+  // ============ PRODUCTS ============
 async function loadCategories(){
   const { data } = await supabaseClient.from('categories').select('*').order('name');
   categoriesCache = data || [];
@@ -714,12 +977,13 @@ async function loadCategories(){
   if (sel) sel.innerHTML = '<option value="">Select category</option>' + categoriesCache.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
   return categoriesCache;
 }
+
 async function loadProductsList(){
   const list = document.getElementById('productsList');
   list.innerHTML = '<p class="text-center text-slate-400 py-6 text-sm">Loading…</p>';
   const { data, error } = await supabaseClient
     .from('products')
-    .select('id,title,price_usd,old_price_usd,image_url,category_id,stock,is_active,product_type,sku,barcode,origin_country,rating,reviews_count,created_at,display_discount_percent,video_url,courier_service,delivery_process,supplier_url,supplier_name,supplier_price_usd,supplier_notes')
+    .select('id,title,price_usd,old_price_usd,image_url,category_id,stock,is_active,product_type,sku,barcode,origin_country,rating,reviews_count,created_at,display_discount_percent,video_url,courier_service,delivery_process,delivery_days_min,delivery_days_max,supplier_url,supplier_name,supplier_price_usd,supplier_notes')
     .order('created_at', { ascending: false });
   if (error) { list.innerHTML = '<p class="text-center text-red-500 py-6 text-sm">Failed: ' + esc(error.message) + '</p>'; return; }
   productsCache = data || [];
@@ -728,7 +992,12 @@ async function loadProductsList(){
 
 function renderProductsList(){
   const q = (document.getElementById('productSearch')?.value || '').toLowerCase().trim();
-  const filtered = productsCache.filter(p => !q || (p.title||'').toLowerCase().includes(q));
+  const typeFilter = document.getElementById('productTypeFilter')?.value || '';
+  const filtered = productsCache.filter(p => {
+    if (q && !(p.title||'').toLowerCase().includes(q)) return false;
+    if (typeFilter && p.product_type !== typeFilter) return false;
+    return true;
+  });
   const list = document.getElementById('productsList');
   if (filtered.length === 0) { list.innerHTML = '<p class="text-center text-slate-400 py-6 text-sm">No products.</p>'; return; }
   const typeBadge = (t) => {
@@ -742,10 +1011,11 @@ function renderProductsList(){
     <div class="flex gap-1"><button onclick="editProduct('${p.id}')" class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center"><i class="fa-solid fa-pen text-blue-600 text-xs"></i></button><button onclick="deleteProduct('${p.id}')" class="w-8 h-8 rounded-lg hover:bg-red-50 flex items-center justify-center"><i class="fa-solid fa-trash text-red-500 text-xs"></i></button></div>
   </div>`).join('');
 }
+
 function openProductModal(){
   currentProductId = null; currentProductImageUrl = null;
   document.getElementById('productModalTitle').innerText = 'Add Product';
-  ['pTitle','pDesc','pPrice','pOldPrice','pCountry','pBarcode','pSKU','pImageUrl','pDiscount','pCourier','pDeliveryProcess','pSupplierUrl','pSupplierName','pSupplierPrice','pSupplierNotes','pVideoUrl'].forEach(id => {
+  ['pTitle','pDesc','pPrice','pOldPrice','pCountry','pBarcode','pSKU','pImageUrl','pDiscount','pCourier','pDeliveryProcess','pDeliveryMin','pDeliveryMax','pSupplierUrl','pSupplierName','pSupplierPrice','pSupplierNotes','pVideoUrl'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
   document.getElementById('pStock').value = '999';
@@ -759,6 +1029,7 @@ function openProductModal(){
   document.getElementById('dropshipFields').classList.add('hidden');
   openModal('productModal');
 }
+
 function editProduct(id){
   const p = productsCache.find(x => x.id === id);
   if (!p) return;
@@ -779,6 +1050,8 @@ function editProduct(id){
   document.getElementById('pDiscount').value = p.display_discount_percent || '';
   document.getElementById('pCourier').value = p.courier_service || '';
   document.getElementById('pDeliveryProcess').value = p.delivery_process || '';
+  document.getElementById('pDeliveryMin').value = p.delivery_days_min || '';
+  document.getElementById('pDeliveryMax').value = p.delivery_days_max || '';
   document.getElementById('pSupplierUrl').value = p.supplier_url || '';
   document.getElementById('pSupplierName').value = p.supplier_name || '';
   document.getElementById('pSupplierPrice').value = p.supplier_price_usd || '';
@@ -803,7 +1076,8 @@ function convertToUSD(amount, currency){
   const rates = { USD: 1, BDT: 118, INR: 83, EUR: 0.92, GBP: 0.79 };
   return +(amount / rates[currency]).toFixed(2);
 }
-  async function compressImage(file, maxSize = 800, quality = 0.85){
+
+async function compressImage(file, maxSize = 800, quality = 0.85){
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -822,6 +1096,7 @@ function convertToUSD(amount, currency){
     reader.onerror = reject; reader.readAsDataURL(file);
   });
 }
+
 async function handleProductImage(event){
   const file = event.target.files[0];
   if (!file) return;
@@ -840,6 +1115,7 @@ async function handleProductImage(event){
     status.className = 'text-[11px] mt-1 text-emerald-600'; status.innerText = '✓ Uploaded';
   } catch(err) { status.className = 'text-[11px] mt-1 text-red-500'; status.innerText = 'Upload failed: ' + (err.message || err); }
 }
+
 async function saveProduct(){
   const btn = document.getElementById('saveProductBtn'), msg = document.getElementById('productMsg');
   const title = document.getElementById('pTitle').value.trim();
@@ -870,6 +1146,8 @@ async function saveProduct(){
     display_discount_percent: parseFloat(document.getElementById('pDiscount').value) || null,
     courier_service: document.getElementById('pCourier').value.trim() || null,
     delivery_process: document.getElementById('pDeliveryProcess').value.trim() || null,
+    delivery_days_min: parseInt(document.getElementById('pDeliveryMin').value) || null,
+    delivery_days_max: parseInt(document.getElementById('pDeliveryMax').value) || null,
     supplier_url: isDropship ? (document.getElementById('pSupplierUrl').value.trim() || null) : null,
     supplier_name: isDropship ? (document.getElementById('pSupplierName').value.trim() || null) : null,
     supplier_price_usd: isDropship ? (parseFloat(document.getElementById('pSupplierPrice').value) || null) : null,
@@ -886,13 +1164,15 @@ async function saveProduct(){
   closeModal('productModal');
   await loadProductsList();
 }
+
 async function deleteProduct(id){
   if (!confirm('Delete this product?')) return;
   const { error } = await supabaseClient.from('products').delete().eq('id', id);
   if (error) { alert('Failed: ' + error.message); return; }
   await logActivity('delete_product', 'product', id, null);
   await loadProductsList();
-}
+  }
+ // ============ CATEGORIES ============
 async function loadCategoriesList(){
   const list = document.getElementById('categoriesList');
   list.innerHTML = '<p class="text-center text-slate-400 py-6 text-sm">Loading…</p>';
@@ -918,8 +1198,10 @@ async function deleteCategory(id){
   const { error } = await supabaseClient.from('categories').delete().eq('id', id);
   if (error) { alert('Failed: ' + error.message); return; }
   await loadCategoriesList();
-                          }
-  let orderFilter = 'all';
+}
+
+// ============ ORDERS ============
+let orderFilter = 'all';
 function filterOrders(f){
   orderFilter = f;
   document.querySelectorAll('.oft').forEach(b => {
@@ -947,6 +1229,7 @@ function renderOrdersList(){
       <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${statusColor[o.status] || 'bg-slate-100'} uppercase shrink-0">${esc(o.status.replace(/_/g,' '))}</span>
     </div>
     <div class="flex justify-between items-center text-xs"><span class="text-slate-500">${new Date(o.created_at).toLocaleDateString()}</span><span class="font-black text-blue-600">$${Number(o.total_usd).toFixed(2)}</span></div>
+    ${o.coupon_code ? `<p class="text-[10px] text-pink-600 mt-1"><i class="fa-solid fa-ticket"></i> ${esc(o.coupon_code)} (-$${Number(o.coupon_discount_usd||0).toFixed(2)})</p>` : ''}
   </div>`).join('');
 }
 async function openOrderDetail(id){
@@ -975,6 +1258,7 @@ async function openOrderDetail(id){
     <div class="bg-slate-50 rounded-xl p-3 text-xs">
       <div class="flex justify-between"><span>Subtotal</span><span>$${Number(o.subtotal_usd).toFixed(2)}</span></div>
       <div class="flex justify-between"><span>Shipping</span><span>$${Number(o.shipping_usd).toFixed(2)}</span></div>
+      ${o.coupon_discount_usd ? `<div class="flex justify-between text-pink-600"><span>Coupon (${esc(o.coupon_code||'')})</span><span>-$${Number(o.coupon_discount_usd).toFixed(2)}</span></div>` : ''}
       <div class="flex justify-between font-black text-sm pt-1 border-t border-slate-300 mt-1"><span>Total</span><span class="text-blue-600">$${Number(o.total_usd).toFixed(2)}</span></div>
       ${o.total_local ? `<div class="flex justify-between text-[10px] text-slate-400 mt-1"><span>Local</span><span>${o.local_currency} ${Number(o.total_local).toFixed(0)}</span></div>` : ''}
     </div>
@@ -989,6 +1273,7 @@ async function openOrderDetail(id){
     </div>
     <div><label class="text-xs font-bold text-slate-500">Courier Name</label><input id="orderCourier" value="${esc(o.courier_name||'')}" placeholder="e.g. Pathao" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"></div>
     <div><label class="text-xs font-bold text-slate-500">Tracking Number</label><input id="orderTracking" value="${esc(o.tracking_no||'')}" placeholder="e.g. 9876543210" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"></div>
+    <div><label class="text-xs font-bold text-slate-500">Delivery Notes (customer দেখবে)</label><textarea id="orderDeliveryNotes" rows="2" placeholder="e.g. Arriving tomorrow" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">${esc(o.delivery_notes||'')}</textarea></div>
     <div class="flex gap-2 pt-1">
       <button onclick="closeModal('orderModal')" class="flex-1 bg-slate-200 text-slate-800 font-bold py-3 rounded-xl text-sm">Close</button>
       <button onclick="saveOrderUpdate('${o.id}')" class="flex-[2] bg-blue-600 hover:bg-blue-700 text-white font-black py-3 rounded-xl text-sm"><i class="fa-solid fa-check"></i> Save</button>
@@ -999,25 +1284,65 @@ async function saveOrderUpdate(id){
   const updates = {
     status: document.getElementById('orderStatusSel').value,
     courier_name: document.getElementById('orderCourier').value.trim() || null,
-    tracking_no: document.getElementById('orderTracking').value.trim() || null
+    tracking_no: document.getElementById('orderTracking').value.trim() || null,
+    delivery_notes: document.getElementById('orderDeliveryNotes').value.trim() || null,
+    delivery_updated_at: new Date().toISOString()
   };
   const { error } = await supabaseClient.from('orders').update(updates).eq('id', id);
   if (error) { alert('Failed: ' + error.message); return; }
   await logActivity('update_order', 'order', id, updates);
+
+  // Notify customer
+  const o = ordersCache.find(x => x.id === id);
+  if (o?.customer_id) {
+    try {
+      await supabaseClient.from('notifications').insert({
+        user_id: o.customer_id,
+        title: 'Order ' + updates.status.replace(/_/g,' '),
+        message: 'Your order ' + o.order_code + ' is now ' + updates.status.replace(/_/g,' '),
+        type: 'order',
+        link: '#orders'
+      });
+    } catch(e) {}
+  }
+
   closeModal('orderModal');
   await loadOrders();
-  }
-  async function loadReviews(){
+}
+
+// ============ REVIEWS ============
+async function loadReviews(){
   const list = document.getElementById('reviewsList');
   list.innerHTML = '<p class="text-center text-slate-400 py-6 text-sm">Loading…</p>';
   const { data, error } = await supabaseClient.from('reviews').select('id, rating, comment, created_at, product_id, customer_id, products(title, image_url)').order('created_at', { ascending: false }).limit(100);
   if (error) { list.innerHTML = '<p class="text-center text-red-500 py-6 text-sm">Failed: ' + esc(error.message) + '</p>'; return; }
   if (!data || data.length === 0) { list.innerHTML = '<p class="text-center text-slate-400 py-6 text-sm">No reviews.</p>'; return; }
-  list.innerHTML = data.map(r => `<div class="bg-white rounded-2xl border border-slate-200 p-3 flex gap-3">
-    <img src="${r.products?.image_url || 'https://placehold.co/100x100'}" class="w-14 h-14 rounded-lg object-cover bg-slate-100 shrink-0">
-    <div class="flex-1 min-w-0"><p class="font-bold text-xs truncate">${esc(r.products?.title || 'Product')}</p><p class="text-amber-400 text-xs">${'★'.repeat(r.rating)}</p><p class="text-slate-600 text-[11px] mt-1">${esc(r.comment || '(no comment)')}</p><p class="text-[10px] text-slate-400 mt-1">${new Date(r.created_at).toLocaleDateString()}</p></div>
-    <button onclick="deleteReview('${r.id}')" class="w-8 h-8 rounded-lg hover:bg-red-50 flex items-center justify-center shrink-0"><i class="fa-solid fa-trash text-red-500 text-xs"></i></button>
-  </div>`).join('');
+
+  // Load images for all reviews
+  const reviewIds = data.map(r => r.id);
+  const { data: images } = await supabaseClient.from('review_images').select('review_id, image_url').in('review_id', reviewIds);
+  const imagesByReview = {};
+  (images || []).forEach(img => {
+    if (!imagesByReview[img.review_id]) imagesByReview[img.review_id] = [];
+    imagesByReview[img.review_id].push(img.image_url);
+  });
+
+  list.innerHTML = data.map(r => {
+    const imgs = imagesByReview[r.id] || [];
+    return `<div class="bg-white rounded-2xl border border-slate-200 p-3">
+      <div class="flex gap-3">
+        <img src="${r.products?.image_url || 'https://placehold.co/100x100'}" class="w-14 h-14 rounded-lg object-cover bg-slate-100 shrink-0">
+        <div class="flex-1 min-w-0">
+          <p class="font-bold text-xs truncate">${esc(r.products?.title || 'Product')}</p>
+          <p class="text-amber-400 text-xs">${'★'.repeat(r.rating)}</p>
+          <p class="text-slate-600 text-[11px] mt-1">${esc(r.comment || '(no comment)')}</p>
+          <p class="text-[10px] text-slate-400 mt-1">${new Date(r.created_at).toLocaleDateString()}</p>
+        </div>
+        <button onclick="deleteReview('${r.id}')" class="w-8 h-8 rounded-lg hover:bg-red-50 flex items-center justify-center shrink-0 self-start"><i class="fa-solid fa-trash text-red-500 text-xs"></i></button>
+      </div>
+      ${imgs.length > 0 ? `<div class="flex gap-1.5 mt-2 overflow-x-auto">${imgs.map(url => `<img src="${esc(url)}" class="w-16 h-16 rounded-lg object-cover cursor-pointer shrink-0" onclick="showKycPhoto('${esc(url)}')">`).join('')}</div>` : ''}
+    </div>`;
+  }).join('');
 }
 async function deleteReview(id){
   if (!confirm('Delete this review?')) return;
@@ -1026,8 +1351,13 @@ async function deleteReview(id){
   await logActivity('delete_review', 'review', id, null);
   await loadReviews();
 }
+function showKycPhoto(url){
+  document.getElementById('kycPhotoImg').src = url;
+  openModal('kycPhotoModal');
+  }
+  // ============ CUSTOMERS ============
 async function loadCustomers(){
-  const { data, error } = await supabaseClient.from('profiles').select('id, full_name, phone, role, is_banned, profile_pic_url, created_at').eq('role', 'customer').order('created_at', { ascending: false });
+  const { data, error } = await supabaseClient.from('profiles').select('id, full_name, phone, role, is_banned, profile_pic_url, is_trusted, created_at').eq('role', 'customer').order('created_at', { ascending: false });
   if (error) { document.getElementById('customersList').innerHTML = '<p class="text-center text-red-500 py-6 text-sm">Failed</p>'; return; }
   customersCache = data || [];
   renderCustomers();
@@ -1040,23 +1370,24 @@ function renderCustomers(){
   list.innerHTML = filtered.map(c => {
     const name = c.full_name || 'Unnamed';
     const initial = (name[0] || '?').toUpperCase();
+    const trusted = c.is_trusted ? '<span class="text-[9px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded-full ml-1"><i class="fa-solid fa-circle-check"></i> Trusted</span>' : '';
     return `<div class="p-3 flex items-center gap-3">
       ${c.profile_pic_url ? `<img src="${esc(c.profile_pic_url)}" class="w-10 h-10 rounded-full object-cover">` : `<div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-black">${initial}</div>`}
-      <div class="flex-1 min-w-0"><p class="font-bold text-sm truncate">${esc(name)}</p><p class="text-[11px] text-slate-500">${esc(c.phone || 'No phone')}</p><p class="text-[10px] text-slate-400">Joined ${new Date(c.created_at).toLocaleDateString()}</p></div>
+      <div class="flex-1 min-w-0"><p class="font-bold text-sm truncate">${esc(name)}${trusted}</p><p class="text-[11px] text-slate-500">${esc(c.phone || 'No phone')}</p><p class="text-[10px] text-slate-400">Joined ${new Date(c.created_at).toLocaleDateString()}</p></div>
       <button onclick="changeRole('${c.id}','seller')" class="text-[10px] bg-orange-100 text-orange-700 font-bold px-2 py-1 rounded">Make Seller</button>
+      <button onclick="openTrustedModal('${c.id}', ${c.is_trusted})" class="w-8 h-8 rounded-lg hover:bg-emerald-50 flex items-center justify-center" title="Trusted Badge"><i class="fa-solid fa-circle-check text-emerald-600 text-xs"></i></button>
     </div>`;
   }).join('');
 }
+
+// ============ SELLERS (Applications) ============
 async function loadSellers(){
   const list = document.getElementById('sellersList');
   list.innerHTML = '<p class="text-center text-slate-400 py-6 text-sm">Loading…</p>';
-  const { data, error } = await supabaseClient
-    .from('seller_applications')
-    .select('*')
-    .order('created_at', { ascending: false });
+  const { data, error } = await supabaseClient.from('seller_applications').select('*').order('created_at', { ascending: false });
   if (error) { list.innerHTML = '<p class="text-center text-red-500 py-6 text-sm">Failed: ' + esc(error.message) + '</p>'; return; }
   if (!data || data.length === 0) {
-    list.innerHTML = '<div class="bg-white rounded-2xl border border-slate-200 p-10 text-center"><i class="fa-solid fa-store text-slate-300 text-5xl mb-3"></i><p class="text-slate-500 text-sm">No seller applications yet.</p><p class="text-xs text-slate-400 mt-1">Applications appear here for review.</p></div>';
+    list.innerHTML = '<div class="bg-white rounded-2xl border border-slate-200 p-10 text-center"><i class="fa-solid fa-store text-slate-300 text-5xl mb-3"></i><p class="text-slate-500 text-sm">No seller applications yet.</p></div>';
     return;
   }
   const statusColor = { pending:'bg-amber-100 text-amber-700', approved:'bg-emerald-100 text-emerald-700', rejected:'bg-red-100 text-red-700' };
@@ -1074,12 +1405,12 @@ async function loadSellers(){
         </div>
       </div>
       <div class="grid grid-cols-3 gap-1.5 mb-3">
-        <img src="${a.nid_front_url}" class="w-full aspect-square object-cover rounded-lg bg-slate-100 cursor-pointer" onclick="viewKycPhoto('${a.nid_front_url}')">
-        <img src="${a.nid_back_url}" class="w-full aspect-square object-cover rounded-lg bg-slate-100 cursor-pointer" onclick="viewKycPhoto('${a.nid_back_url}')">
-        <img src="${a.selfie_with_nid_url}" class="w-full aspect-square object-cover rounded-lg bg-slate-100 cursor-pointer" onclick="viewKycPhoto('${a.selfie_with_nid_url}')">
-        <img src="${a.face_front_url}" class="w-full aspect-square object-cover rounded-lg bg-slate-100 cursor-pointer" onclick="viewKycPhoto('${a.face_front_url}')">
-        <img src="${a.face_left_url}" class="w-full aspect-square object-cover rounded-lg bg-slate-100 cursor-pointer" onclick="viewKycPhoto('${a.face_left_url}')">
-        <img src="${a.face_right_url}" class="w-full aspect-square object-cover rounded-lg bg-slate-100 cursor-pointer" onclick="viewKycPhoto('${a.face_right_url}')">
+        <img src="${a.nid_front_url}" class="w-full aspect-square object-cover rounded-lg bg-slate-100 cursor-pointer" onclick="showKycPhoto('${a.nid_front_url}')">
+        <img src="${a.nid_back_url}" class="w-full aspect-square object-cover rounded-lg bg-slate-100 cursor-pointer" onclick="showKycPhoto('${a.nid_back_url}')">
+        <img src="${a.selfie_with_nid_url}" class="w-full aspect-square object-cover rounded-lg bg-slate-100 cursor-pointer" onclick="showKycPhoto('${a.selfie_with_nid_url}')">
+        <img src="${a.face_front_url}" class="w-full aspect-square object-cover rounded-lg bg-slate-100 cursor-pointer" onclick="showKycPhoto('${a.face_front_url}')">
+        <img src="${a.face_left_url}" class="w-full aspect-square object-cover rounded-lg bg-slate-100 cursor-pointer" onclick="showKycPhoto('${a.face_left_url}')">
+        <img src="${a.face_right_url}" class="w-full aspect-square object-cover rounded-lg bg-slate-100 cursor-pointer" onclick="showKycPhoto('${a.face_right_url}')">
       </div>
       ${a.business_proof_url ? `<p class="text-[11px] text-slate-500 mb-2"><i class="fa-solid fa-link"></i> <a href="${esc(a.business_proof_url)}" target="_blank" class="text-blue-600 underline">Business Proof</a></p>` : ''}
       ${a.admin_notes ? `<p class="text-[11px] text-slate-600 bg-slate-50 rounded-lg p-2 mb-2"><b>Notes:</b> ${esc(a.admin_notes)}</p>` : ''}
@@ -1092,39 +1423,331 @@ async function loadSellers(){
     </div>
   `).join('');
 }
-
-function viewKycPhoto(url){
-  const m = document.createElement('div');
-  m.className = 'fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4';
-  m.onclick = () => m.remove();
-  m.innerHTML = `<img src="${esc(url)}" class="max-w-full max-h-full rounded-lg">`;
-  document.body.appendChild(m);
-}
-
 async function approveSellerApp(appId, userId){
   if (!confirm('Approve this seller application?')) return;
-  const { error: e1 } = await supabaseClient.from('seller_applications')
-    .update({ status: 'approved', reviewed_by: adminUser.id, reviewed_at: new Date().toISOString() })
-    .eq('id', appId);
+  const { error: e1 } = await supabaseClient.from('seller_applications').update({ status: 'approved', reviewed_by: adminUser.id, reviewed_at: new Date().toISOString() }).eq('id', appId);
   if (e1) { alert('Failed: ' + e1.message); return; }
-  const { error: e2 } = await supabaseClient.from('profiles')
-    .update({ role: 'seller' })
-    .eq('id', userId);
+  const { error: e2 } = await supabaseClient.from('profiles').update({ role: 'seller' }).eq('id', userId);
   if (e2) { alert('Failed to update role: ' + e2.message); return; }
+  try { await supabaseClient.from('notifications').insert({ user_id: userId, title: 'Seller Application Approved!', message: 'Congratulations! You can now start selling on Zorvex.', type: 'success', link: '#seller' }); } catch(e) {}
   await logActivity('approve_seller', 'seller_application', appId, { user_id: userId });
   await loadSellers();
 }
-
 async function rejectSellerApp(appId){
   const notes = prompt('Reason for rejection (optional):');
   if (notes === null) return;
-  const { error } = await supabaseClient.from('seller_applications')
-    .update({ status: 'rejected', admin_notes: notes || null, reviewed_by: adminUser.id, reviewed_at: new Date().toISOString() })
-    .eq('id', appId);
+  const { error } = await supabaseClient.from('seller_applications').update({ status: 'rejected', admin_notes: notes || null, reviewed_by: adminUser.id, reviewed_at: new Date().toISOString() }).eq('id', appId);
   if (error) { alert('Failed: ' + error.message); return; }
   await logActivity('reject_seller', 'seller_application', appId, null);
   await loadSellers();
 }
+
+// ============ COUPONS ============
+async function loadCoupons(){
+  const list = document.getElementById('couponsList');
+  list.innerHTML = '<p class="text-center text-slate-400 py-6 text-sm">Loading…</p>';
+  const { data, error } = await supabaseClient.from('coupons').select('*').order('created_at', { ascending: false });
+  if (error) { list.innerHTML = '<p class="text-center text-red-500 py-6 text-sm">Failed: ' + esc(error.message) + '</p>'; return; }
+  couponsCache = data || [];
+  if (couponsCache.length === 0) { list.innerHTML = '<p class="text-center text-slate-400 py-6 text-sm">No coupons yet.</p>'; return; }
+  list.innerHTML = couponsCache.map(c => {
+    const expired = c.valid_until && new Date(c.valid_until) < new Date();
+    const maxed = c.max_uses && c.used_count >= c.max_uses;
+    const active = c.is_active && !expired && !maxed;
+    return `<div class="p-3 flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-pink-100 flex items-center justify-center shrink-0"><i class="fa-solid fa-ticket text-pink-600"></i></div>
+      <div class="flex-1 min-w-0">
+        <p class="font-black font-mono text-sm">${esc(c.code)}</p>
+        <p class="text-[11px] text-slate-500">${c.discount_type === 'percent' ? c.discount_value + '% off' : '$' + c.discount_value + ' off'} · Used: ${c.used_count}${c.max_uses ? '/' + c.max_uses : ''}${c.min_order_usd ? ' · Min $' + c.min_order_usd : ''}</p>
+        <span class="inline-block mt-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full ${active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600'}">${active ? 'ACTIVE' : (expired ? 'EXPIRED' : (maxed ? 'MAX USES' : 'INACTIVE'))}</span>
+      </div>
+      <button onclick="deleteCoupon('${c.id}')" class="w-8 h-8 rounded-lg hover:bg-red-50 flex items-center justify-center shrink-0"><i class="fa-solid fa-trash text-red-500 text-xs"></i></button>
+    </div>`;
+  }).join('');
+}
+function openCouponModal(){
+  ['cCode','cValue','cMinOrder','cMaxUses','cValidUntil'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('cType').value = 'percent';
+  document.getElementById('couponMsg').innerText = '';
+  openModal('couponModal');
+}
+async function saveCoupon(){
+  const code = document.getElementById('cCode').value.trim().toUpperCase();
+  const discount_type = document.getElementById('cType').value;
+  const discount_value = parseFloat(document.getElementById('cValue').value);
+  const min_order_usd = parseFloat(document.getElementById('cMinOrder').value) || 0;
+  const max_uses = parseInt(document.getElementById('cMaxUses').value) || null;
+  const valid_until = document.getElementById('cValidUntil').value || null;
+  const msg = document.getElementById('couponMsg');
+  if (!code || !discount_value) { msg.className = 'text-xs text-center text-red-500'; msg.innerText = 'Code & value required'; return; }
+  const { error } = await supabaseClient.from('coupons').insert({ code, discount_type, discount_value, min_order_usd, max_uses, valid_until });
+  if (error) { msg.className = 'text-xs text-center text-red-500'; msg.innerText = error.message; return; }
+  await logActivity('create_coupon', 'coupon', code, { discount_type, discount_value });
+  closeModal('couponModal');
+  await loadCoupons();
+}
+async function deleteCoupon(id){
+  if (!confirm('Delete this coupon?')) return;
+  const { error } = await supabaseClient.from('coupons').delete().eq('id', id);
+  if (error) { alert('Failed: ' + error.message); return; }
+  await logActivity('delete_coupon', 'coupon', id, null);
+  await loadCoupons();
+}
+
+// ============ SHIPPING ============
+async function loadShipping(){
+  const list = document.getElementById('shippingList');
+  list.innerHTML = '<p class="text-center text-slate-400 py-6 text-sm">Loading…</p>';
+  const { data, error } = await supabaseClient.from('shipping_rates').select('*').order('country_name');
+  if (error) { list.innerHTML = '<p class="text-center text-red-500 py-6 text-sm">Failed</p>'; return; }
+  shippingCache = data || [];
+  if (shippingCache.length === 0) { list.innerHTML = '<p class="text-center text-slate-400 py-6 text-sm">No shipping rates.</p>'; return; }
+  list.innerHTML = shippingCache.map(s => `<div class="p-3 flex items-center gap-3">
+    <div class="w-10 h-10 rounded-xl bg-cyan-100 flex items-center justify-center shrink-0 font-black text-cyan-700 text-xs">${esc(s.country_code)}</div>
+    <div class="flex-1 min-w-0">
+      <p class="font-bold text-sm">${esc(s.country_name)}</p>
+      <p class="text-[11px] text-slate-500">$${Number(s.cost_usd).toFixed(2)} · ${s.delivery_days_min}-${s.delivery_days_max} days</p>
+      <span class="inline-block mt-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full ${s.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600'}">${s.is_active ? 'ACTIVE' : 'INACTIVE'}</span>
+    </div>
+    <button onclick="editShipping('${s.country_code}')" class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center"><i class="fa-solid fa-pen text-blue-600 text-xs"></i></button>
+    <button onclick="deleteShipping('${s.country_code}')" class="w-8 h-8 rounded-lg hover:bg-red-50 flex items-center justify-center"><i class="fa-solid fa-trash text-red-500 text-xs"></i></button>
+  </div>`).join('');
+}
+function openShippingModal(){
+  currentShippingCode = null;
+  document.getElementById('shippingModalTitle').innerText = 'Add Shipping Rate';
+  ['sCountryCode','sCountryName','sCost','sMinDays','sMaxDays'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('sActive').checked = true;
+  document.getElementById('shippingMsg').innerText = '';
+  openModal('shippingModal');
+}
+function editShipping(code){
+  const s = shippingCache.find(x => x.country_code === code);
+  if (!s) return;
+  currentShippingCode = code;
+  document.getElementById('shippingModalTitle').innerText = 'Edit Shipping Rate';
+  document.getElementById('sCountryCode').value = s.country_code;
+  document.getElementById('sCountryCode').disabled = true;
+  document.getElementById('sCountryName').value = s.country_name;
+  document.getElementById('sCost').value = s.cost_usd;
+  document.getElementById('sMinDays').value = s.delivery_days_min;
+  document.getElementById('sMaxDays').value = s.delivery_days_max;
+  document.getElementById('sActive').checked = s.is_active;
+  document.getElementById('shippingMsg').innerText = '';
+  openModal('shippingModal');
+}
+async function saveShipping(){
+  const code = document.getElementById('sCountryCode').value.trim().toUpperCase();
+  const name = document.getElementById('sCountryName').value.trim();
+  const cost = parseFloat(document.getElementById('sCost').value);
+  const minD = parseInt(document.getElementById('sMinDays').value) || 7;
+  const maxD = parseInt(document.getElementById('sMaxDays').value) || 14;
+  const active = document.getElementById('sActive').checked;
+  const msg = document.getElementById('shippingMsg');
+  if (!code || !name || !cost) { msg.className = 'text-xs text-center text-red-500'; msg.innerText = 'All fields required'; return; }
+  const payload = { country_code: code, country_name: name, cost_usd: cost, delivery_days_min: minD, delivery_days_max: maxD, is_active: active, updated_at: new Date().toISOString() };
+  const { error } = await supabaseClient.from('shipping_rates').upsert(payload, { onConflict: 'country_code' });
+  if (error) { msg.className = 'text-xs text-center text-red-500'; msg.innerText = error.message; return; }
+  await logActivity('update_shipping', 'shipping_rate', code, payload);
+  document.getElementById('sCountryCode').disabled = false;
+  closeModal('shippingModal');
+  await loadShipping();
+}
+async function deleteShipping(code){
+  if (!confirm('Delete this shipping rate?')) return;
+  const { error } = await supabaseClient.from('shipping_rates').delete().eq('country_code', code);
+  if (error) { alert('Failed: ' + error.message); return; }
+  await loadShipping();
+}
+
+// ============ ANALYTICS ============
+async function loadAnalytics(){
+  const since30 = new Date(Date.now() - 30*24*60*60*1000).toISOString();
+  const since7 = new Date(Date.now() - 7*24*60*60*1000).toISOString();
+
+  const [v7, v30, o30] = await Promise.all([
+    supabaseClient.from('page_views').select('id', { count: 'exact', head: true }).gte('created_at', since7),
+    supabaseClient.from('page_views').select('id', { count: 'exact', head: true }).gte('created_at', since30),
+    supabaseClient.from('orders').select('total_usd').gte('created_at', since30)
+  ]);
+
+  document.getElementById('anViews7').innerText = v7.count ?? '—';
+  document.getElementById('anViews30').innerText = v30.count ?? '—';
+  document.getElementById('anOrders30').innerText = (o30.data || []).length;
+  const revenue = (o30.data || []).reduce((s, x) => s + Number(x.total_usd || 0), 0);
+  document.getElementById('anRevenue30').innerText = '$' + revenue.toFixed(2);
+
+  // Chart — last 14 days
+  const { data: allViews } = await supabaseClient.from('page_views').select('created_at').gte('created_at', new Date(Date.now() - 14*24*60*60*1000).toISOString());
+  const dayMap = {};
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(Date.now() - i*24*60*60*1000);
+    const key = d.toISOString().substring(0, 10);
+    dayMap[key] = 0;
+  }
+  (allViews || []).forEach(v => {
+    const k = v.created_at.substring(0, 10);
+    if (dayMap[k] !== undefined) dayMap[k]++;
+  });
+  const labels = Object.keys(dayMap).map(k => k.substring(5));
+  const values = Object.values(dayMap);
+
+  if (viewsChartInstance) viewsChartInstance.destroy();
+  const ctx = document.getElementById('viewsChart');
+  if (ctx) {
+    viewsChartInstance = new Chart(ctx, {
+      type: 'line',
+      data: { labels, datasets: [{ label: 'Views', data: values, borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,0.1)', fill: true, tension: 0.3 }] },
+      options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+    });
+  }
+
+  // Top pages
+  const { data: topViews } = await supabaseClient.from('page_views').select('page').gte('created_at', since30);
+  const pageCount = {};
+  (topViews || []).forEach(v => { pageCount[v.page] = (pageCount[v.page] || 0) + 1; });
+  const sorted = Object.entries(pageCount).sort((a, b) => b[1] - a[1]).slice(0, 10);
+  document.getElementById('topPagesList').innerHTML = sorted.length === 0 ? '<p class="text-slate-400 text-xs">No data.</p>' :
+    sorted.map(([p, c]) => `<div class="flex justify-between items-center bg-slate-50 rounded-lg px-3 py-2"><span class="truncate text-xs">${esc(p)}</span><span class="font-bold text-blue-600">${c}</span></div>`).join('');
+
+  // Recent activity
+  const { data: logs } = await supabaseClient.from('activity_logs').select('*').order('created_at', { ascending: false }).limit(15);
+  document.getElementById('recentActivityList').innerHTML = (logs || []).map(l => `<div class="flex items-start gap-2 py-1 border-b border-slate-100 last:border-0"><i class="fa-solid fa-circle text-[6px] text-blue-500 mt-1.5"></i><div class="flex-1"><p class="text-slate-700">${esc((l.user_email||'').split('@')[0])} · ${esc(l.action.replace(/_/g,' '))}</p><p class="text-[9px] text-slate-400">${new Date(l.created_at).toLocaleString()}</p></div></div>`).join('') || '<p class="text-slate-400 text-xs">No activity.</p>';
+}
+
+// ============ REFERRALS ============
+async function loadReferrals(){
+  const list = document.getElementById('referralsList');
+  list.innerHTML = '<p class="text-center text-slate-400 py-6 text-sm">Loading…</p>';
+  const { data, error } = await supabaseClient.from('referrals').select('*').order('created_at', { ascending: false }).limit(200);
+  if (error) { list.innerHTML = '<p class="text-center text-red-500 py-6 text-sm">Failed</p>'; return; }
+  const all = data || [];
+  document.getElementById('refTotal').innerText = all.length;
+  document.getElementById('refPending').innerText = all.filter(r => r.status === 'pending').length;
+  document.getElementById('refCompleted').innerText = all.filter(r => r.status === 'completed').length;
+  document.getElementById('refRewards').innerText = '$' + all.reduce((s, r) => s + Number(r.reward_amount_usd || 0), 0).toFixed(2);
+  if (all.length === 0) { list.innerHTML = '<p class="text-center text-slate-400 py-6 text-sm">No referrals yet.</p>'; return; }
+  list.innerHTML = all.map(r => `<div class="p-3 flex items-center gap-3"><div class="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center"><i class="fa-solid fa-user-plus text-indigo-600 text-xs"></i></div><div class="flex-1 min-w-0"><p class="text-xs truncate">Referrer: ${esc(r.referrer_id?.substring(0,8))}… → Referred: ${esc(r.referred_id?.substring(0,8))}…</p><p class="text-[10px] text-slate-400">${new Date(r.created_at).toLocaleDateString()} · Status: <b class="uppercase">${esc(r.status)}</b>${r.reward_amount_usd ? ' · $' + r.reward_amount_usd : ''}</p></div></div>`).join('');
+}
+
+// ============ AFFILIATES ============
+async function loadAffiliates(){
+  const list = document.getElementById('affiliatesList');
+  list.innerHTML = '<p class="text-center text-slate-400 py-6 text-sm">Loading…</p>';
+  const { data, error } = await supabaseClient.from('affiliates').select('*').order('created_at', { ascending: false });
+  if (error) { list.innerHTML = '<p class="text-center text-red-500 py-6 text-sm">Failed</p>'; return; }
+  const all = data || [];
+  document.getElementById('affTotal').innerText = all.length;
+  document.getElementById('affClicks').innerText = all.reduce((s, a) => s + (a.total_clicks || 0), 0);
+  document.getElementById('affSales').innerText = '$' + all.reduce((s, a) => s + Number(a.total_sales_usd || 0), 0).toFixed(2);
+  document.getElementById('affEarnings').innerText = '$' + all.reduce((s, a) => s + Number(a.total_earnings_usd || 0), 0).toFixed(2);
+  if (all.length === 0) { list.innerHTML = '<p class="text-center text-slate-400 py-6 text-sm">No affiliates yet.</p>'; return; }
+  list.innerHTML = all.map(a => `<div class="p-3 flex items-center gap-3"><div class="w-9 h-9 rounded-full bg-orange-100 flex items-center justify-center"><i class="fa-solid fa-handshake text-orange-600 text-xs"></i></div><div class="flex-1 min-w-0"><p class="font-bold text-sm font-mono">${esc(a.affiliate_code)}</p><p class="text-[10px] text-slate-500">${a.commission_rate}% · Clicks: ${a.total_clicks} · Sales: $${Number(a.total_sales_usd).toFixed(2)}</p></div><span class="text-[10px] font-bold ${a.is_active ? 'text-emerald-600' : 'text-slate-400'}">${a.is_active ? 'ACTIVE' : 'OFF'}</span></div>`).join('');
+}
+
+// ============ MARKETING ============
+function loadMarketing(){
+  const link = window.location.origin;
+  const el = document.getElementById('storeShareLink');
+  if (el) el.value = link;
+  const qr = document.getElementById('storeQRImg');
+  if (qr) qr.src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(link)}`;
+}
+function copyStoreLink(){
+  const val = document.getElementById('storeShareLink').value;
+  navigator.clipboard.writeText(val).then(() => alert('Link copied!')).catch(() => alert(val));
+}
+function generateQuickCoupon(){
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = 'ZORVEX';
+  for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  document.getElementById('quickCouponCode').value = code;
+}
+function copyCouponCode(){
+  const val = document.getElementById('quickCouponCode').value;
+  if (!val) return;
+  navigator.clipboard.writeText(val).then(() => alert('Coupon code copied!')).catch(() => alert(val));
+}
+function downloadQR(){
+  const img = document.getElementById('storeQRImg');
+  if (!img || !img.src) return;
+  const a = document.createElement('a');
+  a.href = img.src;
+  a.download = 'zorvex-qr.png';
+  a.target = '_blank';
+  a.click();
+}
+
+// ============ BULK UPLOAD ============
+function downloadCSVTemplate(){
+  const header = 'title,description,price_usd,old_price_usd,category_id,stock,origin_country,image_url,barcode,sku';
+  const sample = 'Wireless Earbuds Pro,Noise cancelling,24.99,39.99,1,999,CN,https://example.com/img.jpg,8901234567890,SKU001';
+  const csv = header + '\n' + sample;
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'zorvex-products-template.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+async function handleBulkUpload(){
+  const file = document.getElementById('bulkCSVFile').files[0];
+  const results = document.getElementById('bulkResults');
+  if (!file) { results.innerHTML = '<p class="text-red-500">Please select a CSV file.</p>'; return; }
+  const btn = document.getElementById('bulkUploadBtn');
+  btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing…';
+  results.innerHTML = '';
+
+  try {
+    const text = await file.text();
+    const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+    if (lines.length < 2) throw new Error('CSV must have header + at least 1 row');
+
+    const headers = lines[0].split(',').map(h => h.trim());
+    const required = ['title','price_usd'];
+    const missing = required.filter(r => !headers.includes(r));
+    if (missing.length) throw new Error('Missing columns: ' + missing.join(', '));
+
+    const rows = [];
+    for (let i = 1; i < lines.length; i++) {
+      const vals = lines[i].split(',').map(v => v.trim());
+      const row = {};
+      headers.forEach((h, idx) => { row[h] = vals[idx] || null; });
+      if (!row.title || !row.price_usd) continue;
+      rows.push({
+        title: row.title,
+        description: row.description || null,
+        price_usd: parseFloat(row.price_usd),
+        old_price_usd: parseFloat(row.old_price_usd) || null,
+        category_id: parseInt(row.category_id) || null,
+        stock: parseInt(row.stock) || 999,
+        origin_country: row.origin_country || 'BD',
+        image_url: row.image_url || null,
+        barcode: row.barcode || null,
+        sku: row.sku || null,
+        product_type: 'own',
+        is_active: true,
+        owner_id: adminUser.id
+      });
+    }
+
+    if (rows.length === 0) throw new Error('No valid rows found');
+
+    const { data, error } = await supabaseClient.from('products').insert(rows).select('id');
+    if (error) throw error;
+
+    await logActivity('bulk_upload', 'product', null, { count: rows.length });
+    results.innerHTML = `<p class="text-emerald-600 font-bold">✓ ${rows.length} products imported successfully!</p>`;
+    setTimeout(() => showPage('products'), 1500);
+  } catch(err) {
+    results.innerHTML = `<p class="text-red-500">Failed: ${esc(err.message)}</p>`;
+  }
+
+  btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-upload"></i> Upload & Import';
+}
+
+// ============ INIT ============
+loadMarketing();
 </script>
 </body>
 </html>
