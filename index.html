@@ -134,10 +134,10 @@
       <button onclick="closeModal('productModal')"><i class="fa-solid fa-xmark"></i></button>
     </div>
           <div class="grid sm:grid-cols-2 gap-4 p-4">
-      <div class="relative">
-        <img id="pImg" class="w-full aspect-square object-cover rounded-xl bg-slate-100">
-        <span id="pDiscountBadge" class="hidden absolute top-2 right-2 bg-red-600 text-white text-[11px] font-bold px-2 py-1 rounded-lg shadow"></span>
-      </div>
+         <div class="relative">
+          <img id="pImg" class="w-full aspect-square object-cover rounded-xl bg-slate-100">
+          <span id="pDiscountBadge" class="hidden absolute top-2 right-2 bg-red-600 text-white text-[11px] font-bold px-2 py-1 rounded-lg shadow"></span>
+              </div>
       <div>
         <h2 id="pTitle" class="text-lg font-black mb-1"></h2>
         <p class="text-xs text-slate-500 mb-2"><i class="fa-solid fa-location-dot"></i> Ships from <span id="pCountry"></span></p>
@@ -146,14 +146,15 @@
           <span id="pReviewCount" class="text-slate-400"></span>
         </div>
         <p id="pDesc" class="text-sm text-slate-600 mb-3"></p>
-        <div class="flex items-baseline gap-2 mb-4">
-          <span id="pPrice" class="text-2xl font-black text-blue-600"></span>
-          <span id="pOldPrice" class="text-sm text-slate-400 line-through"></span>
-        </div>
-        <div class="flex gap-2">
-          <button onclick="addToCart(currentProduct)" class="flex-1 bg-slate-900 text-white font-bold py-2.5 rounded-xl text-xs">Add to Cart</button>
-          <button onclick="buyNow()" class="flex-1 bg-blue-600 text-white font-bold py-2.5 rounded-xl text-xs">Buy Now</button>
-        </div>
+        <div class="flex items-baseline gap-2 mb-3">
+            <span id="pPrice" class="text-2xl font-black text-blue-600"></span>
+            <span id="pOldPrice" class="text-sm text-slate-400 line-through"></span>
+          </div>
+          <div id="pShippingBox" class="hidden bg-slate-50 rounded-xl p-3 mb-4"></div>
+          <div class="flex gap-2">
+            <button onclick="addToCart(currentProduct)" class="flex-1 bg-slate-900 text-white font-bold py-2.5 rounded-xl text-xs">Add to Cart</button>
+            <button onclick="buyNow()" class="flex-1 bg-blue-600 text-white font-bold py-2.5 rounded-xl text-xs">Buy Now</button>
+          </div>
       </div>
     </div>
     <div class="p-4 border-t">
@@ -256,8 +257,16 @@
       </div>
       <div class="flex justify-between text-xs text-slate-500"><span>Subtotal</span><span id="checkoutSubtotal"></span></div>
       <div class="flex justify-between text-xs text-slate-500"><span>Shipping</span><span id="checkoutShipping"></span></div>
-      <div class="flex justify-between font-bold text-sm pt-2 border-t"><span>Total</span><span id="checkoutTotal"></span></div>
-      <button type="submit" id="placeOrderBtn" class="w-full bg-blue-600 text-white font-black py-3 rounded-xl text-xs">Place Order</button>
+      <div class="flex justify-between items-center font-bold text-sm pt-2 border-t">
+        <span>Total</span>
+        <div class="flex items-center gap-2">
+          <span id="checkoutPricingBadge" class="hidden"></span>
+          <span id="checkoutTotal"></span>
+        </div>
+      </div>
+      <button type="submit" id="placeOrderBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-3 rounded-xl text-xs">
+        <i class="fa-solid fa-lock"></i> Place Order
+      </button>
     </form>
   </div>
 </div>
@@ -508,12 +517,17 @@ let currentProduct = null;
 let searchTerm = '';
 let activeCat = null;
 let cart = JSON.parse(localStorage.getItem('tg_cart') || '[]');
-const RATES = { USD:1, BDT:118, GBP:0.79, EUR:0.92, INR:83 };
 const SYMBOLS = { USD:'$', BDT:'৳', GBP:'£', EUR:'€', INR:'₹' };
 const FLAT_SHIPPING_USD = 5;
 
 function currentCurrency(){ return document.getElementById('currency').value; }
-function fmt(usd){ const c = currentCurrency(); return SYMBOLS[c] + (usd * RATES[c]).toFixed(0); }
+
+function fmt(usd){
+  const c = currentCurrency();
+  const rate = liveRates[c] || 1;
+  return SYMBOLS[c] + (usd * rate).toFixed(0);
+}
+  
 function closeModal(id){ document.getElementById(id).classList.add('hidden'); }
 function openModal(id){ document.getElementById(id).classList.remove('hidden'); }
 function esc(s){ return (s==null?'':String(s)).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
@@ -784,7 +798,7 @@ function onSearch(val){
 }
 function resetSearch(){ onSearch(''); activeCat = null; loadProducts(); }
   // ============ PRODUCTS ============
-const SAFE_COLS = 'id,title,description,category_id,price_usd,old_price_usd,origin_country,image_url,default_courier,is_active,stock,rating,reviews_count,created_at,barcode,display_discount_percent,is_trusted';
+const SAFE_COLS = 'id,title,description,category_id,price_usd,old_price_usd,origin_country,image_url,default_courier,is_active,stock,rating,reviews_count,created_at,barcode,display_discount_percent,is_trusted,video_url,courier_service,delivery_process';
 let categoriesMap = {};
 async function loadCategories(){
   const { data } = await supabaseClient.from('categories').select('*').order('name');
@@ -871,6 +885,12 @@ function renderProducts(){
   `}).join('');
 }
 
+function getYouTubeId(url){
+  if (!url) return null;
+  const m = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+  return m ? m[1] : null;
+}
+
 function openProduct(id){
   currentProduct = allProducts.find(p => p.id === id);
   if (!currentProduct) return;
@@ -892,6 +912,29 @@ function openProduct(id){
     badge.classList.remove('hidden');
   } else {
     badge.classList.add('hidden');
+  }
+
+  // Video
+  const videoBox = document.getElementById('pVideoBox');
+  const videoId = getYouTubeId(p.video_url);
+  if (videoId) {
+    videoBox.innerHTML = `<iframe class="w-full aspect-video rounded-xl" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>`;
+    videoBox.classList.remove('hidden');
+  } else {
+    videoBox.innerHTML = '';
+    videoBox.classList.add('hidden');
+  }
+
+  // Shipping info
+  const shipBox = document.getElementById('pShippingBox');
+  if (p.courier_service || p.delivery_process) {
+    shipBox.innerHTML = `
+      ${p.courier_service ? `<p class="text-xs text-slate-600"><i class="fa-solid fa-truck text-blue-600"></i> Ships via <b>${esc(p.courier_service)}</b></p>` : ''}
+      ${p.delivery_process ? `<p class="text-xs text-slate-600 mt-1"><i class="fa-solid fa-clock text-blue-600"></i> ${esc(p.delivery_process)}</p>` : ''}
+    `;
+    shipBox.classList.remove('hidden');
+  } else {
+    shipBox.classList.add('hidden');
   }
 
   document.getElementById('reviewForm').classList.toggle('hidden', !currentUser);
@@ -997,24 +1040,82 @@ function cartSubtotal(){ return cart.reduce((s,i)=> s + i.price*i.qty, 0); }
 function openCheckout(){
   if (!currentUser) { closeModal('cartDrawer'); openAuthModal(); return; }
   if (cart.length === 0) { alert('Your cart is empty.'); return; }
-  document.getElementById('checkoutSubtotal').innerText = fmt(cartSubtotal());
-  document.getElementById('checkoutShipping').innerText = fmt(FLAT_SHIPPING_USD);
-  document.getElementById('checkoutTotal').innerText = fmt(cartSubtotal() + FLAT_SHIPPING_USD);
+
+  // Auto-fill name/phone
   if (userProfile?.full_name && !document.getElementById('coName').value)
     document.getElementById('coName').value = userProfile.full_name;
   if (userProfile?.phone && !document.getElementById('coPhone').value)
     document.getElementById('coPhone').value = userProfile.phone;
+
+  // Build payment options based on ship country
+  const shipCountry = document.getElementById('shipCountry').value;
+  const codAllowed = isCodAllowedForCountry(shipCountry);
+  const paymentSelect = document.getElementById('coPayment');
+
+  paymentSelect.innerHTML = '';
+  if (codAllowed) {
+    paymentSelect.innerHTML += `<option value="cod">Cash on Delivery (COD)</option>`;
+  }
+  paymentSelect.innerHTML += `
+    <option value="bkash_manual">bKash (Prepaid)</option>
+    <option value="nagad_manual">Nagad (Prepaid)</option>
+  `;
+
+  // Default: COD if available, else first prepaid option
+  paymentSelect.value = codAllowed ? 'cod' : 'bkash_manual';
+
+  updateCheckoutTotals();
+  togglePaymentInfo();
+
   closeModal('cartDrawer');
   openModal('checkoutModal');
+}
+
+function updateCheckoutTotals(){
+  const baseSubtotal = cartSubtotal();
+  const baseShipping = FLAT_SHIPPING_USD;
+  const baseTotal = baseSubtotal + baseShipping;
+  const paymentMethod = document.getElementById('coPayment').value;
+  const isCod = paymentMethod === 'cod';
+
+  const prepaidTotal = calcPrepaidPrice(baseTotal);
+  const codTotal = calcCodPrice(baseTotal);
+
+  document.getElementById('checkoutSubtotal').innerText = fmt(baseSubtotal);
+  document.getElementById('checkoutShipping').innerText = fmt(baseShipping);
+  document.getElementById('checkoutTotal').innerText = fmt(isCod ? codTotal : prepaidTotal);
+
+  // Show prepaid discount / COD charge badge
+  const badge = document.getElementById('checkoutPricingBadge');
+  if (badge) {
+    if (isCod) {
+      badge.innerText = '+' + getCodCharge() + '% COD Charge';
+      badge.className = 'bg-red-600 text-white text-[11px] font-bold px-2 py-1 rounded';
+      badge.classList.remove('hidden');
+    } else {
+      badge.innerText = getPrepaidDiscount() + '% OFF 🎉';
+      badge.className = 'bg-red-600 text-white text-[11px] font-bold px-2 py-1 rounded';
+      badge.classList.remove('hidden');
+    }
+  }
 }
 
 function togglePaymentInfo(){
   const val = document.getElementById('coPayment').value;
   const isManual = val !== 'cod';
+
+  // Update totals + badge
+  updateCheckoutTotals();
+
   document.getElementById('manualPayBox').classList.toggle('hidden', !isManual);
+
   if (isManual){
     document.getElementById('payNumber').innerText = val === 'bkash_manual' ? '01XXXXXXXXX (bKash Personal)' : '01XXXXXXXXX (Nagad Personal)';
-    document.getElementById('payAmount').innerText = fmt(cartSubtotal() + FLAT_SHIPPING_USD);
+
+    // Show the prepaid total in manual pay box
+    const baseTotal = cartSubtotal() + FLAT_SHIPPING_USD;
+    const prepaidTotal = calcPrepaidPrice(baseTotal);
+    document.getElementById('payAmount').innerText = fmt(prepaidTotal);
   }
 }
 
@@ -1028,8 +1129,16 @@ async function placeOrder(e){
 
   const subtotal = cartSubtotal();
   const shipping = FLAT_SHIPPING_USD;
+  const baseTotal = subtotal + shipping;
   const cur = currentCurrency();
-  const rate = RATES[cur];
+  const rate = liveRates[cur] || 1;
+  const paymentMethod = document.getElementById('coPayment').value;
+  const isCod = paymentMethod === 'cod';
+
+  // Apply prepaid discount OR COD charge
+  const finalTotal = isCod ? calcCodPrice(baseTotal) : calcPrepaidPrice(baseTotal);
+  const adjustment = finalTotal - baseTotal; // + for COD, − for prepaid
+  const commissionRate = 0;
 
   const order = {
     customer_id: currentUser.id,
@@ -1037,13 +1146,17 @@ async function placeOrder(e){
     phone: document.getElementById('coPhone').value,
     address: document.getElementById('coAddress').value,
     ship_country: document.getElementById('shipCountry').value,
-    currency: cur, local_currency: cur, exchange_rate: rate,
-    payment_method: document.getElementById('coPayment').value,
+    currency: cur,
+    local_currency: cur,
+    exchange_rate: rate,
+    payment_method: paymentMethod,
     payment_txn_id: document.getElementById('coTxnId')?.value || null,
-    subtotal_usd: subtotal, shipping_usd: shipping, total_usd: subtotal + shipping,
+    subtotal_usd: subtotal,
+    shipping_usd: shipping,
+    total_usd: +finalTotal.toFixed(2),
     subtotal_local: +(subtotal * rate).toFixed(2),
     shipping_local: +(shipping * rate).toFixed(2),
-    total_local: +((subtotal + shipping) * rate).toFixed(2)
+    total_local: +(finalTotal * rate).toFixed(2)
   };
 
   const { data, error } = await supabaseClient.from('orders').insert(order).select().single();
@@ -1051,12 +1164,14 @@ async function placeOrder(e){
     btn.disabled = false; btn.innerText = 'Place Order';
     alert('Order failed: ' + error.message); return false;
   }
+
   const items = cart.map(i => ({ order_id: data.id, product_id: i.id, title_snapshot: i.title, price_usd: i.price, qty: i.qty }));
   const { error: itemErr } = await supabaseClient.from('order_items').insert(items);
   if (itemErr){
     btn.disabled = false; btn.innerText = 'Place Order';
     alert('Items failed: ' + itemErr.message); return false;
   }
+
   cart = []; saveCart();
   closeModal('checkoutModal');
   document.getElementById('successOrderId').innerText = data.order_code;
@@ -1083,7 +1198,7 @@ async function openOrdersModal(){
         </div>
         <p class="text-slate-400 mb-2">Status: <b class="${cancelled ? 'text-red-500' : 'text-blue-600'}">${esc(o.status.replace(/_/g,' '))}</b></p>
         ${!cancelled ? `
-          <div class="flex gap-1 mb-2">
+          <div class="flex gap-1 mb-1">
             ${STAGES.map(s => `<div class="flex-1 h-1.5 rounded ${idx >= STAGES.indexOf(s) ? 'bg-blue-600' : 'bg-slate-200'}"></div>`).join('')}
           </div>
           <div class="flex justify-between text-[9px] text-slate-400 mb-2">
@@ -1092,7 +1207,7 @@ async function openOrdersModal(){
             <span class="${idx >= 5 ? 'text-emerald-600 font-bold' : ''}">Delivered</span>
           </div>
         ` : ''}
-        ${o.courier_name ? `<p class="text-[11px] text-slate-500 mt-1"><i class="fa-solid fa-truck"></i> ${esc(o.courier_name)}${o.tracking_no ? ' · ' + esc(o.tracking_no) : ''}</p>` : ''}
+        ${o.courier_name ? `<p class="text-[11px] text-slate-500 mt-1"><i class="fa-solid fa-truck"></i> ${esc(o.courier_name)}${o.tracking_no ? ' · ' + esc(o.tracking_no) : ''}</p>` : (o.tracking_no ? `<p class="text-[11px] text-slate-500 mt-1"><i class="fa-solid fa-truck"></i> Tracking: ${esc(o.tracking_no)}</p>` : '')}
         ${o.delivery_notes ? `<div class="bg-blue-50 border border-blue-100 rounded-lg p-2 mt-2 text-[11px] text-blue-800"><i class="fa-solid fa-circle-info"></i> ${esc(o.delivery_notes)}</div>` : ''}
       </div>`;
   }).join('') || '<p class="text-slate-400">No orders yet.</p>';
@@ -1293,14 +1408,85 @@ function handleScanResult(text){
   saveSearchHistory(text);
 }
 
+  // ============ LIVE CURRENCY RATES ============
+let liveRates = { USD:1, BDT:118, GBP:0.79, EUR:0.92, INR:83 };
+let ratesLoadedFrom = 'fallback';
+
+async function loadLiveRates(){
+  // 1. Check cache (6 hour)
+  try {
+    const cached = localStorage.getItem('zorvex_rates');
+    if (cached) {
+      const { rates, timestamp } = JSON.parse(cached);
+      if (Date.now() - timestamp < 6 * 60 * 60 * 1000) {
+        liveRates = rates;
+        ratesLoadedFrom = 'cache';
+        return;
+      }
+    }
+  } catch(e) {}
+
+  // 2. Fetch live rates
+  try {
+    const res = await fetch('https://api.exchangerate.host/latest?base=USD');
+    if (!res.ok) throw new Error('API failed');
+    const data = await res.json();
+    if (data && data.rates) {
+      liveRates = {
+        USD: 1,
+        BDT: data.rates.BDT || 118,
+        INR: data.rates.INR || 83,
+        EUR: data.rates.EUR || 0.92,
+        GBP: data.rates.GBP || 0.79
+      };
+      ratesLoadedFrom = 'live';
+      localStorage.setItem('zorvex_rates', JSON.stringify({
+        rates: liveRates,
+        timestamp: Date.now()
+      }));
+      return;
+    }
+  } catch(e) {
+    console.warn('Live rates failed, using fallback:', e.message);
+  }
+
+  // 3. Fallback: use admin-set BDT rate
+  if (siteSettings.currency_bdt_rate) {
+    liveRates.BDT = parseFloat(siteSettings.currency_bdt_rate) || 118;
+    ratesLoadedFrom = 'admin';
+  }
+}
+
+// ============ PRICING HELPERS ============
+function getPrepaidDiscount(){
+  return parseFloat(siteSettings.prepaid_discount || '5');
+}
+function getCodCharge(){
+  return parseFloat(siteSettings.cod_charge || '10');
+}
+function isCodAllowedForCountry(country){
+  const bdOnly = (siteSettings.cod_bd_only || 'true') === 'true';
+  if (!bdOnly) return true;
+  return country === 'BD';
+}
+function calcPrepaidPrice(baseUsd){
+  const disc = getPrepaidDiscount();
+  return baseUsd * (1 - disc / 100);
+}
+function calcCodPrice(baseUsd){
+  const charge = getCodCharge();
+  return baseUsd * (1 + charge / 100);
+}
+  
   // ============ SITE SETTINGS / CONTACT ============
 let siteSettings = {};
 
 async function loadSiteSettings(){
   const { data, error } = await supabaseClient.from('site_settings').select('key, value');
-  if (error) { console.warn('Settings load failed:', error.message); return; }
+  if (error) { console.warn('Settings load failed:', error.message); }
   siteSettings = {};
   (data || []).forEach(s => { siteSettings[s.key] = (s.value || '').trim(); });
+  await loadLiveRates();
   applySiteSettings();
 }
 
@@ -1309,6 +1495,9 @@ function applySiteSettings(){
   const tagEl = document.getElementById('topbarTagline');
   if (tagEl) tagEl.innerText = tagline;
   buildContactLinks();
+  // Re-render with new live rates
+  if (allProducts.length > 0) renderProducts();
+  if (cart.length > 0 && !document.getElementById('cartDrawer').classList.contains('hidden')) renderCart();
 }
 
 function smartWhatsAppLink(raw){
