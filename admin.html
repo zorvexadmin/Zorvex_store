@@ -257,21 +257,60 @@
       </div>
 
       <div id="page-commission" class="page hidden fade-in">
-        <h1 class="text-2xl font-black mb-1">Commission</h1>
-        <p class="text-sm text-slate-500 mb-6">Platform commission rates</p>
+        <h1 class="text-2xl font-black mb-1">Pricing & Commission</h1>
+        <p class="text-sm text-slate-500 mb-6">Platform rates & customer pricing</p>
+
         <div class="bg-white rounded-2xl p-5 border border-slate-200 mb-4">
           <div class="flex items-center gap-3 mb-4"><div class="w-9 h-9 bg-blue-100 rounded-xl flex items-center justify-center"><i class="fa-solid fa-store text-blue-600"></i></div><div><h2 class="font-black">Seller's Own Products</h2><p class="text-[11px] text-slate-500">When a seller sells their own product</p></div></div>
           <label class="text-xs font-bold text-slate-500">Commission Rate (%)</label>
           <input id="set_commission_own_rate" type="number" step="0.1" min="0" max="50" placeholder="5" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
           <p class="text-[10px] text-slate-400 mt-1">Default: 5%. Admin keeps this % of the selling price.</p>
         </div>
+
         <div class="bg-white rounded-2xl p-5 border border-slate-200 mb-4">
           <div class="flex items-center gap-3 mb-4"><div class="w-9 h-9 bg-amber-100 rounded-xl flex items-center justify-center"><i class="fa-solid fa-arrows-rotate text-amber-600"></i></div><div><h2 class="font-black">Admin Product Resell</h2><p class="text-[11px] text-slate-500">When a seller resells admin's product</p></div></div>
           <label class="text-xs font-bold text-slate-500">Commission Rate (%)</label>
           <input id="set_commission_resell_rate" type="number" step="0.1" min="0" max="50" placeholder="10" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
           <p class="text-[10px] text-slate-400 mt-1">Default: 10%. Includes website fee + resell royalty.</p>
         </div>
-        <button onclick="saveCommission()" id="saveCommissionBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-3 rounded-xl text-sm mb-20"><i class="fa-solid fa-check"></i> Save Commission Rates</button>
+
+        <div class="bg-white rounded-2xl p-5 border border-emerald-200 mb-4">
+          <div class="flex items-center gap-3 mb-4"><div class="w-9 h-9 bg-emerald-100 rounded-xl flex items-center justify-center"><i class="fa-solid fa-tags text-emerald-600"></i></div><div><h2 class="font-black">Prepaid Discount</h2><p class="text-[11px] text-slate-500">Customer saves this % when paying online</p></div></div>
+          <label class="text-xs font-bold text-slate-500">Discount (%)</label>
+          <input id="set_prepaid_discount" type="number" step="0.1" min="0" max="30" placeholder="5" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
+          <p class="text-[10px] text-slate-400 mt-1">Default: 5%. Customer pays less than base price.</p>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 border border-red-200 mb-4">
+          <div class="flex items-center gap-3 mb-4"><div class="w-9 h-9 bg-red-100 rounded-xl flex items-center justify-center"><i class="fa-solid fa-money-bill-wave text-red-600"></i></div><div><h2 class="font-black">COD Charge</h2><p class="text-[11px] text-slate-500">Extra charge for Cash on Delivery</p></div></div>
+          <label class="text-xs font-bold text-slate-500">Extra Charge (%)</label>
+          <input id="set_cod_charge" type="number" step="0.1" min="0" max="30" placeholder="10" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
+          <p class="text-[10px] text-slate-400 mt-1">Default: 10%. Customer pays more for COD.</p>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 mb-4">
+          <div class="flex items-center gap-3 mb-4"><div class="w-9 h-9 bg-sky-100 rounded-xl flex items-center justify-center"><i class="fa-solid fa-globe text-sky-600"></i></div><div><h2 class="font-black">COD Availability</h2><p class="text-[11px] text-slate-500">Which countries allow COD</p></div></div>
+          <label class="flex items-center gap-2 text-sm">
+            <input id="set_cod_bd_only" type="checkbox" class="w-4 h-4 accent-blue-600">
+            <span class="font-bold">Only Bangladesh</span>
+          </label>
+          <p class="text-[10px] text-slate-400 mt-2">Unchecked → COD available everywhere (not recommended)</p>
+        </div>
+
+         <div class="bg-white rounded-2xl p-5 border border-indigo-200 mb-4">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-9 h-9 bg-indigo-100 rounded-xl flex items-center justify-center"><i class="fa-solid fa-coins text-indigo-600"></i></div>
+            <div>
+              <h2 class="font-black">Currency Rate (Fallback)</h2>
+              <p class="text-[11px] text-slate-500">Only used if live API fails</p>
+            </div>
+          </div>
+          <label class="text-xs font-bold text-slate-500">$1 USD = ৳ (BDT)</label>
+          <input id="set_currency_bdt_rate" type="number" step="0.01" min="1" placeholder="118" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
+          <p class="text-[10px] text-slate-400 mt-1">Live API rate is used normally. This is fallback only.</p>
+        </div>
+        
+        <button onclick="saveCommission()" id="saveCommissionBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-3 rounded-xl text-sm mb-20"><i class="fa-solid fa-check"></i> Save All Rates</button>
       </div>
 
       <div id="page-logs" class="page hidden fade-in">
@@ -307,18 +346,29 @@
       <input id="pTitle" placeholder="Product title *" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
       <textarea id="pDesc" placeholder="Description" rows="2" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
       <select id="pCategory" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none"></select>
-      <div class="grid grid-cols-2 gap-2">
-        <input id="pPrice" type="number" step="0.01" placeholder="Price USD *" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+
+            <div class="grid grid-cols-3 gap-2">
+        <input id="pPrice" type="number" step="0.01" placeholder="Price *" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
         <input id="pOldPrice" type="number" step="0.01" placeholder="Old price" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-      </div>
+        <select id="pCurrency" class="w-full border border-slate-300 rounded-xl px-2 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+          <option value="BDT">৳ BDT</option>
+          <option value="USD">$ USD</option>
+          <option value="INR">₹ INR</option>
+          <option value="EUR">€ EUR</option>
+          <option value="GBP">£ GBP</option>
+        </select>
+            </div>
+
       <div class="grid grid-cols-2 gap-2">
         <input id="pStock" type="number" placeholder="Stock" value="999" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
         <input id="pCountry" placeholder="Origin (e.g. CN)" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
       </div>
+
       <div class="grid grid-cols-2 gap-2">
         <input id="pBarcode" placeholder="Barcode" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
         <input id="pSKU" placeholder="SKU" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
       </div>
+
       <div>
         <label class="text-xs font-bold text-slate-500">Product Image</label>
         <input id="pImageFile" type="file" accept="image/*" onchange="handleProductImage(event)" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm mt-1">
@@ -326,10 +376,44 @@
         <img id="pImagePreview" class="w-full h-32 object-cover rounded-xl mt-2 bg-slate-100 hidden">
         <p id="pImageStatus" class="text-[11px] mt-1"></p>
       </div>
+
+            <div>
+        <label class="text-xs font-bold text-slate-500">Product Video (YouTube URL - optional)</label>
+        <input id="pVideoUrl" placeholder="https://youtube.com/watch?v=..." class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
+        <p class="text-[10px] text-slate-400 mt-1">Leave empty if no video</p>
+            </div>
+      
       <div class="grid grid-cols-2 gap-2">
-        <select id="pType" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none"><option value="own">Own Product</option><option value="admin_resell">Admin Resell</option></select>
-        <select id="pActive" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none"><option value="true">Active</option><option value="false">Hidden</option></select>
+        <select id="pType" onchange="toggleDropshipFields()" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+          <option value="own">Own Product</option>
+          <option value="dropship">Drop Shipping</option>
+        </select>
+        <select id="pActive" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+          <option value="true">Active</option>
+          <option value="false">Hidden</option>
+        </select>
       </div>
+
+      <div>
+        <label class="text-xs font-bold text-slate-500">Display Discount % (optional)</label>
+        <input id="pDiscount" type="number" step="0.1" min="0" max="90" placeholder="Leave empty for auto" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
+        <p class="text-[10px] text-slate-400 mt-1">Customer দেখবে এই % OFF</p>
+      </div>
+
+      <div class="border-t border-slate-200 pt-3">
+        <p class="text-xs font-bold text-slate-600 mb-2"><i class="fa-solid fa-truck"></i> Shipping Info (Customer দেখবে)</p>
+        <input id="pCourier" placeholder="Courier name (e.g. Pathao, DHL)" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mb-2 focus:ring-2 focus:ring-blue-500 outline-none">
+        <input id="pDeliveryProcess" placeholder="Delivery time (e.g. 7-14 days)" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+      </div>
+
+      <div id="dropshipFields" class="hidden border-t border-amber-200 pt-3 bg-amber-50 rounded-xl p-3">
+        <p class="text-xs font-bold text-amber-700 mb-2"><i class="fa-solid fa-lock"></i> Supplier Info (Admin-only)</p>
+        <input id="pSupplierUrl" placeholder="Supplier URL" class="w-full border border-amber-200 rounded-xl px-3 py-2.5 text-sm mb-2 focus:ring-2 focus:ring-amber-500 outline-none bg-white">
+        <input id="pSupplierName" placeholder="Supplier name" class="w-full border border-amber-200 rounded-xl px-3 py-2.5 text-sm mb-2 focus:ring-2 focus:ring-amber-500 outline-none bg-white">
+        <input id="pSupplierPrice" type="number" step="0.01" placeholder="Supplier price USD (your cost)" class="w-full border border-amber-200 rounded-xl px-3 py-2.5 text-sm mb-2 focus:ring-2 focus:ring-amber-500 outline-none bg-white">
+        <textarea id="pSupplierNotes" rows="2" placeholder="Supplier notes (e.g. blind shipping)" class="w-full border border-amber-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-amber-500 outline-none bg-white"></textarea>
+      </div>
+
       <div class="flex gap-2 pt-2">
         <button onclick="closeModal('productModal')" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-3 rounded-xl text-sm">Cancel</button>
         <button id="saveProductBtn" onclick="saveProduct()" class="flex-[2] bg-blue-600 hover:bg-blue-700 text-white font-black py-3 rounded-xl text-sm"><i class="fa-solid fa-check"></i> Save Product</button>
@@ -482,28 +566,46 @@ async function saveSettings(){
   const { error } = await supabaseClient.from('site_settings').upsert(updates, { onConflict: 'key' });
   btn.disabled = false; btn.innerHTML = original;
   if (error) { alert('Save failed: ' + error.message); return; }
-  btn.innerHTML = '<i class="fa-solid fa-check"></i> Saved!';
+  btn.innerconstHTML = '<i class="fa-solid fa-check"></i> Saved!';
   await logActivity('update_settings', 'site_settings', null, null);
   setTimeout(() => { btn.innerHTML = original; }, 1500);
-}
+} 
 async function loadCommission(){
-  const { data } = await supabaseClient.from('site_settings').select('key, value').in('key', ['commission_own_rate','commission_resell_rate']);
-  (data || []).forEach(s => { const el = document.getElementById('set_' + s.key); if (el) el.value = s.value || ''; });
+  const { data } = await supabaseClient.from('site_settings').select('key, value')
+    .in('key', ['commission_own_rate','commission_resell_rate','prepaid_discount','cod_charge','cod_bd_only','currency_bdt_rate']);
+  (data || []).forEach(s => {
+    const el = document.getElementById('set_' + s.key);
+    if (!el) return;
+    if (s.key === 'cod_bd_only') el.checked = s.value === 'true';
+    else el.value = s.value || '';
+  });
 }
+
 async function saveCommission(){
   const btn = document.getElementById('saveCommissionBtn'), original = btn.innerHTML;
   btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving…';
+
   const own = document.getElementById('set_commission_own_rate').value || '5';
   const resell = document.getElementById('set_commission_resell_rate').value || '10';
+  const prepaid = document.getElementById('set_prepaid_discount').value || '5';
+  const cod = document.getElementById('set_cod_charge').value || '10';
+  const codBdOnly = document.getElementById('set_cod_bd_only').checked ? 'true' : 'false';
+  const bdtRate = document.getElementById('set_currency_bdt_rate').value || '118';
+
   const updates = [
     { key: 'commission_own_rate', value: own, updated_at: new Date().toISOString() },
-    { key: 'commission_resell_rate', value: resell, updated_at: new Date().toISOString() }
+    { key: 'commission_resell_rate', value: resell, updated_at: new Date().toISOString() },
+    { key: 'prepaid_discount', value: prepaid, updated_at: new Date().toISOString() },
+    { key: 'cod_charge', value: cod, updated_at: new Date().toISOString() },
+    { key: 'cod_bd_only', value: codBdOnly, updated_at: new Date().toISOString() },
+    { key: 'currency_bdt_rate', value: bdtRate, updated_at: new Date().toISOString() }
   ];
+
   const { error } = await supabaseClient.from('site_settings').upsert(updates, { onConflict: 'key' });
   btn.disabled = false; btn.innerHTML = original;
   if (error) { alert('Save failed: ' + error.message); return; }
   btn.innerHTML = '<i class="fa-solid fa-check"></i> Saved!';
-  await logActivity('update_commission', 'site_settings', null, { own, resell });
+  await logActivity('update_commission', 'site_settings', null, { own, resell, prepaid, cod, codBdOnly, bdtRate });
   setTimeout(() => { btn.innerHTML = original; }, 1500);
 }
 async function loadTeam(){
@@ -615,33 +717,46 @@ async function loadCategories(){
 async function loadProductsList(){
   const list = document.getElementById('productsList');
   list.innerHTML = '<p class="text-center text-slate-400 py-6 text-sm">Loading…</p>';
-  const { data, error } = await supabaseClient.from('products').select('id,title,price_usd,old_price_usd,image_url,category_id,stock,is_active,product_type,sku,barcode,origin_country,rating,reviews_count,created_at').order('created_at', { ascending: false });
+  const { data, error } = await supabaseClient
+    .from('products')
+    .select('id,title,price_usd,old_price_usd,image_url,category_id,stock,is_active,product_type,sku,barcode,origin_country,rating,reviews_count,created_at,display_discount_percent,video_url,courier_service,delivery_process,supplier_url,supplier_name,supplier_price_usd,supplier_notes')
+    .order('created_at', { ascending: false });
   if (error) { list.innerHTML = '<p class="text-center text-red-500 py-6 text-sm">Failed: ' + esc(error.message) + '</p>'; return; }
   productsCache = data || [];
   renderProductsList();
 }
+
 function renderProductsList(){
   const q = (document.getElementById('productSearch')?.value || '').toLowerCase().trim();
   const filtered = productsCache.filter(p => !q || (p.title||'').toLowerCase().includes(q));
   const list = document.getElementById('productsList');
   if (filtered.length === 0) { list.innerHTML = '<p class="text-center text-slate-400 py-6 text-sm">No products.</p>'; return; }
+  const typeBadge = (t) => {
+    if (t === 'dropship') return '<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">DROPSHIP</span>';
+    if (t === 'seller') return '<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-purple-100 text-purple-700">SELLER</span>';
+    return '<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-100 text-blue-700">OWN</span>';
+  };
   list.innerHTML = filtered.map(p => `<div class="p-3 flex items-center gap-3">
     <img src="${p.image_url || 'https://placehold.co/100x100'}" class="w-14 h-14 rounded-lg object-cover bg-slate-100 shrink-0">
-    <div class="flex-1 min-w-0"><p class="font-bold text-sm truncate">${esc(p.title)}</p><div class="flex items-center gap-2 mt-0.5 flex-wrap"><span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${p.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600'}">${p.is_active ? 'ACTIVE' : 'HIDDEN'}</span><span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${p.product_type === 'admin_resell' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'}">${p.product_type === 'admin_resell' ? 'RESELL' : 'OWN'}</span></div><p class="text-xs text-blue-600 font-bold mt-0.5">$${Number(p.price_usd).toFixed(2)} · Stock: ${p.stock||0}</p></div>
+    <div class="flex-1 min-w-0"><p class="font-bold text-sm truncate">${esc(p.title)}</p><div class="flex items-center gap-2 mt-0.5 flex-wrap"><span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${p.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600'}">${p.is_active ? 'ACTIVE' : 'HIDDEN'}</span>${typeBadge(p.product_type)}</div><p class="text-xs text-blue-600 font-bold mt-0.5">$${Number(p.price_usd).toFixed(2)} · Stock: ${p.stock||0}</p></div>
     <div class="flex gap-1"><button onclick="editProduct('${p.id}')" class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center"><i class="fa-solid fa-pen text-blue-600 text-xs"></i></button><button onclick="deleteProduct('${p.id}')" class="w-8 h-8 rounded-lg hover:bg-red-50 flex items-center justify-center"><i class="fa-solid fa-trash text-red-500 text-xs"></i></button></div>
   </div>`).join('');
 }
 function openProductModal(){
   currentProductId = null; currentProductImageUrl = null;
   document.getElementById('productModalTitle').innerText = 'Add Product';
-  ['pTitle','pDesc','pPrice','pOldPrice','pCountry','pBarcode','pSKU','pImageUrl'].forEach(id => document.getElementById(id).value = '');
+  ['pTitle','pDesc','pPrice','pOldPrice','pCountry','pBarcode','pSKU','pImageUrl','pDiscount','pCourier','pDeliveryProcess','pSupplierUrl','pSupplierName','pSupplierPrice','pSupplierNotes','pVideoUrl'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
   document.getElementById('pStock').value = '999';
   document.getElementById('pCategory').value = '';
   document.getElementById('pType').value = 'own';
   document.getElementById('pActive').value = 'true';
+  document.getElementById('pCurrency').value = 'BDT';
   document.getElementById('pImagePreview').classList.add('hidden');
   document.getElementById('pImageStatus').innerText = '';
   document.getElementById('productMsg').innerText = '';
+  document.getElementById('dropshipFields').classList.add('hidden');
   openModal('productModal');
 }
 function editProduct(id){
@@ -660,11 +775,34 @@ function editProduct(id){
   document.getElementById('pImageUrl').value = p.image_url || '';
   document.getElementById('pType').value = p.product_type || 'own';
   document.getElementById('pActive').value = String(p.is_active);
+  document.getElementById('pCurrency').value = 'USD';
+  document.getElementById('pDiscount').value = p.display_discount_percent || '';
+  document.getElementById('pCourier').value = p.courier_service || '';
+  document.getElementById('pDeliveryProcess').value = p.delivery_process || '';
+  document.getElementById('pSupplierUrl').value = p.supplier_url || '';
+  document.getElementById('pSupplierName').value = p.supplier_name || '';
+  document.getElementById('pSupplierPrice').value = p.supplier_price_usd || '';
+  document.getElementById('pSupplierNotes').value = p.supplier_notes || '';
+  document.getElementById('pVideoUrl').value = p.video_url || '';
   const prev = document.getElementById('pImagePreview');
   if (p.image_url) { prev.src = p.image_url; prev.classList.remove('hidden'); } else { prev.classList.add('hidden'); }
   document.getElementById('productMsg').innerText = '';
+  toggleDropshipFields();
   openModal('productModal');
-  }
+}
+
+function toggleDropshipFields(){
+  const type = document.getElementById('pType').value;
+  const box = document.getElementById('dropshipFields');
+  if (type === 'dropship') box.classList.remove('hidden');
+  else box.classList.add('hidden');
+}
+
+function convertToUSD(amount, currency){
+  if (!amount || !currency) return amount;
+  const rates = { USD: 1, BDT: 118, INR: 83, EUR: 0.92, GBP: 0.79 };
+  return +(amount / rates[currency]).toFixed(2);
+}
   async function compressImage(file, maxSize = 800, quality = 0.85){
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -705,23 +843,40 @@ async function handleProductImage(event){
 async function saveProduct(){
   const btn = document.getElementById('saveProductBtn'), msg = document.getElementById('productMsg');
   const title = document.getElementById('pTitle').value.trim();
-  const price = parseFloat(document.getElementById('pPrice').value);
-  if (!title || !price) { msg.className = 'text-xs text-center text-red-500'; msg.innerText = 'Title & price required'; return; }
+  const priceRaw = parseFloat(document.getElementById('pPrice').value);
+  const oldPriceRaw = parseFloat(document.getElementById('pOldPrice').value) || null;
+  const currency = document.getElementById('pCurrency').value;
+  if (!title || !priceRaw) { msg.className = 'text-xs text-center text-red-500'; msg.innerText = 'Title & price required'; return; }
   btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving…';
+
+  const price = convertToUSD(priceRaw, currency);
+  const oldPrice = oldPriceRaw ? convertToUSD(oldPriceRaw, currency) : null;
+  const productType = document.getElementById('pType').value;
+  const isDropship = productType === 'dropship';
+
   const data = {
     title, price_usd: price,
+    old_price_usd: oldPrice,
     description: document.getElementById('pDesc').value.trim() || null,
     category_id: parseInt(document.getElementById('pCategory').value) || null,
-    old_price_usd: parseFloat(document.getElementById('pOldPrice').value) || null,
     stock: parseInt(document.getElementById('pStock').value) || 999,
     origin_country: document.getElementById('pCountry').value.trim() || 'BD',
     barcode: document.getElementById('pBarcode').value.trim() || null,
     sku: document.getElementById('pSKU').value.trim() || null,
     image_url: document.getElementById('pImageUrl').value.trim() || currentProductImageUrl || null,
-    product_type: document.getElementById('pType').value,
+    video_url: document.getElementById('pVideoUrl').value.trim() || null,
+    product_type: productType,
     is_active: document.getElementById('pActive').value === 'true',
+    display_discount_percent: parseFloat(document.getElementById('pDiscount').value) || null,
+    courier_service: document.getElementById('pCourier').value.trim() || null,
+    delivery_process: document.getElementById('pDeliveryProcess').value.trim() || null,
+    supplier_url: isDropship ? (document.getElementById('pSupplierUrl').value.trim() || null) : null,
+    supplier_name: isDropship ? (document.getElementById('pSupplierName').value.trim() || null) : null,
+    supplier_price_usd: isDropship ? (parseFloat(document.getElementById('pSupplierPrice').value) || null) : null,
+    supplier_notes: isDropship ? (document.getElementById('pSupplierNotes').value.trim() || null) : null,
     owner_id: adminUser.id
   };
+
   let error;
   if (currentProductId) ({ error } = await supabaseClient.from('products').update(data).eq('id', currentProductId));
   else ({ error } = await supabaseClient.from('products').insert(data));
@@ -895,18 +1050,80 @@ function renderCustomers(){
 async function loadSellers(){
   const list = document.getElementById('sellersList');
   list.innerHTML = '<p class="text-center text-slate-400 py-6 text-sm">Loading…</p>';
-  const { data, error } = await supabaseClient.from('profiles').select('id, full_name, phone, role, is_banned, profile_pic_url, shop_name, shop_logo_url, shop_bio, created_at').eq('role', 'seller').order('created_at', { ascending: false });
-  if (error) { list.innerHTML = '<p class="text-center text-red-500 py-6 text-sm">Failed</p>'; return; }
-  if (!data || data.length === 0) { list.innerHTML = '<div class="bg-white rounded-2xl border border-slate-200 p-10 text-center"><i class="fa-solid fa-store text-slate-300 text-5xl mb-3"></i><p class="text-slate-500 text-sm">No sellers yet.</p><p class="text-xs text-slate-400 mt-1">Sellers appear here after they sign up from the customer site.</p></div>'; return; }
-  list.innerHTML = data.map(s => `<div class="bg-white rounded-2xl border border-slate-200 p-4">
-    <div class="flex items-center gap-3 mb-3">
-      ${s.shop_logo_url || s.profile_pic_url ? `<img src="${esc(s.shop_logo_url || s.profile_pic_url)}" class="w-12 h-12 rounded-xl object-cover">` : `<div class="w-12 h-12 rounded-xl bg-orange-500 text-white flex items-center justify-center font-black text-lg">${esc((s.shop_name || s.full_name || 'S')[0].toUpperCase())}</div>`}
-      <div class="flex-1 min-w-0"><p class="font-black truncate">${esc(s.shop_name || s.full_name || 'Unnamed Store')}</p><p class="text-xs text-slate-500 truncate">${esc(s.full_name || '')} · ${esc(s.phone || 'No phone')}</p></div>
-      ${s.is_banned ? '<span class="text-[10px] font-bold text-red-500 bg-red-50 px-2 py-1 rounded">BANNED</span>' : '<span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded">ACTIVE</span>'}
+  const { data, error } = await supabaseClient
+    .from('seller_applications')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (error) { list.innerHTML = '<p class="text-center text-red-500 py-6 text-sm">Failed: ' + esc(error.message) + '</p>'; return; }
+  if (!data || data.length === 0) {
+    list.innerHTML = '<div class="bg-white rounded-2xl border border-slate-200 p-10 text-center"><i class="fa-solid fa-store text-slate-300 text-5xl mb-3"></i><p class="text-slate-500 text-sm">No seller applications yet.</p><p class="text-xs text-slate-400 mt-1">Applications appear here for review.</p></div>';
+    return;
+  }
+  const statusColor = { pending:'bg-amber-100 text-amber-700', approved:'bg-emerald-100 text-emerald-700', rejected:'bg-red-100 text-red-700' };
+  list.innerHTML = data.map(a => `
+    <div class="bg-white rounded-2xl border border-slate-200 p-4">
+      <div class="flex items-start gap-3 mb-3">
+        <div class="w-12 h-12 rounded-xl bg-orange-500 text-white flex items-center justify-center font-black text-lg shrink-0">${esc((a.shop_name || 'S')[0].toUpperCase())}</div>
+        <div class="flex-1 min-w-0">
+          <p class="font-black truncate">${esc(a.shop_name)}</p>
+          <p class="text-xs text-slate-500 truncate">${esc(a.full_name)} · ${esc(a.phone)}</p>
+          <div class="flex items-center gap-2 mt-1">
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${statusColor[a.status] || 'bg-slate-100'} uppercase">${esc(a.status)}</span>
+            <span class="text-[10px] text-slate-400">${new Date(a.created_at).toLocaleDateString()}</span>
+          </div>
+        </div>
+      </div>
+      <div class="grid grid-cols-3 gap-1.5 mb-3">
+        <img src="${a.nid_front_url}" class="w-full aspect-square object-cover rounded-lg bg-slate-100 cursor-pointer" onclick="viewKycPhoto('${a.nid_front_url}')">
+        <img src="${a.nid_back_url}" class="w-full aspect-square object-cover rounded-lg bg-slate-100 cursor-pointer" onclick="viewKycPhoto('${a.nid_back_url}')">
+        <img src="${a.selfie_with_nid_url}" class="w-full aspect-square object-cover rounded-lg bg-slate-100 cursor-pointer" onclick="viewKycPhoto('${a.selfie_with_nid_url}')">
+        <img src="${a.face_front_url}" class="w-full aspect-square object-cover rounded-lg bg-slate-100 cursor-pointer" onclick="viewKycPhoto('${a.face_front_url}')">
+        <img src="${a.face_left_url}" class="w-full aspect-square object-cover rounded-lg bg-slate-100 cursor-pointer" onclick="viewKycPhoto('${a.face_left_url}')">
+        <img src="${a.face_right_url}" class="w-full aspect-square object-cover rounded-lg bg-slate-100 cursor-pointer" onclick="viewKycPhoto('${a.face_right_url}')">
+      </div>
+      ${a.business_proof_url ? `<p class="text-[11px] text-slate-500 mb-2"><i class="fa-solid fa-link"></i> <a href="${esc(a.business_proof_url)}" target="_blank" class="text-blue-600 underline">Business Proof</a></p>` : ''}
+      ${a.admin_notes ? `<p class="text-[11px] text-slate-600 bg-slate-50 rounded-lg p-2 mb-2"><b>Notes:</b> ${esc(a.admin_notes)}</p>` : ''}
+      ${a.status === 'pending' ? `
+        <div class="flex gap-2">
+          <button onclick="rejectSellerApp('${a.id}')" class="flex-1 bg-red-100 text-red-700 font-bold py-2 rounded-xl text-xs"><i class="fa-solid fa-xmark"></i> Reject</button>
+          <button onclick="approveSellerApp('${a.id}','${a.user_id}')" class="flex-1 bg-emerald-600 text-white font-bold py-2 rounded-xl text-xs"><i class="fa-solid fa-check"></i> Approve</button>
+        </div>
+      ` : ''}
     </div>
-    ${s.shop_bio ? `<p class="text-xs text-slate-600 mb-3">${esc(s.shop_bio)}</p>` : ''}
-    <div class="flex gap-2"><button onclick="changeRole('${s.id}','customer')" class="flex-1 bg-slate-100 text-slate-700 font-bold py-2 rounded-xl text-xs">Remove Seller</button><button onclick="toggleBan('${s.id}', ${!s.is_banned})" class="flex-1 ${s.is_banned ? 'bg-emerald-600' : 'bg-red-600'} text-white font-bold py-2 rounded-xl text-xs">${s.is_banned ? 'Unban' : 'Ban'}</button></div>
-  </div>`).join('');
+  `).join('');
+}
+
+function viewKycPhoto(url){
+  const m = document.createElement('div');
+  m.className = 'fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4';
+  m.onclick = () => m.remove();
+  m.innerHTML = `<img src="${esc(url)}" class="max-w-full max-h-full rounded-lg">`;
+  document.body.appendChild(m);
+}
+
+async function approveSellerApp(appId, userId){
+  if (!confirm('Approve this seller application?')) return;
+  const { error: e1 } = await supabaseClient.from('seller_applications')
+    .update({ status: 'approved', reviewed_by: adminUser.id, reviewed_at: new Date().toISOString() })
+    .eq('id', appId);
+  if (e1) { alert('Failed: ' + e1.message); return; }
+  const { error: e2 } = await supabaseClient.from('profiles')
+    .update({ role: 'seller' })
+    .eq('id', userId);
+  if (e2) { alert('Failed to update role: ' + e2.message); return; }
+  await logActivity('approve_seller', 'seller_application', appId, { user_id: userId });
+  await loadSellers();
+}
+
+async function rejectSellerApp(appId){
+  const notes = prompt('Reason for rejection (optional):');
+  if (notes === null) return;
+  const { error } = await supabaseClient.from('seller_applications')
+    .update({ status: 'rejected', admin_notes: notes || null, reviewed_by: adminUser.id, reviewed_at: new Date().toISOString() })
+    .eq('id', appId);
+  if (error) { alert('Failed: ' + error.message); return; }
+  await logActivity('reject_seller', 'seller_application', appId, null);
+  await loadSellers();
 }
 </script>
 </body>
