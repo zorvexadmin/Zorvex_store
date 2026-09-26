@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Zorvex | Worldwide Store</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2563eb">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Zorvex">
+<link rel="apple-touch-icon" href="icon-192.png">
+
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
   tailwind.config = { theme: { extend: { colors: {
@@ -16,14 +25,19 @@
 <style>
   body{font-family:'Inter',sans-serif}
   .line-clamp-2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .fade-in{animation:fadeIn .25s ease-out}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+  .popup-banner{animation:popupIn .3s ease-out}
+  @keyframes popupIn{from{opacity:0;transform:translateY(8px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
 </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen">
 
+<!-- ===== TOP BAR ===== -->
 <div class="bg-slate-900 text-white text-xs py-2 px-4 flex flex-wrap gap-2 justify-between items-center">
   <span class="flex items-center gap-1.5"><i class="fa-solid fa-globe text-blue-400"></i> <span id="topbarTagline">Worldwide Express Delivery</span></span>
   <div class="flex items-center gap-3">
-    <select id="shipCountry" class="bg-slate-800 text-white text-xs rounded px-2 py-1 outline-none">
+    <select id="shipCountry" onchange="onCountryChange()" class="bg-slate-800 text-white text-xs rounded px-2 py-1 outline-none">
       <option value="BD">🇧🇩 Bangladesh</option>
       <option value="US">🇺🇸 United States</option>
       <option value="UK">🇬🇧 United Kingdom</option>
@@ -39,25 +53,33 @@
       <option value="EUR">EUR (€)</option>
       <option value="INR">INR (₹)</option>
     </select>
+    <button id="langBtn" onclick="toggleLanguage()" class="hover:text-blue-400 font-bold" title="Change Language">
+      <i class="fa-solid fa-language"></i> <span id="langLabel">EN</span>
+    </button>
   </div>
 </div>
 
+<!-- ===== HEADER ===== -->
 <header class="sticky top-0 z-30 bg-white/95 backdrop-blur border-b shadow-sm">
   <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
     <div class="flex items-center gap-2 font-black text-xl text-slate-900 cursor-pointer shrink-0" onclick="resetSearch()">
       <div class="w-9 h-9 bg-blue-600 rounded-xl text-white flex items-center justify-center"><i class="fa-solid fa-earth-americas"></i></div>
       <span>Zor<span class="text-blue-600">vex</span></span>
     </div>
-        <div class="flex-1 max-w-xl hidden md:block relative">
+    <div class="flex-1 max-w-xl hidden md:block relative">
       <input id="searchInput" oninput="onSearch(this.value)" onfocus="showSearchHistory('searchHistory')" placeholder="Search products..." class="w-full pl-10 pr-20 py-2.5 rounded-xl bg-slate-100 text-sm outline-none focus:ring-2 focus:ring-blue-500">
       <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400"></i>
       <div class="absolute right-2 top-1.5 flex gap-0.5">
-        <button type="button" onclick="startVoiceSearch('searchInput')" class="w-8 h-8 rounded-lg hover:bg-slate-200 text-slate-600 flex items-center justify-center" title="Voice search"><i class="fa-solid fa-microphone text-xs"></i></button>
-        <button type="button" onclick="openQRScanner()" class="w-8 h-8 rounded-lg hover:bg-slate-200 text-slate-600 flex items-center justify-center" title="Scan barcode/QR"><i class="fa-solid fa-qrcode text-xs"></i></button>
+        <button type="button" onclick="startVoiceSearch('searchInput')" class="w-8 h-8 rounded-lg hover:bg-slate-200 text-slate-600 flex items-center justify-center"><i class="fa-solid fa-microphone text-xs"></i></button>
+        <button type="button" onclick="openQRScanner()" class="w-8 h-8 rounded-lg hover:bg-slate-200 text-slate-600 flex items-center justify-center"><i class="fa-solid fa-qrcode text-xs"></i></button>
       </div>
       <div id="searchHistory" class="hidden absolute left-0 right-0 top-14 bg-white rounded-xl shadow-lg border border-slate-200 py-1 z-40 max-h-80 overflow-y-auto"></div>
-        </div>
+    </div>
     <div class="flex items-center gap-2 ml-auto">
+      <button id="notifBtn" onclick="openNotifications()" class="relative text-xs font-bold bg-slate-100 text-slate-700 px-2.5 py-2 rounded-xl">
+        <i class="fa-solid fa-bell"></i>
+        <span id="notifCount" class="hidden absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 text-[10px] flex items-center justify-center">0</span>
+      </button>
       <button onclick="openCart()" class="relative text-xs font-bold bg-slate-900 text-white px-3 py-2 rounded-xl">
         <i class="fa-solid fa-cart-shopping"></i>
         <span id="cartCount" class="absolute -top-2 -right-2 bg-red-500 rounded-full w-5 h-5 text-[10px] flex items-center justify-center">0</span>
@@ -79,95 +101,120 @@
             </div>
           </div>
           <div class="py-1">
-            <button onclick="openProfileModal()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-slate-50">
-              <i class="fa-solid fa-user-pen text-blue-600 w-4"></i> My Profile
-            </button>
-            <button onclick="openOrdersModal()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-slate-50">
-              <i class="fa-solid fa-truck-fast text-blue-600 w-4"></i> My Orders
-            </button>
-            <button onclick="openReviewsModal()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-slate-50">
-              <i class="fa-solid fa-star text-blue-600 w-4"></i> My Reviews
-            </button>
+            <button onclick="openProfileModal()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-slate-50"><i class="fa-solid fa-user-pen text-blue-600 w-4"></i> <span data-i18n="profile">My Profile</span></button>
+            <button onclick="openOrdersModal()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-slate-50"><i class="fa-solid fa-truck-fast text-blue-600 w-4"></i> <span data-i18n="orders">My Orders</span></button>
+            <button onclick="openReviewsModal()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-slate-50"><i class="fa-solid fa-star text-blue-600 w-4"></i> <span data-i18n="reviews">My Reviews</span></button>
+            <button onclick="openReferralModal()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-slate-50"><i class="fa-solid fa-user-plus text-indigo-600 w-4"></i> <span data-i18n="referral">Refer & Earn</span></button>
+            <button onclick="openAffiliateModal()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-slate-50"><i class="fa-solid fa-handshake text-orange-600 w-4"></i> <span data-i18n="affiliate">Affiliate Program</span></button>
           </div>
           <div class="border-t border-slate-100 py-1">
-            <button onclick="openSupportModal()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-slate-50">
-              <i class="fa-solid fa-headset text-slate-600 w-4"></i> Help & Support
-            </button>
-            <button onclick="openAboutModal()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-slate-50">
-              <i class="fa-solid fa-circle-info text-slate-600 w-4"></i> About Zorvex
-            </button>
-            <button onclick="openSellerFlow()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-slate-50">
-  <i class="fa-solid fa-store text-slate-600 w-4"></i> Become a Seller
-            </button>
+            <button onclick="openSupportModal()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-slate-50"><i class="fa-solid fa-headset text-slate-600 w-4"></i> <span data-i18n="help">Help & Support</span></button>
+            <button onclick="openAboutModal()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-slate-50"><i class="fa-solid fa-circle-info text-slate-600 w-4"></i> <span data-i18n="about">About Zorvex</span></button>
+            <button onclick="openSellerFlow()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-slate-50"><i class="fa-solid fa-store text-slate-600 w-4"></i> <span data-i18n="seller">Become a Seller</span></button>
           </div>
           <div class="border-t border-slate-100 py-1">
-            <button onclick="signOutUser()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50">
-              <i class="fa-solid fa-right-from-bracket w-4"></i> Sign Out
-            </button>
+            <button onclick="signOutUser()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50"><i class="fa-solid fa-right-from-bracket w-4"></i> <span data-i18n="signout">Sign Out</span></button>
           </div>
         </div>
       </div>
     </div>
   </div>
-    <div class="md:hidden max-w-7xl mx-auto px-4 pb-3 relative">
+  <div class="md:hidden max-w-7xl mx-auto px-4 pb-3 relative">
     <input id="searchInputMobile" oninput="onSearch(this.value)" onfocus="showSearchHistory('searchHistoryMobile')" placeholder="Search products..." class="w-full pl-10 pr-20 py-2.5 rounded-xl bg-slate-100 text-sm outline-none focus:ring-2 focus:ring-blue-500">
     <i class="fa-solid fa-magnifying-glass absolute left-7 top-3.5 text-slate-400"></i>
     <div class="absolute right-6 top-3 flex gap-0.5">
-      <button type="button" onclick="startVoiceSearch('searchInputMobile')" class="w-8 h-8 rounded-lg hover:bg-slate-200 text-slate-600 flex items-center justify-center" title="Voice search"><i class="fa-solid fa-microphone text-xs"></i></button>
-      <button type="button" onclick="openQRScanner()" class="w-8 h-8 rounded-lg hover:bg-slate-200 text-slate-600 flex items-center justify-center" title="Scan barcode/QR"><i class="fa-solid fa-qrcode text-xs"></i></button>
+      <button type="button" onclick="startVoiceSearch('searchInputMobile')" class="w-8 h-8 rounded-lg hover:bg-slate-200 text-slate-600 flex items-center justify-center"><i class="fa-solid fa-microphone text-xs"></i></button>
+      <button type="button" onclick="openQRScanner()" class="w-8 h-8 rounded-lg hover:bg-slate-200 text-slate-600 flex items-center justify-center"><i class="fa-solid fa-qrcode text-xs"></i></button>
     </div>
     <div id="searchHistoryMobile" class="hidden absolute left-4 right-4 top-14 bg-white rounded-xl shadow-lg border border-slate-200 py-1 z-40 max-h-80 overflow-y-auto"></div>
-    </div>
+  </div>
   <div id="categoryBar" class="max-w-7xl mx-auto px-4 pb-3 flex gap-2 overflow-x-auto text-xs font-semibold"></div>
 </header>
-
 <main class="max-w-7xl mx-auto px-4 py-8">
   <div id="productGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"></div>
   <p id="emptyMsg" class="hidden text-center text-slate-400 py-16">No products found.</p>
   <p id="loadingMsg" class="text-center text-slate-400 py-16">Loading…</p>
 </main>
 
+<!-- ===== PRODUCT MODAL ===== -->
 <div id="productModal" class="fixed inset-0 z-50 hidden bg-black/60 flex items-center justify-center p-4">
   <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
     <div class="flex justify-between items-center p-4 border-b">
       <h3 class="font-bold">Product Details</h3>
       <button onclick="closeModal('productModal')"><i class="fa-solid fa-xmark"></i></button>
     </div>
-          <div class="grid sm:grid-cols-2 gap-4 p-4">
-         <div class="relative">
+    <div class="grid sm:grid-cols-2 gap-4 p-4">
+      <div>
+        <div class="relative">
           <img id="pImg" class="w-full aspect-square object-cover rounded-xl bg-slate-100">
           <span id="pDiscountBadge" class="hidden absolute top-2 right-2 bg-red-600 text-white text-[11px] font-bold px-2 py-1 rounded-lg shadow"></span>
-              </div>
+        </div>
+        <div id="pVideoBox" class="hidden mt-3"></div>
+      </div>
       <div>
         <h2 id="pTitle" class="text-lg font-black mb-1"></h2>
-        <p class="text-xs text-slate-500 mb-2"><i class="fa-solid fa-location-dot"></i> Ships from <span id="pCountry"></span></p>
+        <div class="flex items-center gap-2 mb-2 flex-wrap">
+          <p class="text-xs text-slate-500"><i class="fa-solid fa-location-dot"></i> Ships from <span id="pCountry"></span></p>
+          <span id="pTrustedBadge" class="hidden text-[10px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded-full cursor-pointer" onclick="showTrustedPopup()"><i class="fa-solid fa-circle-check"></i> Trusted</span>
+        </div>
         <div class="flex items-center gap-2 mb-2 text-amber-400 text-sm">
           <span id="pStars"></span> <span id="pRating" class="text-slate-700 font-bold"></span>
           <span id="pReviewCount" class="text-slate-400"></span>
         </div>
         <p id="pDesc" class="text-sm text-slate-600 mb-3"></p>
         <div class="flex items-baseline gap-2 mb-3">
-            <span id="pPrice" class="text-2xl font-black text-blue-600"></span>
-            <span id="pOldPrice" class="text-sm text-slate-400 line-through"></span>
-          </div>
-          <div id="pShippingBox" class="hidden bg-slate-50 rounded-xl p-3 mb-4"></div>
-          <div class="flex gap-2">
-            <button onclick="addToCart(currentProduct)" class="flex-1 bg-slate-900 text-white font-bold py-2.5 rounded-xl text-xs">Add to Cart</button>
-            <button onclick="buyNow()" class="flex-1 bg-blue-600 text-white font-bold py-2.5 rounded-xl text-xs">Buy Now</button>
-          </div>
+          <span id="pPrice" class="text-2xl font-black text-blue-600"></span>
+          <span id="pOldPrice" class="text-sm text-slate-400 line-through"></span>
+        </div>
+        <div id="pShippingBox" class="hidden bg-slate-50 rounded-xl p-3 mb-4"></div>
+        <div class="flex gap-2">
+          <button onclick="addToCart(currentProduct)" class="flex-1 bg-slate-900 text-white font-bold py-2.5 rounded-xl text-xs">Add to Cart</button>
+          <button onclick="buyNow()" class="flex-1 bg-blue-600 text-white font-bold py-2.5 rounded-xl text-xs">Buy Now</button>
+        </div>
       </div>
     </div>
     <div class="p-4 border-t">
       <h4 class="font-bold text-sm mb-2">Reviews</h4>
-      <div id="reviewForm" class="hidden mb-3 flex gap-2">
-        <select id="reviewRating" class="border rounded px-2 text-xs"><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select>
-        <input id="reviewComment" placeholder="Write a review..." class="flex-1 border rounded px-2 text-xs">
-        <button onclick="submitReview()" class="bg-blue-600 text-white text-xs px-3 rounded">Post</button>
+      <div id="reviewForm" class="hidden mb-3 space-y-2">
+        <div class="flex gap-2">
+          <select id="reviewRating" class="border rounded px-2 text-xs"><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select>
+          <input id="reviewComment" placeholder="Write a review..." class="flex-1 border rounded px-2 text-xs">
+        </div>
+        <div class="flex items-center gap-2">
+          <label class="text-[11px] font-bold text-slate-500 cursor-pointer flex items-center gap-1 bg-slate-100 px-2 py-1.5 rounded-lg">
+            <i class="fa-solid fa-camera"></i> Add Photos
+            <input id="reviewImages" type="file" accept="image/*" multiple class="hidden" onchange="handleReviewImages(event)">
+          </label>
+          <span id="reviewImageCount" class="text-[10px] text-slate-400"></span>
+          <button onclick="submitReview()" class="ml-auto bg-blue-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold">Post</button>
+        </div>
+        <div id="reviewImagePreview" class="flex gap-1.5 flex-wrap"></div>
       </div>
       <div id="reviewsList" class="space-y-2 text-xs"></div>
     </div>
   </div>
 </div>
+
+<!-- ===== TRUSTED POPUP ===== -->
+<div id="trustedPopup" class="hidden fixed z-[60]" style="max-width:280px">
+  <div class="popup-banner bg-slate-900 text-white rounded-xl shadow-2xl p-4 text-xs">
+    <div class="flex items-start gap-3">
+      <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center shrink-0">
+        <i class="fa-solid fa-shield-halved"></i>
+      </div>
+      <div class="flex-1">
+        <p class="font-black text-sm mb-1">Trusted by Zorvex</p>
+        <div class="space-y-1 text-[11px] text-slate-300">
+          <p><i class="fa-solid fa-circle-check text-emerald-400"></i> Identity verified</p>
+          <p><i class="fa-solid fa-circle-check text-emerald-400"></i> 50+ successful orders</p>
+          <p><i class="fa-solid fa-circle-check text-emerald-400"></i> Member since <span id="trustedSince">2026</span></p>
+        </div>
+      </div>
+    </div>
+    <div class="absolute left-6 -bottom-2 w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-slate-900"></div>
+  </div>
+</div>
+<!-- ===== AUTH MODAL ===== -->
 <div id="authModal" class="fixed inset-0 z-50 hidden bg-black/60 flex items-center justify-center p-4">
   <div class="bg-white rounded-2xl max-w-sm w-full p-6">
     <div class="flex justify-between mb-4"><h3 class="font-black text-lg">Welcome</h3><button onclick="closeModal('authModal')"><i class="fa-solid fa-xmark"></i></button></div>
@@ -189,6 +236,7 @@
   </div>
 </div>
 
+<!-- ===== PROFILE MODAL ===== -->
 <div id="profileModal" class="fixed inset-0 z-50 hidden bg-black/60 flex items-center justify-center p-4">
   <div class="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto p-6">
     <div class="flex justify-between mb-4"><h3 class="font-black text-lg">My Profile</h3><button onclick="closeModal('profileModal')"><i class="fa-solid fa-xmark"></i></button></div>
@@ -204,38 +252,126 @@
       <p class="text-[11px] text-slate-400 mt-2">Tap the camera icon to change</p>
       <button id="removeAvatarBtn" onclick="removeAvatar()" class="text-[11px] text-red-500 mt-1 hidden">Remove Photo</button>
       <p id="avatarStatus" class="text-[11px] mt-1"></p>
+      <span id="profileTrustedBadge" class="hidden mt-2 text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-full"><i class="fa-solid fa-circle-check"></i> Trusted Member</span>
     </div>
     <div class="space-y-3">
-      <div>
-        <label class="text-xs font-bold text-slate-500">Full Name</label>
-        <input id="profileName" class="w-full border rounded-xl px-3 py-2.5 text-sm mt-1">
-      </div>
-      <div>
-        <label class="text-xs font-bold text-slate-500">Phone</label>
-        <input id="profilePhone" placeholder="+8801XXXXXXXXX" class="w-full border rounded-xl px-3 py-2.5 text-sm mt-1">
-      </div>
-      <div>
-        <label class="text-xs font-bold text-slate-500">Email</label>
-        <input id="profileEmail" readonly class="w-full border rounded-xl px-3 py-2.5 text-sm mt-1 bg-slate-100 text-slate-500">
-        <p class="text-[10px] text-slate-400 mt-1">Email cannot be changed (security)</p>
-      </div>
+      <div><label class="text-xs font-bold text-slate-500">Full Name</label><input id="profileName" class="w-full border rounded-xl px-3 py-2.5 text-sm mt-1"></div>
+      <div><label class="text-xs font-bold text-slate-500">Phone</label><input id="profilePhone" placeholder="+8801XXXXXXXXX" class="w-full border rounded-xl px-3 py-2.5 text-sm mt-1"></div>
+      <div><label class="text-xs font-bold text-slate-500">Email</label><input id="profileEmail" readonly class="w-full border rounded-xl px-3 py-2.5 text-sm mt-1 bg-slate-100 text-slate-500"><p class="text-[10px] text-slate-400 mt-1">Email cannot be changed (security)</p></div>
     </div>
     <button onclick="saveProfile()" class="w-full bg-blue-600 text-white font-black py-3 rounded-xl text-xs mt-5">Save Changes</button>
     <p id="profileMsg" class="text-xs text-center mt-2"></p>
   </div>
 </div>
 
-<div id="cartDrawer" class="fixed inset-0 z-50 hidden bg-black/60 flex justify-end">
-  <div class="bg-white w-full max-w-md h-full flex flex-col">
-    <div class="flex justify-between items-center p-4 border-b"><h3 class="font-bold">Your Cart</h3><button onclick="closeModal('cartDrawer')"><i class="fa-solid fa-xmark"></i></button></div>
-    <div id="cartItems" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
-    <div class="p-4 border-t">
-      <div class="flex justify-between font-bold mb-3"><span>Subtotal</span><span id="cartSubtotal"></span></div>
-      <button onclick="openCheckout()" class="w-full bg-blue-600 text-white font-black py-3 rounded-xl text-xs">Proceed to Checkout</button>
+<!-- ===== REFERRAL MODAL ===== -->
+<div id="referralModal" class="fixed inset-0 z-50 hidden bg-black/60 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-md w-full p-6">
+    <div class="flex justify-between mb-4"><h3 class="font-black text-lg">Refer & Earn</h3><button onclick="closeModal('referralModal')"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-2xl p-5 text-white text-center mb-4">
+      <i class="fa-solid fa-gift text-3xl mb-2"></i>
+      <p class="font-black text-lg">Earn $5 per friend</p>
+      <p class="text-xs text-indigo-100 mt-1">Share your code. When they place their first order, you get $5.</p>
+    </div>
+    <div class="bg-slate-50 rounded-xl p-3 mb-3">
+      <p class="text-[11px] font-bold text-slate-500 mb-1">Your Referral Code</p>
+      <div class="flex gap-2">
+        <input id="referralCode" readonly class="flex-1 border rounded-lg px-3 py-2 text-sm font-mono font-bold bg-white text-center">
+        <button onclick="copyReferralCode()" class="bg-blue-600 text-white font-bold px-3 py-2 rounded-lg text-xs"><i class="fa-solid fa-copy"></i></button>
+      </div>
+    </div>
+    <div class="bg-slate-50 rounded-xl p-3 mb-3">
+      <p class="text-[11px] font-bold text-slate-500 mb-1">Share Link</p>
+      <div class="flex gap-2">
+        <input id="referralLink" readonly class="flex-1 border rounded-lg px-3 py-2 text-xs bg-white">
+        <button onclick="copyReferralLink()" class="bg-blue-600 text-white font-bold px-3 py-2 rounded-lg text-xs"><i class="fa-solid fa-copy"></i></button>
+      </div>
+    </div>
+    <div class="flex gap-2 mb-3">
+      <a id="waReferral" target="_blank" class="flex-1 bg-green-600 text-white font-bold py-2.5 rounded-xl text-xs text-center"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>
+      <a id="fbReferral" target="_blank" class="flex-1 bg-blue-700 text-white font-bold py-2.5 rounded-xl text-xs text-center"><i class="fa-brands fa-facebook"></i> Facebook</a>
+      <a id="tgReferral" target="_blank" class="flex-1 bg-sky-500 text-white font-bold py-2.5 rounded-xl text-xs text-center"><i class="fa-brands fa-telegram"></i> Telegram</a>
+    </div>
+    <div class="border-t pt-3">
+      <p class="text-[11px] font-bold text-slate-500 mb-2">Your Referrals</p>
+      <div id="referralStats" class="text-center text-xs text-slate-400 py-3">Loading…</div>
     </div>
   </div>
 </div>
 
+<!-- ===== AFFILIATE MODAL ===== -->
+<div id="affiliateModal" class="fixed inset-0 z-50 hidden bg-black/60 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-md w-full p-6">
+    <div class="flex justify-between mb-4"><h3 class="font-black text-lg">Affiliate Program</h3><button onclick="closeModal('affiliateModal')"><i class="fa-solid fa-xmark"></i></button></div>
+    <div id="affiliateJoinView" class="space-y-3">
+      <div class="bg-gradient-to-br from-orange-500 to-amber-600 rounded-2xl p-5 text-white text-center">
+        <i class="fa-solid fa-handshake text-3xl mb-2"></i>
+        <p class="font-black text-lg">Earn Commission on Every Sale</p>
+        <p class="text-xs text-orange-100 mt-1">Get 5% commission on every order from your unique link</p>
+      </div>
+      <button onclick="joinAffiliateProgram()" id="joinAffBtn" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-black py-3 rounded-xl text-sm"><i class="fa-solid fa-plus"></i> Join Affiliate Program</button>
+    </div>
+    <div id="affiliateDashView" class="hidden space-y-3">
+      <div class="bg-slate-50 rounded-xl p-3">
+        <p class="text-[11px] font-bold text-slate-500 mb-1">Your Affiliate Code</p>
+        <div class="flex gap-2">
+          <input id="affCode" readonly class="flex-1 border rounded-lg px-3 py-2 text-sm font-mono font-bold bg-white text-center">
+          <button onclick="copyAffCode()" class="bg-orange-600 text-white font-bold px-3 py-2 rounded-lg text-xs"><i class="fa-solid fa-copy"></i></button>
+        </div>
+      </div>
+      <div class="bg-slate-50 rounded-xl p-3">
+        <p class="text-[11px] font-bold text-slate-500 mb-1">Affiliate Link</p>
+        <div class="flex gap-2">
+          <input id="affLink" readonly class="flex-1 border rounded-lg px-3 py-2 text-xs bg-white">
+          <button onclick="copyAffLink()" class="bg-orange-600 text-white font-bold px-3 py-2 rounded-lg text-xs"><i class="fa-solid fa-copy"></i></button>
+        </div>
+      </div>
+      <div class="grid grid-cols-3 gap-2">
+        <div class="bg-slate-50 rounded-xl p-3 text-center"><p id="affClicks" class="text-xl font-black text-orange-600">0</p><p class="text-[10px] text-slate-500">Clicks</p></div>
+        <div class="bg-slate-50 rounded-xl p-3 text-center"><p id="affSales" class="text-xl font-black text-emerald-600">$0</p><p class="text-[10px] text-slate-500">Sales</p></div>
+        <div class="bg-slate-50 rounded-xl p-3 text-center"><p id="affEarnings" class="text-xl font-black text-amber-600">$0</p><p class="text-[10px] text-slate-500">Earned</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== NOTIFICATIONS PANEL ===== -->
+<div id="notifPanel" class="fixed inset-0 z-50 hidden bg-black/60 flex justify-end">
+  <div class="bg-white w-full max-w-md h-full flex flex-col">
+    <div class="flex justify-between items-center p-4 border-b">
+      <h3 class="font-black text-lg">Notifications</h3>
+      <div class="flex gap-2">
+        <button onclick="markAllRead()" class="text-xs font-bold text-blue-600 hover:bg-blue-50 px-2 py-1 rounded">Mark all read</button>
+        <button onclick="closeModal('notifPanel')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+    </div>
+    <div id="notifList" class="flex-1 overflow-y-auto p-4 space-y-2"></div>
+  </div>
+</div>
+
+<!-- ===== CART DRAWER ===== -->
+<div id="cartDrawer" class="fixed inset-0 z-50 hidden bg-black/60 flex justify-end">
+  <div class="bg-white w-full max-w-md h-full flex flex-col">
+    <div class="flex justify-between items-center p-4 border-b"><h3 class="font-bold">Your Cart</h3><button onclick="closeModal('cartDrawer')"><i class="fa-solid fa-xmark"></i></button></div>
+    <div id="cartItems" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
+    <div class="p-4 border-t space-y-2">
+      <div class="flex gap-2">
+        <input id="cartCouponInput" placeholder="Coupon code" class="flex-1 border rounded-xl px-3 py-2.5 text-sm uppercase font-mono">
+        <button onclick="applyCouponInCart()" class="bg-slate-900 text-white font-bold px-4 rounded-xl text-xs">Apply</button>
+      </div>
+      <p id="cartCouponMsg" class="text-[11px]"></p>
+      <div id="cartCouponApplied" class="hidden bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 flex items-center justify-between">
+        <div class="text-xs"><b class="text-emerald-700" id="cartCouponCode">—</b><span class="text-emerald-600" id="cartCouponAmount"></span></div>
+        <button onclick="removeCoupon()" class="text-red-500 text-xs"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="flex justify-between text-xs text-slate-500"><span>Subtotal</span><span id="cartSubtotal"></span></div>
+      <div id="cartDiscountRow" class="hidden flex justify-between text-xs text-emerald-600"><span>Coupon Discount</span><span id="cartDiscount">—</span></div>
+      <div class="flex justify-between font-bold"><span>Total</span><span id="cartTotal"></span></div>
+      <button onclick="openCheckout()" class="w-full bg-blue-600 text-white font-black py-3 rounded-xl text-xs">Proceed to Checkout</button>
+    </div>
+  </div>
+    </div>
+   <!-- ===== CHECKOUT MODAL ===== -->
 <div id="checkoutModal" class="fixed inset-0 z-50 hidden bg-black/60 flex items-center justify-center p-4">
   <div class="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6">
     <div class="flex justify-between mb-4"><h3 class="font-black text-lg">Checkout</h3><button onclick="closeModal('checkoutModal')"><i class="fa-solid fa-xmark"></i></button></div>
@@ -243,20 +379,27 @@
       <input id="coName" required placeholder="Full Name" class="w-full border rounded-xl px-3 py-2.5 text-sm">
       <input id="coPhone" required placeholder="Phone (with country code)" class="w-full border rounded-xl px-3 py-2.5 text-sm">
       <textarea id="coAddress" required placeholder="Full Delivery Address" class="w-full border rounded-xl px-3 py-2.5 text-sm"></textarea>
+
+      <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 text-xs">
+        <p class="font-bold text-blue-800 mb-1"><i class="fa-solid fa-truck"></i> Shipping to <span id="coCountryName">Bangladesh</span></p>
+        <p class="text-blue-700">Delivery: <b id="coDeliveryTime">2-4 days</b> · Shipping cost: <b id="coShippingCost">$2.00</b></p>
+      </div>
+
       <div>
         <label class="text-xs font-bold text-slate-500">Payment Method</label>
         <select id="coPayment" onchange="togglePaymentInfo()" class="w-full border rounded-xl px-3 py-2.5 text-sm mt-1">
-          <option value="cod">Cash on Delivery</option>
-          <option value="bkash_manual">bKash (Manual - Send Money)</option>
-          <option value="nagad_manual">Nagad (Manual - Send Money)</option>
         </select>
+        <p id="coPaymentNote" class="text-[10px] text-slate-400 mt-1"></p>
       </div>
+
       <div id="manualPayBox" class="hidden bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs space-y-2">
         <p>Send <b id="payAmount">—</b> to <b id="payNumber">01XXXXXXXXX</b> (Personal) and enter the Transaction ID below.</p>
         <input id="coTxnId" placeholder="Transaction ID" class="w-full border rounded-lg px-3 py-2 text-sm">
       </div>
+
       <div class="flex justify-between text-xs text-slate-500"><span>Subtotal</span><span id="checkoutSubtotal"></span></div>
       <div class="flex justify-between text-xs text-slate-500"><span>Shipping</span><span id="checkoutShipping"></span></div>
+      <div id="checkoutCouponRow" class="hidden flex justify-between text-xs text-emerald-600"><span>Coupon Discount</span><span id="checkoutDiscount">—</span></div>
       <div class="flex justify-between items-center font-bold text-sm pt-2 border-t">
         <span>Total</span>
         <div class="flex items-center gap-2">
@@ -264,22 +407,23 @@
           <span id="checkoutTotal"></span>
         </div>
       </div>
-      <button type="submit" id="placeOrderBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-3 rounded-xl text-xs">
-        <i class="fa-solid fa-lock"></i> Place Order
-      </button>
+      <button type="submit" id="placeOrderBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-3 rounded-xl text-xs"><i class="fa-solid fa-lock"></i> Place Order</button>
     </form>
   </div>
 </div>
 
+<!-- ===== SUCCESS MODAL ===== -->
 <div id="successModal" class="fixed inset-0 z-50 hidden bg-black/60 flex items-center justify-center p-4">
   <div class="bg-white rounded-2xl max-w-sm w-full p-6 text-center">
     <i class="fa-solid fa-circle-check text-emerald-500 text-4xl mb-3"></i>
     <h3 class="font-black text-lg mb-1">Order Placed!</h3>
     <p class="text-xs text-slate-500 mb-4">Order ID: <span id="successOrderId" class="font-bold"></span></p>
+    <button onclick="closeModal('successModal'); openOrdersModal()" class="w-full bg-blue-600 text-white font-bold py-2.5 rounded-xl text-xs mb-2">View My Orders</button>
     <button onclick="closeModal('successModal')" class="w-full bg-slate-900 text-white font-bold py-2.5 rounded-xl text-xs">Continue Shopping</button>
   </div>
 </div>
 
+<!-- ===== ORDERS MODAL ===== -->
 <div id="ordersModal" class="fixed inset-0 z-50 hidden bg-black/60 flex items-center justify-center p-4">
   <div class="bg-white rounded-2xl max-w-lg w-full max-h-[80vh] overflow-y-auto p-6">
     <div class="flex justify-between mb-4"><h3 class="font-black text-lg">My Orders</h3><button onclick="closeModal('ordersModal')"><i class="fa-solid fa-xmark"></i></button></div>
@@ -287,6 +431,7 @@
   </div>
 </div>
 
+<!-- ===== MY REVIEWS MODAL ===== -->
 <div id="reviewsModal" class="fixed inset-0 z-50 hidden bg-black/60 flex items-center justify-center p-4">
   <div class="bg-white rounded-2xl max-w-lg w-full max-h-[80vh] overflow-y-auto p-6">
     <div class="flex justify-between mb-4"><h3 class="font-black text-lg">My Reviews</h3><button onclick="closeModal('reviewsModal')"><i class="fa-solid fa-xmark"></i></button></div>
@@ -294,6 +439,7 @@
   </div>
 </div>
 
+<!-- ===== SUPPORT MODAL ===== -->
 <div id="supportModal" class="fixed inset-0 z-50 hidden bg-black/60 flex items-center justify-center p-4">
   <div class="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto p-6">
     <div class="flex justify-between mb-4"><h3 class="font-black text-lg">Help & Support</h3><button onclick="closeModal('supportModal')"><i class="fa-solid fa-xmark"></i></button></div>
@@ -304,15 +450,13 @@
   </div>
 </div>
 
+<!-- ===== ABOUT MODAL ===== -->
 <div id="aboutModal" class="fixed inset-0 z-50 hidden bg-black/60 flex items-center justify-center p-4">
   <div class="bg-white rounded-2xl max-w-md w-full p-6">
     <div class="flex justify-between mb-4"><h3 class="font-black text-lg">About Zorvex</h3><button onclick="closeModal('aboutModal')"><i class="fa-solid fa-xmark"></i></button></div>
     <div class="flex items-center gap-3 mb-4">
       <div class="w-12 h-12 bg-blue-600 rounded-xl text-white flex items-center justify-center text-xl"><i class="fa-solid fa-earth-americas"></i></div>
-      <div>
-        <p class="font-black text-lg">Zorvex</p>
-        <p class="text-[11px] text-slate-400">Worldwide Store</p>
-      </div>
+      <div><p class="font-black text-lg">Zorvex</p><p class="text-[11px] text-slate-400">Worldwide Store</p></div>
     </div>
     <p class="text-sm text-slate-600 leading-relaxed mb-3">Zorvex is a worldwide online store where you can order products from anywhere in the world — delivered straight to your door.</p>
     <div class="grid grid-cols-2 gap-2 text-xs">
@@ -323,7 +467,7 @@
     </div>
   </div>
 </div>
-
+  <!-- ===== SELLER MODAL (KYC) ===== -->
 <div id="sellerModal" class="fixed inset-0 z-50 hidden bg-black/60 flex items-center justify-center p-4">
   <div class="bg-white rounded-2xl max-w-lg w-full max-h-[92vh] overflow-y-auto">
     <div class="sticky top-0 bg-white border-b border-slate-200 p-4 flex items-center justify-between z-10">
@@ -334,7 +478,6 @@
       <button onclick="closeModal('sellerModal')"><i class="fa-solid fa-xmark"></i></button>
     </div>
 
-    <!-- STEP INDICATOR -->
     <div class="px-4 pt-4">
       <div class="flex items-center gap-1">
         <div id="sellerStepDot1" class="flex-1 h-1.5 rounded bg-blue-600"></div>
@@ -347,34 +490,17 @@
 
     <!-- STEP 1 -->
     <div id="sellerStep1" class="p-4 space-y-3">
-      <div>
-        <label class="text-xs font-bold text-slate-500">Full Name (as on NID) *</label>
-        <input id="sk_full_name" placeholder="Your full name" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
-      </div>
-      <div>
-        <label class="text-xs font-bold text-slate-500">Phone Number *</label>
-        <input id="sk_phone" placeholder="+8801XXXXXXXXX" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
-      </div>
-      <div>
-        <label class="text-xs font-bold text-slate-500">Address</label>
-        <textarea id="sk_address" rows="2" placeholder="Your full address" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
-      </div>
+      <div><label class="text-xs font-bold text-slate-500">Full Name (as on NID) *</label><input id="sk_full_name" placeholder="Your full name" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"></div>
+      <div><label class="text-xs font-bold text-slate-500">Phone Number *</label><input id="sk_phone" placeholder="+8801XXXXXXXXX" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"></div>
+      <div><label class="text-xs font-bold text-slate-500">Address</label><textarea id="sk_address" rows="2" placeholder="Your full address" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"></textarea></div>
       <p id="sellerStep1Msg" class="text-xs text-center"></p>
-      <button onclick="sellerNext(1)" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-3 rounded-xl text-sm">
-        Continue <i class="fa-solid fa-arrow-right"></i>
-      </button>
+      <button onclick="sellerNext(1)" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-3 rounded-xl text-sm">Continue <i class="fa-solid fa-arrow-right"></i></button>
     </div>
 
     <!-- STEP 2 -->
     <div id="sellerStep2" class="p-4 space-y-3 hidden">
-      <div>
-        <label class="text-xs font-bold text-slate-500">Shop Name *</label>
-        <input id="sk_shop_name" placeholder="e.g. Zorvex Electronics" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
-      </div>
-      <div>
-        <label class="text-xs font-bold text-slate-500">Shop Description</label>
-        <textarea id="sk_shop_desc" rows="2" placeholder="What will you sell?" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
-      </div>
+      <div><label class="text-xs font-bold text-slate-500">Shop Name *</label><input id="sk_shop_name" placeholder="e.g. Zorvex Electronics" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"></div>
+      <div><label class="text-xs font-bold text-slate-500">Shop Description</label><textarea id="sk_shop_desc" rows="2" placeholder="What will you sell?" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"></textarea></div>
       <div>
         <label class="text-xs font-bold text-slate-500">Business Type</label>
         <select id="sk_business_type" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
@@ -397,46 +523,20 @@
       </div>
     </div>
 
-    <!-- STEP 3 — KYC DOCUMENTS -->
+    <!-- STEP 3 -->
     <div id="sellerStep3" class="p-4 hidden">
       <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4">
         <p class="text-xs font-bold text-amber-800 mb-1"><i class="fa-solid fa-shield-halved"></i> KYC Verification</p>
         <p class="text-[11px] text-amber-700">We need 6 photos to verify your identity. Your data is safe and only visible to admins.</p>
       </div>
-
       <div class="grid grid-cols-2 gap-3">
-        <div onclick="openKycCamera('nid_front')" class="border-2 border-dashed border-slate-300 rounded-xl p-3 text-center cursor-pointer hover:border-blue-500 transition">
-          <img id="thumb_nid_front" class="w-full aspect-square object-cover rounded-lg bg-slate-100 mb-2">
-          <p class="text-[10px] font-bold text-slate-600">NID Front</p>
-          <p class="text-[9px] text-slate-400">Tap to capture</p>
-        </div>
-        <div onclick="openKycCamera('nid_back')" class="border-2 border-dashed border-slate-300 rounded-xl p-3 text-center cursor-pointer hover:border-blue-500 transition">
-          <img id="thumb_nid_back" class="w-full aspect-square object-cover rounded-lg bg-slate-100 mb-2">
-          <p class="text-[10px] font-bold text-slate-600">NID Back</p>
-          <p class="text-[9px] text-slate-400">Tap to capture</p>
-        </div>
-        <div onclick="openKycCamera('face_front')" class="border-2 border-dashed border-slate-300 rounded-xl p-3 text-center cursor-pointer hover:border-blue-500 transition">
-          <img id="thumb_face_front" class="w-full aspect-square object-cover rounded-lg bg-slate-100 mb-2">
-          <p class="text-[10px] font-bold text-slate-600">Face Front</p>
-          <p class="text-[9px] text-slate-400">Tap to capture</p>
-        </div>
-        <div onclick="openKycCamera('face_left')" class="border-2 border-dashed border-slate-300 rounded-xl p-3 text-center cursor-pointer hover:border-blue-500 transition">
-          <img id="thumb_face_left" class="w-full aspect-square object-cover rounded-lg bg-slate-100 mb-2">
-          <p class="text-[10px] font-bold text-slate-600">Face Left</p>
-          <p class="text-[9px] text-slate-400">Turn head left</p>
-        </div>
-        <div onclick="openKycCamera('face_right')" class="border-2 border-dashed border-slate-300 rounded-xl p-3 text-center cursor-pointer hover:border-blue-500 transition">
-          <img id="thumb_face_right" class="w-full aspect-square object-cover rounded-lg bg-slate-100 mb-2">
-          <p class="text-[10px] font-bold text-slate-600">Face Right</p>
-          <p class="text-[9px] text-slate-400">Turn head right</p>
-        </div>
-        <div onclick="openKycCamera('selfie_nid')" class="border-2 border-dashed border-slate-300 rounded-xl p-3 text-center cursor-pointer hover:border-blue-500 transition">
-          <img id="thumb_selfie_nid" class="w-full aspect-square object-cover rounded-lg bg-slate-100 mb-2">
-          <p class="text-[10px] font-bold text-slate-600">Selfie + NID</p>
-          <p class="text-[9px] text-slate-400">Hold NID beside face</p>
-        </div>
+        <div onclick="openKycCamera('nid_front')" class="border-2 border-dashed border-slate-300 rounded-xl p-3 text-center cursor-pointer hover:border-blue-500 transition"><img id="thumb_nid_front" class="w-full aspect-square object-cover rounded-lg bg-slate-100 mb-2"><p class="text-[10px] font-bold text-slate-600">NID Front</p><p class="text-[9px] text-slate-400">Tap to capture</p></div>
+        <div onclick="openKycCamera('nid_back')" class="border-2 border-dashed border-slate-300 rounded-xl p-3 text-center cursor-pointer hover:border-blue-500 transition"><img id="thumb_nid_back" class="w-full aspect-square object-cover rounded-lg bg-slate-100 mb-2"><p class="text-[10px] font-bold text-slate-600">NID Back</p><p class="text-[9px] text-slate-400">Tap to capture</p></div>
+        <div onclick="openKycCamera('face_front')" class="border-2 border-dashed border-slate-300 rounded-xl p-3 text-center cursor-pointer hover:border-blue-500 transition"><img id="thumb_face_front" class="w-full aspect-square object-cover rounded-lg bg-slate-100 mb-2"><p class="text-[10px] font-bold text-slate-600">Face Front</p><p class="text-[9px] text-slate-400">Tap to capture</p></div>
+        <div onclick="openKycCamera('face_left')" class="border-2 border-dashed border-slate-300 rounded-xl p-3 text-center cursor-pointer hover:border-blue-500 transition"><img id="thumb_face_left" class="w-full aspect-square object-cover rounded-lg bg-slate-100 mb-2"><p class="text-[10px] font-bold text-slate-600">Face Left</p><p class="text-[9px] text-slate-400">Turn head left</p></div>
+        <div onclick="openKycCamera('face_right')" class="border-2 border-dashed border-slate-300 rounded-xl p-3 text-center cursor-pointer hover:border-blue-500 transition"><img id="thumb_face_right" class="w-full aspect-square object-cover rounded-lg bg-slate-100 mb-2"><p class="text-[10px] font-bold text-slate-600">Face Right</p><p class="text-[9px] text-slate-400">Turn head right</p></div>
+        <div onclick="openKycCamera('selfie_nid')" class="border-2 border-dashed border-slate-300 rounded-xl p-3 text-center cursor-pointer hover:border-blue-500 transition"><img id="thumb_selfie_nid" class="w-full aspect-square object-cover rounded-lg bg-slate-100 mb-2"><p class="text-[10px] font-bold text-slate-600">Selfie + NID</p><p class="text-[9px] text-slate-400">Hold NID beside face</p></div>
       </div>
-
       <p class="text-[10px] text-slate-500 mt-3 text-center">All 6 photos are required</p>
       <p id="sellerStep3Msg" class="text-xs text-center mt-2"></p>
       <div class="flex gap-2 mt-3">
@@ -445,7 +545,7 @@
       </div>
     </div>
 
-    <!-- STEP 4 — REVIEW & SUBMIT -->
+    <!-- STEP 4 -->
     <div id="sellerStep4" class="p-4 hidden">
       <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 mb-4">
         <p class="text-xs font-bold text-blue-800 mb-1"><i class="fa-solid fa-circle-check"></i> Almost Done!</p>
@@ -455,21 +555,21 @@
       <p id="sellerStep4Msg" class="text-xs text-center"></p>
       <div class="flex gap-2 mt-3">
         <button onclick="sellerBack(3)" class="flex-1 bg-slate-200 text-slate-800 font-bold py-3 rounded-xl text-sm">Back</button>
-        <button id="sellerSubmitBtn" onclick="submitSellerApp()" class="flex-[2] bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 rounded-xl text-sm"><i class="fa-solid fa-paper-plane"></i> Submit Application</button>
+        <button id="sellerSubmitBtn" onclick="submitSellerApp()" class="flex-[2] bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 rounded-xl text-sm"><i class="fa-solid fa-paper-plane"></i> Submit</button>
       </div>
     </div>
 
     <!-- SUCCESS -->
     <div id="sellerSuccessBox" class="p-6 text-center hidden">
-      <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3">
-        <i class="fa-solid fa-check text-emerald-600 text-2xl"></i>
-      </div>
+      <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3"><i class="fa-solid fa-check text-emerald-600 text-2xl"></i></div>
       <h3 class="font-black text-lg mb-1">Application Submitted!</h3>
       <p class="text-xs text-slate-500 mb-4">We'll review your application within 24-48 hours. Once approved, you can start selling on Zorvex.</p>
       <button onclick="closeModal('sellerModal')" class="w-full bg-slate-900 text-white font-bold py-3 rounded-xl text-sm">Got it</button>
     </div>
   </div>
 </div>
+
+<!-- ===== KYC CAMERA MODAL ===== -->
 <div id="kycCameraModal" class="fixed inset-0 z-[70] hidden bg-black flex flex-col">
   <div class="bg-slate-900 text-white p-4 flex items-center justify-between">
     <div>
@@ -478,11 +578,8 @@
     </div>
     <button onclick="closeKycCamera()" class="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
   </div>
-
   <div class="flex-1 relative bg-black overflow-hidden flex items-center justify-center">
     <video id="kycVideo" autoplay playsinline muted class="w-full h-full object-cover"></video>
-
-    <!-- Scan frame overlay -->
     <div id="kycGuideFrame" class="absolute inset-0 pointer-events-none flex items-center justify-center">
       <div class="relative w-[80%] aspect-[16/10] border-2 border-blue-400 rounded-2xl shadow-[0_0_0_9999px_rgba(0,0,0,0.6)]">
         <div class="absolute -top-1 -left-1 w-6 h-6 border-t-4 border-l-4 border-blue-400 rounded-tl-2xl"></div>
@@ -491,11 +588,8 @@
         <div class="absolute -bottom-1 -right-1 w-6 h-6 border-b-4 border-r-4 border-blue-400 rounded-br-2xl"></div>
       </div>
     </div>
-
-    <!-- Hint text -->
     <p id="kycHint" class="absolute bottom-32 left-4 right-4 text-center text-white text-sm bg-black/60 backdrop-blur px-4 py-2 rounded-xl"></p>
   </div>
-
   <div class="bg-slate-900 p-5 pb-8">
     <p id="kycError" class="text-red-400 text-xs text-center mb-3 hidden"></p>
     <div class="flex items-center justify-center">
@@ -506,7 +600,23 @@
     <p class="text-center text-[11px] text-slate-400 mt-3">Tap the button to capture</p>
   </div>
 </div>
-  
+
+<!-- ===== QR SCANNER MODAL ===== -->
+<div id="qrScannerModal" class="fixed inset-0 z-[60] hidden bg-black/90 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-md w-full overflow-hidden">
+    <div class="flex justify-between items-center p-4 border-b">
+      <h3 class="font-bold text-sm">Scan Barcode / QR Code</h3>
+      <button onclick="closeQRScanner()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="qrReader" class="w-full bg-black"></div>
+    <p id="qrStatus" class="text-xs text-center p-3 text-slate-500">Point camera at a barcode or QR code…</p>
+  </div>
+</div>
+
+<!-- ===== KYC PHOTO VIEWER ===== -->
+<div id="kycPhotoModal" class="fixed inset-0 z-[100] hidden bg-black/95 flex items-center justify-center p-4" onclick="closeModal('kycPhotoModal')">
+  <img id="kycPhotoImg" class="max-w-full max-h-full rounded-lg">
+</div>
 <script src="js/supabase-config.js"></script>
 <script>
 // ============ STATE ============
@@ -517,29 +627,92 @@ let currentProduct = null;
 let searchTerm = '';
 let activeCat = null;
 let cart = JSON.parse(localStorage.getItem('tg_cart') || '[]');
-const SYMBOLS = { USD:'$', BDT:'৳', GBP:'£', EUR:'€', INR:'₹' };
-const FLAT_SHIPPING_USD = 5;
+let appliedCoupon = null;
+let allCoupons = [];
+let shippingRates = {};
+let siteSettings = {};
+let liveRates = { USD: 1, BDT: 118, GBP: 0.79, EUR: 0.92, INR: 83 };
+let currentLanguage = localStorage.getItem('zorvex_lang') || 'en';
+let reviewImageFiles = [];
 
+const SYMBOLS = { USD: '$', BDT: '৳', GBP: '£', EUR: '€', INR: '₹' };
+const COUNTRY_NAMES = { BD: 'Bangladesh', US: 'United States', UK: 'United Kingdom', IN: 'India', AE: 'UAE', CA: 'Canada', AU: 'Australia' };
+const COUNTRY_CURRENCY = { BD: 'BDT', US: 'USD', UK: 'GBP', IN: 'INR', AE: 'USD', CA: 'USD', AU: 'USD' };
+
+// ============ I18N ============
+const I18N = {
+  en: { profile: 'My Profile', orders: 'My Orders', reviews: 'My Reviews', referral: 'Refer & Earn', affiliate: 'Affiliate Program', help: 'Help & Support', about: 'About Zorvex', seller: 'Become a Seller', signout: 'Sign Out' },
+  bn: { profile: 'আমার প্রোফাইল', orders: 'আমার অর্ডার', reviews: 'আমার রিভিউ', referral: 'রেফার ও আয়', affiliate: 'অ্যাফিলিয়েট প্রোগ্রাম', help: 'সাহায্য ও সাপোর্ট', about: 'জরভেক্স সম্পর্কে', seller: 'সেলার হোন', signout: 'সাইন আউট' }
+};
+
+// ============ HELPERS ============
 function currentCurrency(){ return document.getElementById('currency').value; }
-
+function currentCountry(){ return document.getElementById('shipCountry').value; }
 function fmt(usd){
   const c = currentCurrency();
   const rate = liveRates[c] || 1;
   return SYMBOLS[c] + (usd * rate).toFixed(0);
 }
-  
 function closeModal(id){ document.getElementById(id).classList.add('hidden'); }
 function openModal(id){ document.getElementById(id).classList.remove('hidden'); }
 function esc(s){ return (s==null?'':String(s)).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+// ============ PRICING HELPERS ============
+function getPrepaidDiscount(){ return parseFloat(siteSettings.prepaid_discount || '5'); }
+function getCodCharge(){ return parseFloat(siteSettings.cod_charge || '10'); }
+function isCodAllowedForCountry(country){
+  const bdOnly = (siteSettings.cod_bd_only || 'true') === 'true';
+  if (!bdOnly) return true;
+  return country === 'BD';
+}
+function calcPrepaidPrice(baseUsd){ return baseUsd * (1 - getPrepaidDiscount() / 100); }
+function calcCodPrice(baseUsd){ return baseUsd * (1 + getCodCharge() / 100); }
+
+// ============ SHIPPING HELPERS ============
+function getShippingRate(country){
+  const r = shippingRates[country];
+  if (r) return r;
+  return { cost_usd: 5, delivery_days_min: 7, delivery_days_max: 14 };
+}
+function currentShippingCost(){ return getShippingRate(currentCountry()).cost_usd; }
+
+// ============ COUNTRY CHANGE ============
+function onCountryChange(){
+  const country = currentCountry();
+  // Auto-switch currency
+  const autoCur = COUNTRY_CURRENCY[country] || 'USD';
+  document.getElementById('currency').value = autoCur;
+  renderProducts();
+  if (!document.getElementById('cartDrawer').classList.contains('hidden')) renderCart();
+}
+
+// ============ LANGUAGE ============
+function toggleLanguage(){
+  currentLanguage = currentLanguage === 'en' ? 'bn' : 'en';
+  localStorage.setItem('zorvex_lang', currentLanguage);
+  document.getElementById('langLabel').innerText = currentLanguage.toUpperCase();
+  applyLanguage();
+}
+function applyLanguage(){
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    if (I18N[currentLanguage] && I18N[currentLanguage][key]) {
+      el.innerText = I18N[currentLanguage][key];
+    }
+  });
+}
 
 // ============ AUTH ============
 supabaseClient.auth.onAuthStateChange(async (event, session) => {
   currentUser = session?.user || null;
   if (currentUser) {
-    const { data } = await supabaseClient
-      .from('profiles').select('full_name, phone, profile_pic_url').eq('id', currentUser.id).single();
+    const { data } = await supabaseClient.from('profiles').select('full_name, phone, profile_pic_url, is_trusted, trusted_since, referral_code, preferred_language').eq('id', currentUser.id).single();
     userProfile = data || {};
+    if (userProfile.referral_code && !localStorage.getItem('referral_processed')) {
+      // referral code is set, OK
+    }
     updateProfileUI();
+    loadNotifications();
   } else {
     userProfile = null;
     updateProfileUI();
@@ -571,7 +744,7 @@ function updateProfileUI(){
   document.getElementById('menuName').innerText = name;
   document.getElementById('menuEmail').innerText = email;
 
-  // Trusted badge
+  // Trusted badge in dropdown
   const oldBadge = document.getElementById('menuTrustedBadge');
   if (oldBadge) oldBadge.remove();
   if (userProfile?.is_trusted) {
@@ -598,13 +771,11 @@ function updateProfileUI(){
 async function oauthLogin(provider){
   await supabaseClient.auth.signInWithOAuth({ provider, options: { redirectTo: window.location.href } });
 }
-
 function openAuthModal(){
   document.getElementById('authMsg').innerText = '';
   document.getElementById('profileMenu').classList.add('hidden');
   openModal('authModal');
 }
-
 async function emailAuth(e){
   e.preventDefault();
   const email = document.getElementById('authEmail').value;
@@ -614,7 +785,6 @@ async function emailAuth(e){
   closeModal('authModal');
   return false;
 }
-
 async function emailSignup(){
   const email = document.getElementById('authEmail').value;
   const password = document.getElementById('authPass').value;
@@ -623,7 +793,6 @@ async function emailSignup(){
   const { error } = await supabaseClient.auth.signUp({ email, password, options: { data: { full_name } } });
   document.getElementById('authMsg').innerText = error ? error.message : 'Account created! Check your email to confirm, then sign in.';
 }
-
 async function signOutUser(){
   document.getElementById('profileMenu').classList.add('hidden');
   await supabaseClient.auth.signOut();
@@ -634,33 +803,132 @@ function toggleProfileMenu(){
   if (!currentUser) { openAuthModal(); return; }
   document.getElementById('profileMenu').classList.toggle('hidden');
 }
-
 document.addEventListener('click', function(e){
   const menu = document.getElementById('profileMenu');
   if (!menu || menu.classList.contains('hidden')) return;
   if (!menu.contains(e.target)) menu.classList.add('hidden');
 });
 
+// ============ LIVE CURRENCY RATES ============
+async function loadLiveRates(){
+  try {
+    const cached = localStorage.getItem('zorvex_rates');
+    if (cached) {
+      const { rates, timestamp } = JSON.parse(cached);
+      if (Date.now() - timestamp < 6 * 60 * 60 * 1000) { liveRates = rates; return; }
+    }
+  } catch(e) {}
+
+  try {
+    const res = await fetch('https://api.exchangerate.host/latest?base=USD');
+    if (!res.ok) throw new Error('API failed');
+    const data = await res.json();
+    if (data && data.rates) {
+      liveRates = {
+        USD: 1,
+        BDT: data.rates.BDT || 118,
+        INR: data.rates.INR || 83,
+        EUR: data.rates.EUR || 0.92,
+        GBP: data.rates.GBP || 0.79
+      };
+      localStorage.setItem('zorvex_rates', JSON.stringify({ rates: liveRates, timestamp: Date.now() }));
+      return;
+    }
+  } catch(e) { console.warn('Live rates failed, using fallback'); }
+
+  if (siteSettings.currency_bdt_rate) {
+    liveRates.BDT = parseFloat(siteSettings.currency_bdt_rate) || 118;
+  }
+}
+
+// ============ SITE SETTINGS ============
+async function loadSiteSettings(){
+  const { data, error } = await supabaseClient.from('site_settings').select('key, value');
+  if (error) { console.warn('Settings load failed:', error.message); }
+  siteSettings = {};
+  (data || []).forEach(s => { siteSettings[s.key] = (s.value || '').trim(); });
+  await loadLiveRates();
+  await loadShippingRates();
+  applySiteSettings();
+}
+async function loadShippingRates(){
+  const { data } = await supabaseClient.from('shipping_rates').select('*').eq('is_active', true);
+  shippingRates = {};
+  (data || []).forEach(r => { shippingRates[r.country_code] = r; });
+}
+function applySiteSettings(){
+  const tagline = siteSettings.site_tagline || 'Worldwide Express Delivery';
+  const tagEl = document.getElementById('topbarTagline');
+  if (tagEl) tagEl.innerText = tagline;
+  buildContactLinks();
+  if (allProducts.length > 0) renderProducts();
+  if (cart.length > 0 && !document.getElementById('cartDrawer').classList.contains('hidden')) renderCart();
+}
+</script>
+<script>
+// ============ CONTACT LINKS ============
+function smartWhatsAppLink(raw){
+  if (!raw) return null;
+  const digits = String(raw).replace(/\D/g, '');
+  if (!digits) return null;
+  if (digits.startsWith('880')) return 'https://wa.me/' + digits;
+  if (digits.startsWith('0')) return 'https://wa.me/88' + digits;
+  return 'https://wa.me/' + digits;
+}
+function smartSocialLink(raw, platform){
+  if (!raw) return null;
+  const val = String(raw).trim();
+  if (/^https?:\/\//i.test(val)) return val;
+  const clean = val.replace(/^@/, '');
+  const map = { facebook: 'https://facebook.com/', messenger: 'https://m.me/', instagram: 'https://instagram.com/', telegram: 'https://t.me/', tiktok: 'https://tiktok.com/@', youtube: 'https://youtube.com/@' };
+  return (map[platform] || '') + clean;
+}
+function buildContactLinks(){
+  const box = document.getElementById('contactLinksBox');
+  if (!box) return;
+  const links = [];
+  const s = siteSettings;
+
+  const wa = smartWhatsAppLink(s.whatsapp_number);
+  if (wa) links.push({ href: wa, icon: 'fa-brands fa-whatsapp text-green-600', title: 'WhatsApp', sub: s.whatsapp_display || s.whatsapp_number, ext: true });
+  const ms = smartSocialLink(s.messenger_username, 'messenger');
+  if (ms) links.push({ href: ms, icon: 'fa-brands fa-facebook-messenger text-blue-500', title: 'Messenger', sub: 'Chat with us on Messenger', ext: true });
+  const fb = smartSocialLink(s.facebook_page, 'facebook');
+  if (fb) links.push({ href: fb, icon: 'fa-brands fa-facebook text-blue-700', title: 'Facebook', sub: 'Follow our page', ext: true });
+  const ig = smartSocialLink(s.instagram_username, 'instagram');
+  if (ig) links.push({ href: ig, icon: 'fa-brands fa-instagram text-pink-600', title: 'Instagram', sub: 'DM us on Instagram', ext: true });
+  const tg = smartSocialLink(s.telegram_username, 'telegram');
+  if (tg) links.push({ href: tg, icon: 'fa-brands fa-telegram text-sky-500', title: 'Telegram', sub: 'Chat on Telegram', ext: true });
+  const tt = smartSocialLink(s.tiktok_username, 'tiktok');
+  if (tt) links.push({ href: tt, icon: 'fa-brands fa-tiktok', title: 'TikTok', sub: 'Follow on TikTok', ext: true });
+  const yt = smartSocialLink(s.youtube_channel, 'youtube');
+  if (yt) links.push({ href: yt, icon: 'fa-brands fa-youtube text-red-600', title: 'YouTube', sub: 'Watch on YouTube', ext: true });
+  if (s.support_email) links.push({ href: 'mailto:' + s.support_email, icon: 'fa-solid fa-envelope text-blue-600', title: 'Email', sub: s.support_email, ext: false });
+
+  if (links.length === 0){ box.innerHTML = '<p class="text-sm text-slate-400 text-center py-4">Contact information will be available soon.</p>'; return; }
+  box.innerHTML = links.map(l => `<a href="${esc(l.href)}" ${l.ext ? 'target="_blank" rel="noopener"' : ''} class="flex items-center gap-3 p-3 border rounded-xl hover:bg-slate-50"><i class="${l.icon} text-xl w-5 text-center"></i><div class="min-w-0 flex-1"><p class="text-sm font-bold">${esc(l.title)}</p><p class="text-[11px] text-slate-400 truncate">${esc(l.sub)}</p></div><i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-300"></i></a>`).join('');
+}
+
 // ============ PROFILE MODAL ============
 function openProfileModal(){
   document.getElementById('profileMenu').classList.add('hidden');
   if (!currentUser) return openAuthModal();
-
   document.getElementById('profileName').value = userProfile?.full_name || '';
   document.getElementById('profilePhone').value = userProfile?.phone || '';
   document.getElementById('profileEmail').value = currentUser.email || '';
   document.getElementById('profileMsg').innerText = '';
   document.getElementById('avatarStatus').innerText = '';
+  // Trusted badge
+  const tb = document.getElementById('profileTrustedBadge');
+  if (userProfile?.is_trusted) tb.classList.remove('hidden'); else tb.classList.add('hidden');
   updateProfilePreview();
   openModal('profileModal');
 }
-
 function updateProfilePreview(){
   const pic = userProfile?.profile_pic_url;
   const bigAv = document.getElementById('profileBigAvatar');
   const bigInit = document.getElementById('profileBigInitial');
   const name = userProfile?.full_name || currentUser?.email || '?';
-
   if (pic){
     bigAv.src = pic;
     bigAv.classList.remove('hidden');
@@ -673,8 +941,7 @@ function updateProfilePreview(){
     document.getElementById('removeAvatarBtn').classList.add('hidden');
   }
 }
-
-async function compressImage(file, maxSize = 400, quality = 0.85) {
+async function compressImage(file, maxSize = 400, quality = 0.85){
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -682,108 +949,181 @@ async function compressImage(file, maxSize = 400, quality = 0.85) {
       img.onload = () => {
         const canvas = document.createElement('canvas');
         let { width, height } = img;
-        if (width > height) {
-          if (width > maxSize) { height = Math.round(height * maxSize / width); width = maxSize; }
-        } else {
-          if (height > maxSize) { width = Math.round(width * maxSize / height); height = maxSize; }
-        }
+        if (width > height) { if (width > maxSize) { height = Math.round(height * maxSize / width); width = maxSize; } }
+        else { if (height > maxSize) { width = Math.round(width * maxSize / height); height = maxSize; } }
         canvas.width = width; canvas.height = height;
         canvas.getContext('2d').drawImage(img, 0, 0, width, height);
         canvas.toBlob((blob) => resolve(blob), 'image/jpeg', quality);
       };
-      img.onerror = reject;
-      img.src = e.target.result;
+      img.onerror = reject; img.src = e.target.result;
     };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
+    reader.onerror = reject; reader.readAsDataURL(file);
   });
 }
-
 async function handleAvatarPick(event){
   const file = event.target.files[0];
   if (!file) return;
   const status = document.getElementById('avatarStatus');
-
-  if (!file.type.startsWith('image/')) {
-    status.className = 'text-[11px] mt-1 text-red-500';
-    status.innerText = 'Please select an image file';
-    return;
-  }
-  if (file.size > 5 * 1024 * 1024) {
-    status.className = 'text-[11px] mt-1 text-red-500';
-    status.innerText = 'File too big (max 5MB)';
-    return;
-  }
-
-  status.className = 'text-[11px] mt-1 text-blue-600';
-  status.innerText = 'Compressing & uploading…';
-
+  if (!file.type.startsWith('image/')) { status.className = 'text-[11px] mt-1 text-red-500'; status.innerText = 'Not an image'; return; }
+  if (file.size > 5 * 1024 * 1024) { status.className = 'text-[11px] mt-1 text-red-500'; status.innerText = 'File too big (max 5MB)'; return; }
+  status.className = 'text-[11px] mt-1 text-blue-600'; status.innerText = 'Compressing & uploading…';
   try {
     const blob = await compressImage(file, 400, 0.85);
     const path = `${currentUser.id}/avatar-${Date.now()}.jpg`;
-
-    const { error: upErr } = await supabaseClient.storage
-      .from('avatars').upload(path, blob, { contentType: 'image/jpeg', upsert: false });
+    const { error: upErr } = await supabaseClient.storage.from('avatars').upload(path, blob, { contentType: 'image/jpeg', upsert: false });
     if (upErr) throw upErr;
-
     const { data: urlData } = supabaseClient.storage.from('avatars').getPublicUrl(path);
-
-    const { error: dbErr } = await supabaseClient.from('profiles')
-      .update({ profile_pic_url: urlData.publicUrl }).eq('id', currentUser.id);
+    const { error: dbErr } = await supabaseClient.from('profiles').update({ profile_pic_url: urlData.publicUrl }).eq('id', currentUser.id);
     if (dbErr) throw dbErr;
-
     userProfile = { ...userProfile, profile_pic_url: urlData.publicUrl };
     updateProfilePreview();
     updateProfileUI();
-    status.className = 'text-[11px] mt-1 text-emerald-600';
-    status.innerText = '✓ Photo updated';
+    status.className = 'text-[11px] mt-1 text-emerald-600'; status.innerText = '✓ Photo updated';
   } catch (err) {
-    status.className = 'text-[11px] mt-1 text-red-500';
-    status.innerText = 'Upload failed: ' + (err.message || err);
+    status.className = 'text-[11px] mt-1 text-red-500'; status.innerText = 'Upload failed: ' + (err.message || err);
   }
   event.target.value = '';
 }
-
 async function removeAvatar(){
   if (!currentUser) return;
   if (!confirm('Remove your profile picture?')) return;
   const status = document.getElementById('avatarStatus');
-
-  const { error } = await supabaseClient.from('profiles')
-    .update({ profile_pic_url: null }).eq('id', currentUser.id);
-  if (error) {
-    status.className = 'text-[11px] mt-1 text-red-500';
-    status.innerText = 'Failed: ' + error.message;
-    return;
-  }
+  const { error } = await supabaseClient.from('profiles').update({ profile_pic_url: null }).eq('id', currentUser.id);
+  if (error) { status.className = 'text-[11px] mt-1 text-red-500'; status.innerText = 'Failed: ' + error.message; return; }
   userProfile = { ...userProfile, profile_pic_url: null };
   updateProfilePreview();
   updateProfileUI();
-  status.className = 'text-[11px] mt-1 text-emerald-600';
-  status.innerText = '✓ Photo removed';
+  status.className = 'text-[11px] mt-1 text-emerald-600'; status.innerText = '✓ Photo removed';
 }
-
 async function saveProfile(){
   const msg = document.getElementById('profileMsg');
-  msg.className = 'text-xs text-center mt-2 text-blue-600';
-  msg.innerText = 'Saving…';
-
+  msg.className = 'text-xs text-center mt-2 text-blue-600'; msg.innerText = 'Saving…';
   const updates = {
     full_name: document.getElementById('profileName').value.trim(),
     phone: document.getElementById('profilePhone').value.trim()
   };
-
   const { error } = await supabaseClient.from('profiles').update(updates).eq('id', currentUser.id);
-  if (error) {
-    msg.className = 'text-xs text-center mt-2 text-red-500';
-    msg.innerText = 'Failed: ' + error.message;
-    return;
-  }
+  if (error) { msg.className = 'text-xs text-center mt-2 text-red-500'; msg.innerText = 'Failed: ' + error.message; return; }
   userProfile = { ...userProfile, ...updates };
   updateProfileUI();
-  msg.className = 'text-xs text-center mt-2 text-emerald-600';
-  msg.innerText = '✓ Saved!';
+  msg.className = 'text-xs text-center mt-2 text-emerald-600'; msg.innerText = '✓ Saved!';
   setTimeout(() => closeModal('profileModal'), 800);
+}
+
+// ============ REFERRAL ============
+async function openReferralModal(){
+  document.getElementById('profileMenu').classList.add('hidden');
+  if (!currentUser) return openAuthModal();
+
+  // Generate referral code if missing
+  let code = userProfile?.referral_code;
+  if (!code) {
+    code = 'ZOR' + (currentUser.id.substring(0, 6).toUpperCase());
+    try {
+      await supabaseClient.from('profiles').update({ referral_code: code }).eq('id', currentUser.id);
+      userProfile.referral_code = code;
+    } catch(e) {}
+  }
+  document.getElementById('referralCode').value = code;
+
+  const link = window.location.origin + '?ref=' + code;
+  document.getElementById('referralLink').value = link;
+
+  const msg = encodeURIComponent('Join Zorvex — Worldwide Store! Use my referral code ' + code + ': ' + link);
+  document.getElementById('waReferral').href = 'https://wa.me/?text=' + msg;
+  document.getElementById('fbReferral').href = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(link);
+  document.getElementById('tgReferral').href = 'https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + encodeURIComponent('Join Zorvex — Worldwide Store!');
+
+  // Load stats
+  const { data } = await supabaseClient.from('referrals').select('status, reward_amount_usd').eq('referrer_id', currentUser.id);
+  const all = data || [];
+  const total = all.length;
+  const rewards = all.reduce((s, r) => s + Number(r.reward_amount_usd || 0), 0);
+  document.getElementById('referralStats').innerHTML = total === 0
+    ? '<p class="text-slate-400">No referrals yet. Share your code!</p>'
+    : `<div class="grid grid-cols-2 gap-3"><div class="bg-indigo-50 rounded-lg p-3"><p class="text-xl font-black text-indigo-600">${total}</p><p class="text-[10px] text-slate-500">Total Referrals</p></div><div class="bg-emerald-50 rounded-lg p-3"><p class="text-xl font-black text-emerald-600">$${rewards.toFixed(2)}</p><p class="text-[10px] text-slate-500">Earned</p></div></div>`;
+
+  openModal('referralModal');
+}
+function copyReferralCode(){
+  const val = document.getElementById('referralCode').value;
+  navigator.clipboard.writeText(val).then(() => alert('Code copied: ' + val)).catch(() => alert(val));
+}
+function copyReferralLink(){
+  const val = document.getElementById('referralLink').value;
+  navigator.clipboard.writeText(val).then(() => alert('Link copied!')).catch(() => alert(val));
+}
+
+// ============ AFFILIATE ============
+async function openAffiliateModal(){
+  document.getElementById('profileMenu').classList.add('hidden');
+  if (!currentUser) return openAuthModal();
+
+  const { data } = await supabaseClient.from('affiliates').select('*').eq('user_id', currentUser.id).maybeSingle();
+  if (data) {
+    // Already joined
+    document.getElementById('affiliateJoinView').classList.add('hidden');
+    document.getElementById('affiliateDashView').classList.remove('hidden');
+    document.getElementById('affCode').value = data.affiliate_code;
+    const link = window.location.origin + '?aff=' + data.affiliate_code;
+    document.getElementById('affLink').value = link;
+    document.getElementById('affClicks').innerText = data.total_clicks || 0;
+    document.getElementById('affSales').innerText = '$' + Number(data.total_sales_usd || 0).toFixed(2);
+    document.getElementById('affEarnings').innerText = '$' + Number(data.total_earnings_usd || 0).toFixed(2);
+  } else {
+    document.getElementById('affiliateJoinView').classList.remove('hidden');
+    document.getElementById('affiliateDashView').classList.add('hidden');
+  }
+  openModal('affiliateModal');
+}
+async function joinAffiliateProgram(){
+  const btn = document.getElementById('joinAffBtn');
+  btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Joining…';
+  const code = 'AFF' + currentUser.id.substring(0, 6).toUpperCase();
+  const { error } = await supabaseClient.from('affiliates').insert({
+    user_id: currentUser.id,
+    affiliate_code: code,
+    commission_rate: parseFloat(siteSettings.affiliate_default_rate || '5')
+  });
+  btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-plus"></i> Join Affiliate Program';
+  if (error) { alert('Failed: ' + error.message); return; }
+  await openAffiliateModal();
+}
+function copyAffCode(){
+  const val = document.getElementById('affCode').value;
+  navigator.clipboard.writeText(val).then(() => alert('Code copied: ' + val)).catch(() => alert(val));
+}
+function copyAffLink(){
+  const val = document.getElementById('affLink').value;
+  navigator.clipboard.writeText(val).then(() => alert('Link copied!')).catch(() => alert(val));
+}
+</script>
+<script>
+// ============ NOTIFICATIONS ============
+async function loadNotifications(){
+  if (!currentUser) return;
+  const { data } = await supabaseClient.from('notifications').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(50);
+  const unread = (data || []).filter(n => !n.is_read).length;
+  const badge = document.getElementById('notifCount');
+  if (unread > 0) { badge.innerText = unread; badge.classList.remove('hidden'); }
+  else badge.classList.add('hidden');
+}
+async function openNotifications(){
+  document.getElementById('profileMenu').classList.add('hidden');
+  if (!currentUser) return openAuthModal();
+  const list = document.getElementById('notifList');
+  list.innerHTML = '<p class="text-center text-slate-400 py-6 text-sm">Loading…</p>';
+  const { data } = await supabaseClient.from('notifications').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(50);
+  if (!data || data.length === 0) { list.innerHTML = '<p class="text-center text-slate-400 py-10 text-sm">No notifications yet.</p>'; openModal('notifPanel'); return; }
+  const iconMap = { order: 'fa-truck text-blue-600', success: 'fa-check-circle text-emerald-600', info: 'fa-circle-info text-slate-500', warning: 'fa-exclamation-triangle text-amber-600' };
+  list.innerHTML = data.map(n => `<div class="border rounded-xl p-3 ${n.is_read ? 'bg-white' : 'bg-blue-50 border-blue-200'}"><div class="flex gap-3"><div class="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center shrink-0"><i class="fa-solid ${iconMap[n.type] || 'fa-bell text-slate-500'}"></i></div><div class="flex-1 min-w-0"><p class="font-bold text-sm">${esc(n.title)}</p>${n.message ? `<p class="text-[11px] text-slate-600 mt-0.5">${esc(n.message)}</p>` : ''}<p class="text-[10px] text-slate-400 mt-1">${new Date(n.created_at).toLocaleString()}</p></div></div></div>`).join('');
+  openModal('notifPanel');
+}
+async function markAllRead(){
+  if (!currentUser) return;
+  await supabaseClient.from('notifications').update({ is_read: true }).eq('user_id', currentUser.id).eq('is_read', false);
+  await loadNotifications();
+  closeModal('notifPanel');
 }
 
 // ============ SEARCH ============
@@ -797,9 +1137,11 @@ function onSearch(val){
   loadProducts();
 }
 function resetSearch(){ onSearch(''); activeCat = null; loadProducts(); }
-  // ============ PRODUCTS ============
-const SAFE_COLS = 'id,title,description,category_id,price_usd,old_price_usd,origin_country,image_url,default_courier,is_active,stock,rating,reviews_count,created_at,barcode,display_discount_percent,is_trusted,video_url,courier_service,delivery_process';
+
+// ============ PRODUCTS ============
+const SAFE_COLS = 'id,title,description,category_id,price_usd,old_price_usd,origin_country,image_url,default_courier,is_active,stock,rating,reviews_count,created_at,barcode,display_discount_percent,is_trusted,video_url,courier_service,delivery_process,delivery_days_min,delivery_days_max';
 let categoriesMap = {};
+
 async function loadCategories(){
   const { data } = await supabaseClient.from('categories').select('*').order('name');
   categoriesMap = {};
@@ -808,17 +1150,14 @@ async function loadCategories(){
   bar.innerHTML = `<button data-cat="all" onclick="filterCat(null)" class="px-3 py-1.5 bg-slate-900 text-white rounded-full">All</button>` +
     (data||[]).map(c => `<button data-cat="${c.id}" onclick="filterCat(${c.id})" class="px-3 py-1.5 bg-slate-100 rounded-full whitespace-nowrap">${esc(c.name)}</button>`).join('');
 }
-
 function filterCat(id){
   activeCat = id;
   document.querySelectorAll('#categoryBar button').forEach(b => {
     const on = (id === null && b.dataset.cat === 'all') || (b.dataset.cat == id);
-    b.className = on ? 'px-3 py-1.5 bg-slate-900 text-white rounded-full whitespace-nowrap'
-                     : 'px-3 py-1.5 bg-slate-100 rounded-full whitespace-nowrap';
+    b.className = on ? 'px-3 py-1.5 bg-slate-900 text-white rounded-full whitespace-nowrap' : 'px-3 py-1.5 bg-slate-100 rounded-full whitespace-nowrap';
   });
   loadProducts();
 }
-
 async function loadProducts(){
   document.getElementById('loadingMsg').classList.remove('hidden');
   document.getElementById('emptyMsg').classList.add('hidden');
@@ -869,6 +1208,7 @@ function renderProducts(){
       <div class="relative">
         <img src="${p.image_url || 'https://placehold.co/400x400?text=No+Image'}" loading="lazy" class="w-full aspect-square object-cover bg-slate-100">
         ${off > 0 ? `<span class="absolute top-1.5 right-1.5 bg-red-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded shadow">${off}% OFF</span>` : ''}
+        ${p.video_url ? '<span class="absolute bottom-1.5 left-1.5 bg-black/70 text-white text-[9px] font-bold px-1.5 py-0.5 rounded"><i class="fa-solid fa-play"></i> Video</span>' : ''}
       </div>
       <div class="p-3">
         <p class="text-xs font-semibold line-clamp-2 h-8">${esc(p.title)}</p>
@@ -881,16 +1221,16 @@ function renderProducts(){
           ${p.old_price_usd ? `<p class="text-[10px] text-slate-400 line-through">${fmt(p.old_price_usd)}</p>` : ''}
         </div>
       </div>
-    </div>
-  `}).join('');
+    </div>`;
+  }).join('');
 }
 
+// ============ PRODUCT MODAL ============
 function getYouTubeId(url){
   if (!url) return null;
   const m = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
   return m ? m[1] : null;
 }
-
 function openProduct(id){
   currentProduct = allProducts.find(p => p.id === id);
   if (!currentProduct) return;
@@ -905,14 +1245,15 @@ function openProduct(id){
   document.getElementById('pReviewCount').innerText = `(${p.reviews_count ?? 0} reviews)`;
   document.getElementById('pStars').innerHTML = '★'.repeat(Math.round(p.rating || 0));
 
+  // Discount badge
   const off = calcDiscountPercent(p);
   const badge = document.getElementById('pDiscountBadge');
-  if (off > 0) {
-    badge.innerText = off + '% OFF';
-    badge.classList.remove('hidden');
-  } else {
-    badge.classList.add('hidden');
-  }
+  if (off > 0) { badge.innerText = off + '% OFF'; badge.classList.remove('hidden'); }
+  else badge.classList.add('hidden');
+
+  // Trusted badge
+  const tb = document.getElementById('pTrustedBadge');
+  if (p.is_trusted) tb.classList.remove('hidden'); else tb.classList.add('hidden');
 
   // Video
   const videoBox = document.getElementById('pVideoBox');
@@ -920,79 +1261,274 @@ function openProduct(id){
   if (videoId) {
     videoBox.innerHTML = `<iframe class="w-full aspect-video rounded-xl" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>`;
     videoBox.classList.remove('hidden');
-  } else {
-    videoBox.innerHTML = '';
-    videoBox.classList.add('hidden');
-  }
+  } else { videoBox.innerHTML = ''; videoBox.classList.add('hidden'); }
 
   // Shipping info
   const shipBox = document.getElementById('pShippingBox');
-  if (p.courier_service || p.delivery_process) {
-    shipBox.innerHTML = `
-      ${p.courier_service ? `<p class="text-xs text-slate-600"><i class="fa-solid fa-truck text-blue-600"></i> Ships via <b>${esc(p.courier_service)}</b></p>` : ''}
-      ${p.delivery_process ? `<p class="text-xs text-slate-600 mt-1"><i class="fa-solid fa-clock text-blue-600"></i> ${esc(p.delivery_process)}</p>` : ''}
-    `;
-    shipBox.classList.remove('hidden');
-  } else {
-    shipBox.classList.add('hidden');
-  }
+  const shipping = getShippingRate(currentCountry());
+  const days = (p.delivery_days_min && p.delivery_days_max)
+    ? `${p.delivery_days_min}-${p.delivery_days_max} days`
+    : `${shipping.delivery_days_min}-${shipping.delivery_days_max} days`;
+  let shipHtml = '';
+  if (p.courier_service) shipHtml += `<p class="text-xs text-slate-600"><i class="fa-solid fa-truck text-blue-600"></i> Ships via <b>${esc(p.courier_service)}</b></p>`;
+  if (p.delivery_process) shipHtml += `<p class="text-xs text-slate-600 mt-1"><i class="fa-solid fa-clock text-blue-600"></i> ${esc(p.delivery_process)}</p>`;
+  shipHtml += `<p class="text-xs text-slate-600 mt-1"><i class="fa-solid fa-calendar text-blue-600"></i> Delivery to ${esc(COUNTRY_NAMES[currentCountry()]||currentCountry())}: <b>${days}</b></p>`;
+  shipBox.innerHTML = shipHtml;
+  shipBox.classList.remove('hidden');
 
   document.getElementById('reviewForm').classList.toggle('hidden', !currentUser);
+  reviewImageFiles = [];
+  updateReviewImagePreview();
   loadReviews(id);
   openModal('productModal');
 }
 
+function showTrustedPopup(){
+  const popup = document.getElementById('trustedPopup');
+  const badge = document.getElementById('pTrustedBadge');
+  if (!badge) return;
+  const rect = badge.getBoundingClientRect();
+  popup.style.left = Math.max(10, rect.left) + 'px';
+  popup.style.top = (rect.bottom + 10) + 'px';
+  const since = userProfile?.trusted_since || currentProduct?.created_at;
+  document.getElementById('trustedSince').innerText = since ? new Date(since).getFullYear() : '2026';
+  popup.classList.remove('hidden');
+  setTimeout(() => { popup.classList.add('hidden'); }, 3500);
+}
+</script>
+<script>
+// ============ REVIEWS ============
 async function loadReviews(productId){
-  const { data } = await supabaseClient.from('reviews').select('*').eq('product_id', productId).order('created_at', { ascending:false });
-  document.getElementById('reviewsList').innerHTML = (data||[]).map(r =>
-    `<div class="border-b pb-2"><b class="text-amber-400">${'★'.repeat(r.rating)}</b> ${esc(r.comment) || ''}</div>`
-  ).join('') || '<p class="text-slate-400">No reviews yet.</p>';
+  const { data } = await supabaseClient.from('reviews').select('*').eq('product_id', productId).order('created_at', { ascending: false });
+  if (!data || data.length === 0) { document.getElementById('reviewsList').innerHTML = '<p class="text-slate-400">No reviews yet.</p>'; return; }
+
+  // Load images
+  const reviewIds = data.map(r => r.id);
+  const { data: imgs } = await supabaseClient.from('review_images').select('review_id, image_url').in('review_id', reviewIds);
+  const map = {};
+  (imgs || []).forEach(i => {
+    if (!map[i.review_id]) map[i.review_id] = [];
+    map[i.review_id].push(i.image_url);
+  });
+
+  document.getElementById('reviewsList').innerHTML = data.map(r => {
+    const ri = map[r.id] || [];
+    return `<div class="border-b pb-2">
+      <div class="flex items-center gap-2"><b class="text-amber-400">${'★'.repeat(r.rating)}</b><span class="text-[10px] text-slate-400">${new Date(r.created_at).toLocaleDateString()}</span></div>
+      <p class="text-slate-600 mt-1">${esc(r.comment) || ''}</p>
+      ${ri.length > 0 ? `<div class="flex gap-1 mt-1.5">${ri.map(u => `<img src="${esc(u)}" class="w-12 h-12 rounded object-cover cursor-pointer" onclick="showKycPhoto('${esc(u)}')">`).join('')}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function handleReviewImages(event){
+  const files = Array.from(event.target.files);
+  if (reviewImageFiles.length + files.length > 3) { alert('Max 3 photos'); return; }
+  reviewImageFiles = reviewImageFiles.concat(files.slice(0, 3 - reviewImageFiles.length));
+  updateReviewImagePreview();
+  event.target.value = '';
+}
+function updateReviewImagePreview(){
+  const box = document.getElementById('reviewImagePreview');
+  const cnt = document.getElementById('reviewImageCount');
+  if (!box) return;
+  box.innerHTML = '';
+  reviewImageFiles.forEach((f, i) => {
+    const url = URL.createObjectURL(f);
+    const el = document.createElement('div');
+    el.className = 'relative';
+    el.innerHTML = `<img src="${url}" class="w-12 h-12 rounded object-cover"><button class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full text-[8px]">×</button>`;
+    el.querySelector('button').onclick = () => { reviewImageFiles.splice(i, 1); updateReviewImagePreview(); };
+    box.appendChild(el);
+  });
+  if (cnt) cnt.innerText = reviewImageFiles.length > 0 ? `${reviewImageFiles.length}/3 photos` : '';
 }
 
 async function submitReview(){
   if (!currentUser) return openAuthModal();
   const rating = parseInt(document.getElementById('reviewRating').value);
   const comment = document.getElementById('reviewComment').value;
-  const { error } = await supabaseClient.from('reviews').insert({ product_id: currentProduct.id, customer_id: currentUser.id, rating, comment });
+  const { data, error } = await supabaseClient.from('reviews').insert({ product_id: currentProduct.id, customer_id: currentUser.id, rating, comment }).select().single();
   if (error) return alert('Review failed: ' + error.message);
+
+  // Upload images
+  for (const file of reviewImageFiles) {
+    try {
+      const blob = await compressImage(file, 600, 0.85);
+      const path = `reviews/${currentProduct.id}/${data.id}-${Date.now()}-${Math.random().toString(36).substring(2,6)}.jpg`;
+      const { error: upErr } = await supabaseClient.storage.from('avatars').upload(path, blob, { contentType: 'image/jpeg' });
+      if (upErr) continue;
+      const { data: urlData } = supabaseClient.storage.from('avatars').getPublicUrl(path);
+      await supabaseClient.from('review_images').insert({ review_id: data.id, image_url: urlData.publicUrl });
+    } catch(e) {}
+  }
+  reviewImageFiles = []; updateReviewImagePreview();
   document.getElementById('reviewComment').value = '';
   await loadReviews(currentProduct.id);
-  const { data } = await supabaseClient.from('products').select('rating,reviews_count').eq('id', currentProduct.id).single();
-  if (data){
-    document.getElementById('pRating').innerText = data.rating;
-    document.getElementById('pReviewCount').innerText = `(${data.reviews_count} reviews)`;
-    document.getElementById('pStars').innerHTML = '★'.repeat(Math.round(data.rating));
+  const { data: pd } = await supabaseClient.from('products').select('rating,reviews_count').eq('id', currentProduct.id).single();
+  if (pd){
+    document.getElementById('pRating').innerText = pd.rating;
+    document.getElementById('pReviewCount').innerText = `(${pd.reviews_count} reviews)`;
+    document.getElementById('pStars').innerHTML = '★'.repeat(Math.round(pd.rating));
   }
 }
 
+// ============ MY REVIEWS ============
 async function openReviewsModal(){
   document.getElementById('profileMenu').classList.add('hidden');
   if (!currentUser) return openAuthModal();
+  const { data } = await supabaseClient.from('reviews').select('id, rating, comment, created_at, product_id, products(title, image_url)').eq('customer_id', currentUser.id).order('created_at', { ascending: false });
 
-  const { data } = await supabaseClient
-    .from('reviews')
-    .select('id, rating, comment, created_at, product_id, products(title, image_url)')
-    .eq('customer_id', currentUser.id)
-    .order('created_at', { ascending: false });
+  // Load images
+  const ids = (data||[]).map(r => r.id);
+  let imgsMap = {};
+  if (ids.length > 0) {
+    const { data: imgs } = await supabaseClient.from('review_images').select('review_id, image_url').in('review_id', ids);
+    (imgs||[]).forEach(i => { if (!imgsMap[i.review_id]) imgsMap[i.review_id] = []; imgsMap[i.review_id].push(i.image_url); });
+  }
 
-  document.getElementById('myReviewsList').innerHTML = (data||[]).map(r => `
-    <div class="border rounded-xl p-3 flex gap-3">
-      <img src="${r.products?.image_url || 'https://placehold.co/100x100'}" class="w-14 h-14 rounded-lg object-cover bg-slate-100">
-      <div class="flex-1 min-w-0">
-        <p class="font-bold text-xs truncate">${esc(r.products?.title || 'Product')}</p>
-        <p class="text-amber-400 text-xs">${'★'.repeat(r.rating)}</p>
-        <p class="text-slate-500 text-[11px] mt-1">${esc(r.comment) || '<em>No comment</em>'}</p>
-        <p class="text-slate-400 text-[10px] mt-1">${new Date(r.created_at).toLocaleDateString()}</p>
+  document.getElementById('myReviewsList').innerHTML = (data||[]).map(r => {
+    const ri = imgsMap[r.id] || [];
+    return `<div class="border rounded-xl p-3">
+      <div class="flex gap-3">
+        <img src="${r.products?.image_url || 'https://placehold.co/100x100'}" class="w-14 h-14 rounded-lg object-cover bg-slate-100 shrink-0">
+        <div class="flex-1 min-w-0">
+          <p class="font-bold text-xs truncate">${esc(r.products?.title || 'Product')}</p>
+          <p class="text-amber-400 text-xs">${'★'.repeat(r.rating)}</p>
+          <p class="text-slate-500 text-[11px] mt-1">${esc(r.comment) || '<em>No comment</em>'}</p>
+          <p class="text-slate-400 text-[10px] mt-1">${new Date(r.created_at).toLocaleDateString()}</p>
+        </div>
       </div>
-    </div>
-  `).join('') || '<p class="text-slate-400 text-center py-6">You have not written any reviews yet.</p>';
+      ${ri.length > 0 ? `<div class="flex gap-1 mt-2">${ri.map(u => `<img src="${esc(u)}" class="w-14 h-14 rounded object-cover cursor-pointer" onclick="showKycPhoto('${esc(u)}')">`).join('')}</div>` : ''}
+    </div>`;
+  }).join('') || '<p class="text-slate-400 text-center py-6">You haven\'t written any reviews yet.</p>';
 
   openModal('reviewsModal');
 }
 
-// ============ MODALS FOR MENU ============
-function openSupportModal(){ document.getElementById('profileMenu').classList.add('hidden'); openModal('supportModal'); }
-function openAboutModal(){ document.getElementById('profileMenu').classList.add('hidden'); openModal('aboutModal'); }
+// ============ SMART SEARCH ============
+function smartScore(p, term){
+  if (!term) return 100;
+  const words = term.split(/\s+/).filter(w => w.length > 1);
+  if (words.length === 0) return 100;
+  const title = (p.title || '').toLowerCase();
+  const desc = (p.description || '').toLowerCase();
+  const catName = (categoriesMap[p.category_id] || '').toLowerCase();
+  const country = (p.origin_country || '').toLowerCase();
+  const barcode = (p.barcode || '').toLowerCase();
+  let score = 0;
+  if (title.includes(term)) score += 50;
+  words.forEach(w => {
+    if (barcode && barcode === w) { score += 100; return; }
+    if (title.includes(w)) score += 15;
+    else if (catName.includes(w)) score += 10;
+    else if (desc.includes(w)) score += 5;
+    else if (country.includes(w)) score += 3;
+    else if (w.length >= 3) {
+      const stem = w.substring(0, Math.min(w.length, 4));
+      if (title.includes(stem)) score += 4;
+      else if (desc.includes(stem)) score += 2;
+    }
+  });
+  return score;
+}
+
+// ============ SEARCH HISTORY ============
+function getSearchHistory(){ try { return JSON.parse(localStorage.getItem('tg_search_history') || '[]'); } catch { return []; } }
+function saveSearchHistory(term){
+  term = (term || '').trim();
+  if (!term || term.length < 2) return;
+  let h = getSearchHistory().filter(t => t.toLowerCase() !== term.toLowerCase());
+  h.unshift(term); h = h.slice(0, 8);
+  localStorage.setItem('tg_search_history', JSON.stringify(h));
+}
+function clearSearchHistory(){ localStorage.removeItem('tg_search_history'); hideSearchHistory(); }
+function showSearchHistory(boxId){
+  boxId = boxId || 'searchHistory';
+  const h = getSearchHistory();
+  const box = document.getElementById(boxId);
+  if (!box) return;
+  if (h.length === 0) { box.classList.add('hidden'); return; }
+  box.innerHTML = `<div class="flex items-center justify-between px-4 py-2 text-[11px] text-slate-400 border-b border-slate-100"><span>Recent searches</span><button type="button" onclick="clearSearchHistory()" class="text-red-400 font-bold">Clear</button></div>` +
+    h.map(t => `<button type="button" onclick="pickHistory(this.dataset.term)" data-term="${esc(t)}" class="w-full flex items-center gap-3 px-4 py-2 text-sm hover:bg-slate-50 text-left"><i class="fa-solid fa-clock-rotate-left text-slate-400 w-3"></i><span class="truncate">${esc(t)}</span></button>`).join('');
+  box.classList.remove('hidden');
+}
+function hideSearchHistory(){ ['searchHistory','searchHistoryMobile'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.add('hidden'); }); }
+function pickHistory(term){ onSearch(term); hideSearchHistory(); }
+document.addEventListener('click', function(e){
+  const dS = document.getElementById('searchInput'), mS = document.getElementById('searchInputMobile');
+  const dB = document.getElementById('searchHistory'), mB = document.getElementById('searchHistoryMobile');
+  const inS = (dS && dS.contains(e.target)) || (mS && mS.contains(e.target));
+  const inD = dB && dB.contains(e.target), inM = mB && mB.contains(e.target);
+  if (!inS && !inD && !inM) hideSearchHistory();
+});
+</script>
+<script>
+// ============ VOICE SEARCH ============
+function startVoiceSearch(inputId){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { alert('Voice search is not supported in this browser.\nPlease use Chrome on Android.'); return; }
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const recognition = new SR();
+  recognition.lang = 'en-US';
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+  const origPlaceholder = input.placeholder;
+  const origBg = input.style.background;
+  input.placeholder = '🎤 Listening…';
+  input.style.background = '#fee2e2';
+  recognition.onresult = (e) => {
+    const text = e.results[0][0].transcript;
+    onSearch(text);
+    saveSearchHistory(text);
+  };
+  recognition.onerror = (e) => {
+    if (e.error !== 'aborted' && e.error !== 'no-speech') alert('Voice search failed: ' + e.error);
+  };
+  recognition.onend = () => { input.placeholder = origPlaceholder; input.style.background = origBg; };
+  try { recognition.start(); } catch (err) {}
+}
+
+// ============ QR SCANNER ============
+let qrScannerInstance = null;
+function openQRScanner(){
+  const modal = document.getElementById('qrScannerModal');
+  modal.classList.remove('hidden');
+  document.getElementById('qrStatus').innerText = 'Loading scanner…';
+  if (typeof Html5Qrcode !== 'undefined') { startQRScanner(); }
+  else {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js';
+    script.onload = () => startQRScanner();
+    script.onerror = () => { document.getElementById('qrStatus').innerText = 'Failed to load scanner library.'; };
+    document.head.appendChild(script);
+  }
+}
+function startQRScanner(){
+  document.getElementById('qrStatus').innerText = 'Point camera at a barcode or QR code…';
+  qrScannerInstance = new Html5Qrcode('qrReader');
+  qrScannerInstance.start(
+    { facingMode: 'environment' },
+    { fps: 10, qrbox: { width: 250, height: 250 } },
+    (decodedText) => { handleScanResult(decodedText); },
+    () => {}
+  ).catch(err => { document.getElementById('qrStatus').innerText = 'Camera error: ' + (err.message || err); });
+}
+function closeQRScanner(){
+  const stop = qrScannerInstance;
+  qrScannerInstance = null;
+  if (stop) { try { stop.stop().then(() => stop.clear()).catch(() => {}); } catch(e) {} }
+  document.getElementById('qrScannerModal').classList.add('hidden');
+}
+function handleScanResult(text){
+  if (navigator.vibrate) navigator.vibrate(80);
+  closeQRScanner();
+  const found = allProducts.find(p => (p.barcode && p.barcode === text) || p.id === text);
+  if (found) { openProduct(found.id); return; }
+  onSearch(text);
+  saveSearchHistory(text);
+}
 
 // ============ CART ============
 function saveCart(){ localStorage.setItem('tg_cart', JSON.stringify(cart)); renderCartCount(); }
@@ -1003,7 +1539,6 @@ function addToCart(p){
   if (addToCartLock) return;
   addToCartLock = true;
   setTimeout(() => { addToCartLock = false; }, 600);
-
   const existing = cart.find(i => i.id === p.id);
   if (existing) existing.qty++; else cart.push({ id:p.id, title:p.title, price:p.price_usd, image:p.image_url, qty:1 });
   saveCart();
@@ -1030,39 +1565,90 @@ function renderCart(){
       <button onclick="removeItem(${idx})" class="text-red-400"><i class="fa-solid fa-trash"></i></button>
     </div>`).join('') || '<p class="text-slate-400 text-sm">Your cart is empty.</p>';
   document.getElementById('cartSubtotal').innerText = fmt(cartSubtotal());
+  updateCartTotals();
+}
+
+function updateCartTotals(){
+  const subtotal = cartSubtotal();
+  const discount = appliedCoupon ? getCouponDiscount(subtotal) : 0;
+  const total = Math.max(0, subtotal - discount);
+  document.getElementById('cartSubtotal').innerText = fmt(subtotal);
+  document.getElementById('cartTotal').innerText = fmt(total);
+  if (appliedCoupon) {
+    document.getElementById('cartDiscountRow').classList.remove('hidden');
+    document.getElementById('cartDiscountRow').classList.add('flex');
+    document.getElementById('cartDiscount').innerText = '- ' + fmt(discount);
+    document.getElementById('cartCouponApplied').classList.remove('hidden');
+    document.getElementById('cartCouponCode').innerText = appliedCoupon.code;
+    document.getElementById('cartCouponAmount').innerText = ' · -' + fmt(discount);
+  } else {
+    document.getElementById('cartDiscountRow').classList.add('hidden');
+    document.getElementById('cartDiscountRow').classList.remove('flex');
+    document.getElementById('cartCouponApplied').classList.add('hidden');
+  }
 }
 
 function updateQty(idx, val){ cart[idx].qty = Math.max(1, parseInt(val)||1); saveCart(); renderCart(); }
 function removeItem(idx){ cart.splice(idx,1); saveCart(); renderCart(); }
 function cartSubtotal(){ return cart.reduce((s,i)=> s + i.price*i.qty, 0); }
 
+// ============ CART COUPON ============
+function getCouponDiscount(subtotal){
+  if (!appliedCoupon) return 0;
+  if (appliedCoupon.discount_type === 'percent') return subtotal * (appliedCoupon.discount_value / 100);
+  return Math.min(subtotal, appliedCoupon.discount_value);
+}
+
+async function applyCouponInCart(){
+  const input = document.getElementById('cartCouponInput');
+  const msg = document.getElementById('cartCouponMsg');
+  const code = (input.value || '').trim().toUpperCase();
+  if (!code) { msg.className = 'text-[11px] text-red-500'; msg.innerText = 'Enter a code'; return; }
+  const subtotal = cartSubtotal();
+  const { data, error } = await supabaseClient.from('coupons').select('*').eq('code', code).eq('is_active', true).maybeSingle();
+  if (error || !data) { msg.className = 'text-[11px] text-red-500'; msg.innerText = 'Invalid coupon code'; return; }
+  if (data.valid_until && new Date(data.valid_until) < new Date()) { msg.className = 'text-[11px] text-red-500'; msg.innerText = 'Coupon expired'; return; }
+  if (data.max_uses && data.used_count >= data.max_uses) { msg.className = 'text-[11px] text-red-500'; msg.innerText = 'Coupon usage limit reached'; return; }
+  if (data.min_order_usd && subtotal < data.min_order_usd) { msg.className = 'text-[11px] text-red-500'; msg.innerText = 'Minimum order $' + data.min_order_usd; return; }
+
+  appliedCoupon = data;
+  msg.className = 'text-[11px] text-emerald-600'; msg.innerText = '✓ Coupon applied!';
+  input.value = '';
+  updateCartTotals();
+}
+function removeCoupon(){
+  appliedCoupon = null;
+  document.getElementById('cartCouponMsg').innerText = '';
+  updateCartTotals();
+}
+</script>
+<script>
 // ============ CHECKOUT ============
 function openCheckout(){
   if (!currentUser) { closeModal('cartDrawer'); openAuthModal(); return; }
   if (cart.length === 0) { alert('Your cart is empty.'); return; }
 
-  // Auto-fill name/phone
-  if (userProfile?.full_name && !document.getElementById('coName').value)
-    document.getElementById('coName').value = userProfile.full_name;
-  if (userProfile?.phone && !document.getElementById('coPhone').value)
-    document.getElementById('coPhone').value = userProfile.phone;
+  if (userProfile?.full_name && !document.getElementById('coName').value) document.getElementById('coName').value = userProfile.full_name;
+  if (userProfile?.phone && !document.getElementById('coPhone').value) document.getElementById('coPhone').value = userProfile.phone;
 
-  // Build payment options based on ship country
-  const shipCountry = document.getElementById('shipCountry').value;
+  const shipCountry = currentCountry();
   const codAllowed = isCodAllowedForCountry(shipCountry);
+  const shipping = getShippingRate(shipCountry);
+
+  // Update shipping info box
+  document.getElementById('coCountryName').innerText = COUNTRY_NAMES[shipCountry] || shipCountry;
+  document.getElementById('coDeliveryTime').innerText = `${shipping.delivery_days_min}-${shipping.delivery_days_max} days`;
+  document.getElementById('coShippingCost').innerText = fmt(shipping.cost_usd);
+
+  // Build payment options
   const paymentSelect = document.getElementById('coPayment');
-
   paymentSelect.innerHTML = '';
-  if (codAllowed) {
-    paymentSelect.innerHTML += `<option value="cod">Cash on Delivery (COD)</option>`;
-  }
-  paymentSelect.innerHTML += `
-    <option value="bkash_manual">bKash (Prepaid)</option>
-    <option value="nagad_manual">Nagad (Prepaid)</option>
-  `;
-
-  // Default: COD if available, else first prepaid option
+  if (codAllowed) paymentSelect.innerHTML += `<option value="cod">Cash on Delivery (COD)</option>`;
+  paymentSelect.innerHTML += `<option value="bkash_manual">bKash (Prepaid)</option><option value="nagad_manual">Nagad (Prepaid)</option>`;
   paymentSelect.value = codAllowed ? 'cod' : 'bkash_manual';
+
+  const note = document.getElementById('coPaymentNote');
+  note.innerText = codAllowed ? 'COD available for ' + (COUNTRY_NAMES[shipCountry]||shipCountry) : 'COD not available — Prepaid only';
 
   updateCheckoutTotals();
   togglePaymentInfo();
@@ -1072,49 +1658,58 @@ function openCheckout(){
 }
 
 function updateCheckoutTotals(){
-  const baseSubtotal = cartSubtotal();
-  const baseShipping = FLAT_SHIPPING_USD;
-  const baseTotal = baseSubtotal + baseShipping;
+  const subtotal = cartSubtotal();
+  const shipping = currentShippingCost();
+  const baseTotal = subtotal + shipping;
   const paymentMethod = document.getElementById('coPayment').value;
   const isCod = paymentMethod === 'cod';
 
-  const prepaidTotal = calcPrepaidPrice(baseTotal);
-  const codTotal = calcCodPrice(baseTotal);
+  // Apply coupon first
+  const couponDiscount = appliedCoupon ? getCouponDiscount(subtotal) : 0;
+  const afterCoupon = Math.max(0, baseTotal - couponDiscount);
 
-  document.getElementById('checkoutSubtotal').innerText = fmt(baseSubtotal);
-  document.getElementById('checkoutShipping').innerText = fmt(baseShipping);
+  const prepaidTotal = calcPrepaidPrice(afterCoupon);
+  const codTotal = calcCodPrice(afterCoupon);
+
+  document.getElementById('checkoutSubtotal').innerText = fmt(subtotal);
+  document.getElementById('checkoutShipping').innerText = fmt(shipping);
+
+  if (appliedCoupon) {
+    document.getElementById('checkoutCouponRow').classList.remove('hidden');
+    document.getElementById('checkoutCouponRow').classList.add('flex');
+    document.getElementById('checkoutDiscount').innerText = '- ' + fmt(couponDiscount);
+  } else {
+    document.getElementById('checkoutCouponRow').classList.add('hidden');
+    document.getElementById('checkoutCouponRow').classList.remove('flex');
+  }
+
   document.getElementById('checkoutTotal').innerText = fmt(isCod ? codTotal : prepaidTotal);
 
-  // Show prepaid discount / COD charge badge
   const badge = document.getElementById('checkoutPricingBadge');
   if (badge) {
     if (isCod) {
       badge.innerText = '+' + getCodCharge() + '% COD Charge';
       badge.className = 'bg-red-600 text-white text-[11px] font-bold px-2 py-1 rounded';
-      badge.classList.remove('hidden');
     } else {
       badge.innerText = getPrepaidDiscount() + '% OFF 🎉';
       badge.className = 'bg-red-600 text-white text-[11px] font-bold px-2 py-1 rounded';
-      badge.classList.remove('hidden');
     }
+    badge.classList.remove('hidden');
   }
 }
 
 function togglePaymentInfo(){
   const val = document.getElementById('coPayment').value;
   const isManual = val !== 'cod';
-
-  // Update totals + badge
   updateCheckoutTotals();
-
   document.getElementById('manualPayBox').classList.toggle('hidden', !isManual);
-
   if (isManual){
-    document.getElementById('payNumber').innerText = val === 'bkash_manual' ? '01XXXXXXXXX (bKash Personal)' : '01XXXXXXXXX (Nagad Personal)';
-
-    // Show the prepaid total in manual pay box
-    const baseTotal = cartSubtotal() + FLAT_SHIPPING_USD;
-    const prepaidTotal = calcPrepaidPrice(baseTotal);
+    document.getElementById('payNumber').innerText = val === 'bkash_manual' ? (siteSettings.whatsapp_display || '01XXXXXXXXX') + ' (bKash)' : (siteSettings.whatsapp_display || '01XXXXXXXXX') + ' (Nagad)';
+    const subtotal = cartSubtotal();
+    const shipping = currentShippingCost();
+    const couponDiscount = appliedCoupon ? getCouponDiscount(subtotal) : 0;
+    const afterCoupon = Math.max(0, subtotal + shipping - couponDiscount);
+    const prepaidTotal = calcPrepaidPrice(afterCoupon);
     document.getElementById('payAmount').innerText = fmt(prepaidTotal);
   }
 }
@@ -1128,24 +1723,25 @@ async function placeOrder(e){
   btn.disabled = true; btn.innerText = 'Placing…';
 
   const subtotal = cartSubtotal();
-  const shipping = FLAT_SHIPPING_USD;
+  const shipping = currentShippingCost();
+  const shipCountry = currentCountry();
+  const shippingData = getShippingRate(shipCountry);
   const baseTotal = subtotal + shipping;
+  const couponDiscount = appliedCoupon ? getCouponDiscount(subtotal) : 0;
+  const afterCoupon = Math.max(0, baseTotal - couponDiscount);
+
   const cur = currentCurrency();
   const rate = liveRates[cur] || 1;
   const paymentMethod = document.getElementById('coPayment').value;
   const isCod = paymentMethod === 'cod';
-
-  // Apply prepaid discount OR COD charge
-  const finalTotal = isCod ? calcCodPrice(baseTotal) : calcPrepaidPrice(baseTotal);
-  const adjustment = finalTotal - baseTotal; // + for COD, − for prepaid
-  const commissionRate = 0;
+  const finalTotal = isCod ? calcCodPrice(afterCoupon) : calcPrepaidPrice(afterCoupon);
 
   const order = {
     customer_id: currentUser.id,
     full_name: document.getElementById('coName').value,
     phone: document.getElementById('coPhone').value,
     address: document.getElementById('coAddress').value,
-    ship_country: document.getElementById('shipCountry').value,
+    ship_country: shipCountry,
     currency: cur,
     local_currency: cur,
     exchange_rate: rate,
@@ -1153,30 +1749,44 @@ async function placeOrder(e){
     payment_txn_id: document.getElementById('coTxnId')?.value || null,
     subtotal_usd: subtotal,
     shipping_usd: shipping,
+    coupon_code: appliedCoupon?.code || null,
+    coupon_discount_usd: couponDiscount,
     total_usd: +finalTotal.toFixed(2),
     subtotal_local: +(subtotal * rate).toFixed(2),
     shipping_local: +(shipping * rate).toFixed(2),
-    total_local: +(finalTotal * rate).toFixed(2)
+    total_local: +(finalTotal * rate).toFixed(2),
+    delivery_estimate_min: shippingData.delivery_days_min,
+    delivery_estimate_max: shippingData.delivery_days_max
   };
 
   const { data, error } = await supabaseClient.from('orders').insert(order).select().single();
-  if (error){
-    btn.disabled = false; btn.innerText = 'Place Order';
-    alert('Order failed: ' + error.message); return false;
-  }
+  if (error){ btn.disabled = false; btn.innerText = 'Place Order'; alert('Order failed: ' + error.message); return false; }
 
   const items = cart.map(i => ({ order_id: data.id, product_id: i.id, title_snapshot: i.title, price_usd: i.price, qty: i.qty }));
   const { error: itemErr } = await supabaseClient.from('order_items').insert(items);
-  if (itemErr){
-    btn.disabled = false; btn.innerText = 'Place Order';
-    alert('Items failed: ' + itemErr.message); return false;
+  if (itemErr){ btn.disabled = false; btn.innerText = 'Place Order'; alert('Items failed: ' + itemErr.message); return false; }
+
+  // Update coupon usage
+  if (appliedCoupon) {
+    try {
+      await supabaseClient.from('coupon_usage').insert({ coupon_id: appliedCoupon.id, user_id: currentUser.id, order_id: data.id });
+      await supabaseClient.from('coupons').update({ used_count: (appliedCoupon.used_count || 0) + 1 }).eq('id', appliedCoupon.id);
+    } catch(e) {}
   }
 
-  cart = []; saveCart();
+  // Notification
+  try {
+    await supabaseClient.from('notifications').insert({ user_id: currentUser.id, title: 'Order Placed!', message: 'Your order ' + data.order_code + ' has been placed successfully.', type: 'success', link: '#orders' });
+  } catch(e) {}
+
+  cart = []; appliedCoupon = null; saveCart();
+  document.getElementById('cartCouponApplied').classList.add('hidden');
+  document.getElementById('cartCouponInput').value = '';
   closeModal('checkoutModal');
   document.getElementById('successOrderId').innerText = data.order_code;
   openModal('successModal');
   btn.disabled = false; btn.innerText = 'Place Order';
+  loadNotifications();
   return false;
 }
 
@@ -1184,12 +1794,13 @@ async function placeOrder(e){
 async function openOrdersModal(){
   document.getElementById('profileMenu').classList.add('hidden');
   if (!currentUser) return openAuthModal();
-  const { data } = await supabaseClient.from('orders').select('*').order('created_at', { ascending:false });
+  const { data } = await supabaseClient.from('orders').select('*').eq('customer_id', currentUser.id).order('created_at', { ascending:false });
   const STAGES = ['pending','confirmed','packaging','shipped','out_for_delivery','delivered'];
   document.getElementById('ordersList').innerHTML = (data||[]).map(o => {
     const cancelled = o.status === 'cancelled';
     const idx = STAGES.indexOf(o.status);
     const local = o.total_local ? `${o.local_currency} ${Number(o.total_local).toFixed(0)}` : '';
+    const estimate = o.delivery_estimate_min && o.delivery_estimate_max ? `${o.delivery_estimate_min}-${o.delivery_estimate_max} days` : '';
     return `
       <div class="border rounded-xl p-3">
         <div class="flex justify-between font-bold">
@@ -1207,372 +1818,29 @@ async function openOrdersModal(){
             <span class="${idx >= 5 ? 'text-emerald-600 font-bold' : ''}">Delivered</span>
           </div>
         ` : ''}
-        ${o.courier_name ? `<p class="text-[11px] text-slate-500 mt-1"><i class="fa-solid fa-truck"></i> ${esc(o.courier_name)}${o.tracking_no ? ' · ' + esc(o.tracking_no) : ''}</p>` : (o.tracking_no ? `<p class="text-[11px] text-slate-500 mt-1"><i class="fa-solid fa-truck"></i> Tracking: ${esc(o.tracking_no)}</p>` : '')}
+        ${o.coupon_code ? `<p class="text-[10px] text-pink-600"><i class="fa-solid fa-ticket"></i> Coupon: ${esc(o.coupon_code)} (-$${Number(o.coupon_discount_usd||0).toFixed(2)})</p>` : ''}
+        ${o.courier_name ? `<p class="text-[11px] text-slate-500 mt-1"><i class="fa-solid fa-truck"></i> ${esc(o.courier_name)}${o.tracking_no ? ' · ' + esc(o.tracking_no) : ''}</p>` : ''}
+        ${estimate && !cancelled ? `<p class="text-[11px] text-slate-500 mt-1"><i class="fa-solid fa-calendar"></i> Estimated delivery: <b>${estimate}</b></p>` : ''}
         ${o.delivery_notes ? `<div class="bg-blue-50 border border-blue-100 rounded-lg p-2 mt-2 text-[11px] text-blue-800"><i class="fa-solid fa-circle-info"></i> ${esc(o.delivery_notes)}</div>` : ''}
       </div>`;
   }).join('') || '<p class="text-slate-400">No orders yet.</p>';
   openModal('ordersModal');
 }
-  
-// ============ SMART SEARCH ============
-function smartScore(p, term){
-  if (!term) return 100;
-  const words = term.split(/\s+/).filter(w => w.length > 1);
-  if (words.length === 0) return 100;
+</script>
+<script>
+// ============ MODALS FOR MENU ============
+function openSupportModal(){ document.getElementById('profileMenu').classList.add('hidden'); openModal('supportModal'); }
+function openAboutModal(){ document.getElementById('profileMenu').classList.add('hidden'); openModal('aboutModal'); }
 
-  const title = (p.title || '').toLowerCase();
-  const desc = (p.description || '').toLowerCase();
-  const catName = (categoriesMap[p.category_id] || '').toLowerCase();
-  const country = (p.origin_country || '').toLowerCase();
-  const barcode = (p.barcode || '').toLowerCase();
-
-  let score = 0;
-
-  if (title.includes(term)) score += 50;
-
-  words.forEach(w => {
-    if (barcode && barcode === w) { score += 100; return; }
-    if (title.includes(w)) score += 15;
-    else if (catName.includes(w)) score += 10;
-    else if (desc.includes(w)) score += 5;
-    else if (country.includes(w)) score += 3;
-    else {
-      if (w.length >= 3) {
-        const stem = w.substring(0, Math.min(w.length, 4));
-        if (title.includes(stem)) score += 4;
-        else if (desc.includes(stem)) score += 2;
-      }
-    }
-  });
-  return score;
+function showKycPhoto(url){
+  document.getElementById('kycPhotoImg').src = url;
+  openModal('kycPhotoModal');
 }
 
-  // ============ SEARCH HISTORY ============
-function getSearchHistory(){
-  try { return JSON.parse(localStorage.getItem('tg_search_history') || '[]'); }
-  catch { return []; }
-}
-
-function saveSearchHistory(term){
-  term = (term || '').trim();
-  if (!term || term.length < 2) return;
-  let h = getSearchHistory().filter(t => t.toLowerCase() !== term.toLowerCase());
-  h.unshift(term);
-  h = h.slice(0, 8);
-  localStorage.setItem('tg_search_history', JSON.stringify(h));
-}
-
-function clearSearchHistory(){
-  localStorage.removeItem('tg_search_history');
-  hideSearchHistory();
-}
-
-function showSearchHistory(boxId){
-  boxId = boxId || 'searchHistory';
-  const h = getSearchHistory();
-  const box = document.getElementById(boxId);
-  if (!box) return;
-  if (h.length === 0) { box.classList.add('hidden'); return; }
-  box.innerHTML = `
-    <div class="flex items-center justify-between px-4 py-2 text-[11px] text-slate-400 border-b border-slate-100">
-      <span>Recent searches</span>
-      <button type="button" onclick="clearSearchHistory()" class="text-red-400 font-bold">Clear</button>
-    </div>
-    ${h.map(t => `<button type="button" onclick="pickHistory(this.dataset.term)" data-term="${esc(t)}" class="w-full flex items-center gap-3 px-4 py-2 text-sm hover:bg-slate-50 text-left">
-      <i class="fa-solid fa-clock-rotate-left text-slate-400 w-3"></i>
-      <span class="truncate">${esc(t)}</span>
-    </button>`).join('')}
-  `;
-  box.classList.remove('hidden');
-}
-
-function hideSearchHistory(){
-  ['searchHistory','searchHistoryMobile'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.classList.add('hidden');
-  });
-}
-
-function pickHistory(term){
-  onSearch(term);
-  hideSearchHistory();
-}
-
-document.addEventListener('click', function(e){
-  const dSearch = document.getElementById('searchInput');
-  const mSearch = document.getElementById('searchInputMobile');
-  const dBox = document.getElementById('searchHistory');
-  const mBox = document.getElementById('searchHistoryMobile');
-  const inSearch = (dSearch && dSearch.contains(e.target)) || (mSearch && mSearch.contains(e.target));
-  const inDBox = dBox && dBox.contains(e.target);
-  const inMBox = mBox && mBox.contains(e.target);
-  if (!inSearch && !inDBox && !inMBox) hideSearchHistory();
-});
-
-  // ============ VOICE SEARCH ============
-function startVoiceSearch(inputId){
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) {
-    alert('Voice search is not supported in this browser.\nPlease use Chrome on Android.');
-    return;
-  }
-  const input = document.getElementById(inputId);
-  if (!input) return;
-
-  const recognition = new SR();
-  recognition.lang = 'en-US';
-  recognition.interimResults = false;
-  recognition.maxAlternatives = 1;
-
-  const origPlaceholder = input.placeholder;
-  const origBg = input.style.background;
-  input.placeholder = '🎤 Listening…';
-  input.style.background = '#fee2e2';
-
-  recognition.onresult = (e) => {
-    const text = e.results[0][0].transcript;
-    onSearch(text);
-    saveSearchHistory(text);
-  };
-  recognition.onerror = (e) => {
-    if (e.error !== 'aborted' && e.error !== 'no-speech') {
-      alert('Voice search failed: ' + e.error);
-    }
-  };
-  recognition.onend = () => {
-    input.placeholder = origPlaceholder;
-    input.style.background = origBg;
-  };
-  try { recognition.start(); } catch (err) { /* already running */ }
-}
-
-  // ============ QR / BARCODE SCANNER ============
-let qrScannerInstance = null;
-
-function openQRScanner(){
-  const modal = document.getElementById('qrScannerModal');
-  modal.classList.remove('hidden');
-  document.getElementById('qrStatus').innerText = 'Loading scanner…';
-
-  if (typeof Html5Qrcode !== 'undefined') {
-    startQRScanner();
-  } else {
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js';
-    script.onload = () => startQRScanner();
-    script.onerror = () => {
-      document.getElementById('qrStatus').innerText = 'Failed to load scanner library. Check your internet.';
-    };
-    document.head.appendChild(script);
-  }
-}
-
-function startQRScanner(){
-  document.getElementById('qrStatus').innerText = 'Point camera at a barcode or QR code…';
-
-  qrScannerInstance = new Html5Qrcode('qrReader');
-  qrScannerInstance.start(
-    { facingMode: 'environment' },
-    { fps: 10, qrbox: { width: 250, height: 250 } },
-    (decodedText) => { handleScanResult(decodedText); },
-    () => { /* per-frame errors: ignore */ }
-  ).catch(err => {
-    document.getElementById('qrStatus').innerText = 'Camera error: ' + (err.message || err);
-  });
-}
-
-function closeQRScanner(){
-  const stop = qrScannerInstance;
-  qrScannerInstance = null;
-  if (stop) {
-    try {
-      stop.stop().then(() => stop.clear()).catch(() => {});
-    } catch(e) {}
-  }
-  document.getElementById('qrScannerModal').classList.add('hidden');
-}
-
-function handleScanResult(text){
-  if (navigator.vibrate) navigator.vibrate(80);
-  closeQRScanner();
-
-  const found = allProducts.find(p =>
-    (p.barcode && p.barcode === text) || p.id === text
-  );
-  if (found) {
-    openProduct(found.id);
-    return;
-  }
-
-  onSearch(text);
-  saveSearchHistory(text);
-}
-
-  // ============ LIVE CURRENCY RATES ============
-let liveRates = { USD:1, BDT:118, GBP:0.79, EUR:0.92, INR:83 };
-let ratesLoadedFrom = 'fallback';
-
-async function loadLiveRates(){
-  // 1. Check cache (6 hour)
-  try {
-    const cached = localStorage.getItem('zorvex_rates');
-    if (cached) {
-      const { rates, timestamp } = JSON.parse(cached);
-      if (Date.now() - timestamp < 6 * 60 * 60 * 1000) {
-        liveRates = rates;
-        ratesLoadedFrom = 'cache';
-        return;
-      }
-    }
-  } catch(e) {}
-
-  // 2. Fetch live rates
-  try {
-    const res = await fetch('https://api.exchangerate.host/latest?base=USD');
-    if (!res.ok) throw new Error('API failed');
-    const data = await res.json();
-    if (data && data.rates) {
-      liveRates = {
-        USD: 1,
-        BDT: data.rates.BDT || 118,
-        INR: data.rates.INR || 83,
-        EUR: data.rates.EUR || 0.92,
-        GBP: data.rates.GBP || 0.79
-      };
-      ratesLoadedFrom = 'live';
-      localStorage.setItem('zorvex_rates', JSON.stringify({
-        rates: liveRates,
-        timestamp: Date.now()
-      }));
-      return;
-    }
-  } catch(e) {
-    console.warn('Live rates failed, using fallback:', e.message);
-  }
-
-  // 3. Fallback: use admin-set BDT rate
-  if (siteSettings.currency_bdt_rate) {
-    liveRates.BDT = parseFloat(siteSettings.currency_bdt_rate) || 118;
-    ratesLoadedFrom = 'admin';
-  }
-}
-
-// ============ PRICING HELPERS ============
-function getPrepaidDiscount(){
-  return parseFloat(siteSettings.prepaid_discount || '5');
-}
-function getCodCharge(){
-  return parseFloat(siteSettings.cod_charge || '10');
-}
-function isCodAllowedForCountry(country){
-  const bdOnly = (siteSettings.cod_bd_only || 'true') === 'true';
-  if (!bdOnly) return true;
-  return country === 'BD';
-}
-function calcPrepaidPrice(baseUsd){
-  const disc = getPrepaidDiscount();
-  return baseUsd * (1 - disc / 100);
-}
-function calcCodPrice(baseUsd){
-  const charge = getCodCharge();
-  return baseUsd * (1 + charge / 100);
-}
-  
-  // ============ SITE SETTINGS / CONTACT ============
-let siteSettings = {};
-
-async function loadSiteSettings(){
-  const { data, error } = await supabaseClient.from('site_settings').select('key, value');
-  if (error) { console.warn('Settings load failed:', error.message); }
-  siteSettings = {};
-  (data || []).forEach(s => { siteSettings[s.key] = (s.value || '').trim(); });
-  await loadLiveRates();
-  applySiteSettings();
-}
-
-function applySiteSettings(){
-  const tagline = siteSettings.site_tagline || 'Worldwide Express Delivery';
-  const tagEl = document.getElementById('topbarTagline');
-  if (tagEl) tagEl.innerText = tagline;
-  buildContactLinks();
-  // Re-render with new live rates
-  if (allProducts.length > 0) renderProducts();
-  if (cart.length > 0 && !document.getElementById('cartDrawer').classList.contains('hidden')) renderCart();
-}
-
-function smartWhatsAppLink(raw){
-  if (!raw) return null;
-  const digits = String(raw).replace(/\D/g, '');
-  if (!digits) return null;
-  if (digits.startsWith('880')) return 'https://wa.me/' + digits;
-  if (digits.startsWith('0')) return 'https://wa.me/88' + digits;
-  return 'https://wa.me/' + digits;
-}
-
-function smartSocialLink(raw, platform){
-  if (!raw) return null;
-  const val = String(raw).trim();
-  if (/^https?:\/\//i.test(val)) return val;
-  const clean = val.replace(/^@/, '');
-  const map = {
-    facebook: 'https://facebook.com/',
-    messenger: 'https://m.me/',
-    instagram: 'https://instagram.com/',
-    telegram: 'https://t.me/',
-    tiktok: 'https://tiktok.com/@',
-    youtube: 'https://youtube.com/@'
-  };
-  return (map[platform] || '') + clean;
-}
-
-function buildContactLinks(){
-  const box = document.getElementById('contactLinksBox');
-  if (!box) return;
-
-  const links = [];
-  const s = siteSettings;
-
-  const wa = smartWhatsAppLink(s.whatsapp_number);
-  if (wa) links.push({ href: wa, icon: 'fa-brands fa-whatsapp text-green-600', title: 'WhatsApp', sub: s.whatsapp_display || s.whatsapp_number, ext: true });
-
-  const ms = smartSocialLink(s.messenger_username, 'messenger');
-  if (ms) links.push({ href: ms, icon: 'fa-brands fa-facebook-messenger text-blue-500', title: 'Messenger', sub: 'Chat with us on Messenger', ext: true });
-
-  const fb = smartSocialLink(s.facebook_page, 'facebook');
-  if (fb) links.push({ href: fb, icon: 'fa-brands fa-facebook text-blue-700', title: 'Facebook', sub: 'Follow our page', ext: true });
-
-  const ig = smartSocialLink(s.instagram_username, 'instagram');
-  if (ig) links.push({ href: ig, icon: 'fa-brands fa-instagram text-pink-600', title: 'Instagram', sub: 'DM us on Instagram', ext: true });
-
-  const tg = smartSocialLink(s.telegram_username, 'telegram');
-  if (tg) links.push({ href: tg, icon: 'fa-brands fa-telegram text-sky-500', title: 'Telegram', sub: 'Chat on Telegram', ext: true });
-
-  const tt = smartSocialLink(s.tiktok_username, 'tiktok');
-  if (tt) links.push({ href: tt, icon: 'fa-brands fa-tiktok', title: 'TikTok', sub: 'Follow on TikTok', ext: true });
-
-  const yt = smartSocialLink(s.youtube_channel, 'youtube');
-  if (yt) links.push({ href: yt, icon: 'fa-brands fa-youtube text-red-600', title: 'YouTube', sub: 'Watch on YouTube', ext: true });
-
-  if (s.support_email) links.push({ href: 'mailto:' + s.support_email, icon: 'fa-solid fa-envelope text-blue-600', title: 'Email', sub: s.support_email, ext: false });
-
-  if (links.length === 0){
-    box.innerHTML = '<p class="text-sm text-slate-400 text-center py-4">Contact information will be available soon.</p>';
-    return;
-  }
-
-  box.innerHTML = links.map(l => `
-    <a href="${esc(l.href)}" ${l.ext ? 'target="_blank" rel="noopener"' : ''} class="flex items-center gap-3 p-3 border rounded-xl hover:bg-slate-50">
-      <i class="${l.icon} text-xl w-5 text-center"></i>
-      <div class="min-w-0 flex-1"><p class="text-sm font-bold">${esc(l.title)}</p><p class="text-[11px] text-slate-400 truncate">${esc(l.sub)}</p></div>
-      <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-300"></i>
-    </a>
-  `).join('');
-}
-  
-  // ============ SELLER KYC APPLICATION ============
+// ============ SELLER KYC APPLICATION ============
 let kycStream = null;
 let kycCurrentSlot = null;
-let kycPhotos = {}; // { nid_front: {blob, url}, ... }
+let kycPhotos = {};
 let sellerStep = 1;
 
 const KYC_SLOTS = {
@@ -1587,22 +1855,20 @@ const KYC_SLOTS = {
 function openSellerFlow(){
   document.getElementById('profileMenu').classList.add('hidden');
   if (!currentUser) return openAuthModal();
+
+  // Check if already a seller or has pending application
+  if (userProfile?.role === 'seller') { alert('You are already a seller!'); return; }
+
   sellerStep = 1;
   kycPhotos = {};
-  // Reset thumbs
   Object.keys(KYC_SLOTS).forEach(k => {
     const t = document.getElementById('thumb_' + k);
     if (t) t.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="%23cbd5e1" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 4a3 3 0 110 6 3 3 0 010-6zm0 14a8 8 0 01-6-3c0-1.5 2-3 6-3s6 1.5 6 3a8 8 0 01-6 3z"/></svg>';
   });
-  // Reset inputs
-  ['sk_full_name','sk_phone','sk_address','sk_shop_name','sk_shop_desc','sk_business_proof'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.value = '';
-  });
+  ['sk_full_name','sk_phone','sk_address','sk_shop_name','sk_shop_desc','sk_business_proof'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   const bt = document.getElementById('sk_business_type'); if (bt) bt.value = '';
-  const em = document.getElementById('sk_full_name');
-  if (em && userProfile?.full_name) em.value = userProfile.full_name;
-  const ph = document.getElementById('sk_phone');
-  if (ph && userProfile?.phone) ph.value = userProfile.phone;
+  const em = document.getElementById('sk_full_name'); if (em && userProfile?.full_name) em.value = userProfile.full_name;
+  const ph = document.getElementById('sk_phone'); if (ph && userProfile?.phone) ph.value = userProfile.phone;
 
   document.getElementById('sellerSuccessBox').classList.add('hidden');
   document.getElementById('sellerStep1').classList.remove('hidden');
@@ -1633,24 +1899,15 @@ function sellerNext(current){
   if (current === 1){
     const name = document.getElementById('sk_full_name').value.trim();
     const phone = document.getElementById('sk_phone').value.trim();
-    if (!name || !phone) {
-      if (msg) { msg.className = 'text-xs text-center text-red-500'; msg.innerText = 'Name and phone are required'; }
-      return;
-    }
+    if (!name || !phone) { if (msg) { msg.className = 'text-xs text-center text-red-500'; msg.innerText = 'Name and phone are required'; } return; }
     sellerGoToStep(2);
   } else if (current === 2){
     const shop = document.getElementById('sk_shop_name').value.trim();
-    if (!shop) {
-      if (msg) { msg.className = 'text-xs text-center text-red-500'; msg.innerText = 'Shop name is required'; }
-      return;
-    }
+    if (!shop) { if (msg) { msg.className = 'text-xs text-center text-red-500'; msg.innerText = 'Shop name is required'; } return; }
     sellerGoToStep(3);
   } else if (current === 3){
     const missing = Object.keys(KYC_SLOTS).filter(k => !kycPhotos[k]);
-    if (missing.length > 0) {
-      if (msg) { msg.className = 'text-xs text-center text-red-500'; msg.innerText = `Missing ${missing.length} photo(s). All 6 required.`; }
-      return;
-    }
+    if (missing.length > 0) { if (msg) { msg.className = 'text-xs text-center text-red-500'; msg.innerText = `Missing ${missing.length} photo(s). All 6 required.`; } return; }
     buildSellerReview();
     sellerGoToStep(4);
   }
@@ -1671,7 +1928,7 @@ function buildSellerReview(){
     row('KYC Photos', photos + ' / 6 captured');
 }
 
-  // ============ KYC CAMERA ============
+// ============ KYC CAMERA ============
 async function openKycCamera(slot){
   if (!currentUser) return openAuthModal();
   kycCurrentSlot = slot;
@@ -1680,8 +1937,7 @@ async function openKycCamera(slot){
   document.getElementById('kycTitle').innerText = info.title;
   document.getElementById('kycHint').innerText = info.hint;
   document.getElementById('kycError').classList.add('hidden');
-  const modal = document.getElementById('kycCameraModal');
-  modal.classList.remove('hidden');
+  document.getElementById('kycCameraModal').classList.remove('hidden');
 
   try {
     kycStream = await navigator.mediaDevices.getUserMedia({
@@ -1696,10 +1952,7 @@ async function openKycCamera(slot){
 }
 
 function closeKycCamera(){
-  if (kycStream) {
-    kycStream.getTracks().forEach(t => t.stop());
-    kycStream = null;
-  }
+  if (kycStream) { kycStream.getTracks().forEach(t => t.stop()); kycStream = null; }
   document.getElementById('kycCameraModal').classList.add('hidden');
   kycCurrentSlot = null;
 }
@@ -1707,7 +1960,6 @@ function closeKycCamera(){
 async function captureKycPhoto(){
   const video = document.getElementById('kycVideo');
   if (!video || !kycStream) return;
-
   const btn = document.getElementById('kycCaptureBtn');
   btn.disabled = true;
   const errEl = document.getElementById('kycError');
@@ -1719,22 +1971,15 @@ async function captureKycPhoto(){
     canvas.height = video.videoHeight || 720;
     const ctx = canvas.getContext('2d');
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
     const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.8));
     if (!blob) throw new Error('Capture failed');
-
     const path = `seller-kyc/${currentUser.id}/${kycCurrentSlot}-${Date.now()}.jpg`;
-    const { error: upErr } = await supabaseClient.storage
-      .from('avatars').upload(path, blob, { contentType: 'image/jpeg', upsert: false });
+    const { error: upErr } = await supabaseClient.storage.from('avatars').upload(path, blob, { contentType: 'image/jpeg', upsert: false });
     if (upErr) throw upErr;
-
     const { data: urlData } = supabaseClient.storage.from('avatars').getPublicUrl(path);
-
     kycPhotos[kycCurrentSlot] = { url: urlData.publicUrl, path };
-
     const thumb = document.getElementById('thumb_' + kycCurrentSlot);
     if (thumb) thumb.src = urlData.publicUrl;
-
     closeKycCamera();
   } catch (err) {
     errEl.classList.remove('hidden');
@@ -1742,8 +1987,9 @@ async function captureKycPhoto(){
     btn.disabled = false;
   }
 }
-
-  // ============ SUBMIT SELLER APPLICATION ============
+</script>
+<script>
+// ============ SUBMIT SELLER APPLICATION ============
 async function submitSellerApp(){
   const btn = document.getElementById('sellerSubmitBtn');
   const msg = document.getElementById('sellerStep4Msg');
@@ -1754,18 +2000,10 @@ async function submitSellerApp(){
   msg.innerText = '';
 
   try {
-    // Double-check all 6 photos
     const missing = Object.keys(KYC_SLOTS).filter(k => !kycPhotos[k]);
     if (missing.length > 0) throw new Error(`Missing ${missing.length} photo(s)`);
 
-    // Check if user already has a pending application
-    const { data: existing } = await supabaseClient
-      .from('seller_applications')
-      .select('id, status')
-      .eq('user_id', currentUser.id)
-      .eq('status', 'pending')
-      .maybeSingle();
-
+    const { data: existing } = await supabaseClient.from('seller_applications').select('id, status').eq('user_id', currentUser.id).eq('status', 'pending').maybeSingle();
     if (existing) throw new Error('You already have a pending application. Please wait for admin review.');
 
     const app = {
@@ -1789,19 +2027,19 @@ async function submitSellerApp(){
     const { error } = await supabaseClient.from('seller_applications').insert(app);
     if (error) throw error;
 
-    // Update profile with phone if not set
     if (!userProfile?.phone && app.phone) {
       await supabaseClient.from('profiles').update({ phone: app.phone }).eq('id', currentUser.id);
     }
 
-    // Show success screen
+    try {
+      await supabaseClient.from('notifications').insert({ user_id: currentUser.id, title: 'Application Submitted', message: 'Your seller application is under review. We will notify you within 24-48 hours.', type: 'info' });
+    } catch(e) {}
+
     document.getElementById('sellerStep1').classList.add('hidden');
     document.getElementById('sellerStep2').classList.add('hidden');
     document.getElementById('sellerStep3').classList.add('hidden');
     document.getElementById('sellerStep4').classList.add('hidden');
     document.getElementById('sellerSuccessBox').classList.remove('hidden');
-
-    // Clear the form data
     kycPhotos = {};
   } catch (err) {
     msg.className = 'text-xs text-center text-red-500';
@@ -1810,17 +2048,87 @@ async function submitSellerApp(){
     btn.innerHTML = original;
   }
 }
-  
+
+// ============ REFERRAL & AFFILIATE URL CAPTURE ============
+async function processReferralFromURL(){
+  const params = new URLSearchParams(window.location.search);
+  const refCode = params.get('ref');
+  const affCode = params.get('aff');
+
+  if (refCode) localStorage.setItem('pending_referral', refCode);
+  if (affCode) {
+    localStorage.setItem('pending_affiliate', affCode);
+    try {
+      const { data } = await supabaseClient.from('affiliates').select('id, total_clicks').eq('affiliate_code', affCode).maybeSingle();
+      if (data) await supabaseClient.from('affiliates').update({ total_clicks: (data.total_clicks || 0) + 1 }).eq('id', data.id);
+    } catch(e) {}
+  }
+
+  // Clean URL
+  if (refCode || affCode) {
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+}
+
+async function applyPendingReferral(){
+  if (!currentUser) return;
+  const refCode = localStorage.getItem('pending_referral');
+  if (!refCode) return;
+  try {
+    const { data: referrer } = await supabaseClient.from('profiles').select('id').eq('referral_code', refCode).maybeSingle();
+    if (referrer && referrer.id !== currentUser.id) {
+      await supabaseClient.from('referrals').insert({
+        referrer_id: referrer.id,
+        referred_id: currentUser.id,
+        status: 'completed',
+        reward_amount_usd: parseFloat(siteSettings.referral_reward_usd || '5')
+      });
+      try {
+        await supabaseClient.from('notifications').insert({
+          user_id: referrer.id,
+          title: '🎉 New Referral!',
+          message: 'Someone signed up with your referral code. You earned $' + (siteSettings.referral_reward_usd || '5') + '!',
+          type: 'success'
+        });
+      } catch(e) {}
+    }
+  } catch(e) {}
+  localStorage.removeItem('pending_referral');
+}
+
+// ============ PWA SERVICE WORKER ============
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration failed:', err));
+  });
+}
+
 // ============ INIT ============
 document.getElementById('currency').addEventListener('change', () => {
   renderProducts();
   if (!document.getElementById('cartDrawer').classList.contains('hidden')) renderCart();
 });
 
+document.getElementById('shipCountry').addEventListener('change', () => {
+  if (!document.getElementById('checkoutModal').classList.contains('hidden')) openCheckout();
+});
+
+// Apply language on load
+document.getElementById('langLabel').innerText = currentLanguage.toUpperCase();
+applyLanguage();
+
+// Process referral/affiliate from URL
+processReferralFromURL();
+
+// Load everything
 loadCategories();
 loadProducts();
 renderCartCount();
 loadSiteSettings();
+
+// After auth ready, apply pending referral
+setTimeout(() => { if (currentUser) applyPendingReferral(); }, 2000);
+
 </script>
 </body>
 </html>
